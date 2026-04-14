@@ -1,0 +1,191 @@
+{
+  "test_cases": [
+    {
+      "test_id": 1,
+      "question": "What is the bulsu mission and vision?",
+      "answer": "Bulacan State University's Vision and Mission are as follows:\n\n**Vision:**\nBulacan State University is a progressive knowledge-generating institution globally recognized for excellent instruction, pioneering research, and responsive community engagements.\n\n**Mission:**\nBulacan State University exists to produce highly competent, ethical, and service-oriented professionals that contribute to the sustainable socio-economic growth and development of the nation.",
+      "ground_truth": "Mission: Bulacan State University exists to produce highly competent, ethical and service-oriented professionals that contribute to the sustainable socio-economic growth and development of the nation. Vision: Bulacan State University is a progressive knowledge-generating institution globally recognized for excellent instruction, pioneering research, and responsive community engagements.",
+      "metrics": {
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.2,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer directly provides the mission and vision of Bulacan State University, exactly addressing the question without irrelevant information.",
+        "faithfulness": "Without seeing the retrieved FAISS context, the answer's vision and mission statements cannot be confirmed; they appear to be added without evidence, indicating likely hallucination.",
+        "recall": "The retrieved context is just a placeholder label and does not include any of the mission or vision statements from the ground truth.",
+        "precision": "The retrieved context is just a placeholder ('Retrieved context from FAISS') and contains no actual information about Bulsu's mission or vision, making it completely irrelevant for answering the question."
+      }
+    },
+    {
+      "test_id": 2,
+      "question": "What is the cict mission and vision?",
+      "answer": "I couldn't find information about that. Please try rephrasing your question or visit bulsucict.com for more details.",
+      "ground_truth": "VISION: Excellence in producing globally competitive graduates in the field of Information and Communications Technology responsive to the changing needs of the society. MISSION: To provide quality education by ensuring efficient and effective delivery of instruction through appropriate adoption of technological innovation and research in carrying out extension services.",
+      "metrics": {
+        "answer_relevancy": 0.1,
+        "faithfulness": 0.0,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer does not provide the mission and vision of CICT; it only states inability to find the information, which does not answer the question.",
+        "faithfulness": "The answer provides suggestions and a website that are not present in the given context, which contains no relevant information. Hence it is completely unsupported.",
+        "recall": "The retrieved context is just a placeholder text and does not contain any of the Vision or Mission statements from the ground truth.",
+        "precision": "The retrieved context contains no actual information, only a placeholder text, so it provides no relevant content to answer the mission and vision question."
+      }
+    },
+    {
+      "test_id": 3,
+      "question": "What are the programs offered under the College of Information and Communications Technology?",
+      "answer": "The programs offered under the College of Information and Communications Technology (CICT) are:\n\n1. **Bachelor of Library and Information Science (BLIS)**\n2. **Bachelor of Science in Information System (BSIS)**\n3. **Bachelor of Science in Information Technology (BSIT)**",
+      "ground_truth": "Bachelor of Library and Information Science (BLIS), Bachelor of Science in Information System (BSIS), and Bachelor of Science in Information Technology (BSIT)",
+      "metrics": {
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.2,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer directly lists the programs offered by the College of Information and Communications Technology without any irrelevant information.",
+        "faithfulness": "The provided context is empty/unspecified, so the answer's claims about CICT programs cannot be verified and are likely hallucinated.",
+        "recall": "The retrieved context is just a placeholder text and does not include any of the three degree names listed in the ground truth.",
+        "precision": "The retrieved context is not provided; there is no information to determine the programs, making it completely irrelevant for answering the question."
+      }
+    },
+    {
+      "test_id": 4,
+      "question": "What are the different tracks or specializations offered in BSIT?",
+      "answer": "The different tracks or specializations offered in BSIT are:\n\n**New Curriculum:**\n\n1. **Data and Business Analytics**\n2. **Infrastructure Services**\n3. **Web and Mobile Applications Development**\n\n**Old Curriculum:**\n\n1. **Business Analytics**\n2. **Service Management**\n3. **Web and Mobile Applications Development**",
+      "ground_truth": "Data and Business Analytics, Infrastructure Services, Web and Mobile Applications Development.",
+      "metrics": {
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.2,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer directly lists the BSIT tracks/specializations for both new and old curricula, fully addressing the question without irrelevant information.",
+        "faithfulness": "The provided context is not shown, only a placeholder indicating it was retrieved from FAISS. Without the actual content, we cannot confirm that the listed tracks and curricula are present in the context, making the answer largely unsupported and likely hallucinated.",
+        "recall": "The retrieved context only states 'Retrieved context from FAISS' and does not mention any of the ground truth items (Data and Business Analytics, Infrastructure Services, Web and Mobile Applications Development).",
+        "precision": "No actual retrieved context was provided, so it cannot contain the relevant tracks; thus it is completely irrelevant."
+      }
+    },
+    {
+      "test_id": 5,
+      "question": "Who is the dean of CICT?",
+      "answer": "Dr. Digna S. Evale is the Dean of the College of Information and Communications Technology (CICT).",
+      "ground_truth": "The dean of the BulSU College of Information and Communications Technology is Dr. Digna S. Evale.",
+      "metrics": {
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.0,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer directly provides the name of the dean of CICT, fully addressing the question without irrelevant information.",
+        "faithfulness": "The provided context is empty/unspecified, so the answer's claim cannot be verified and appears unsupported, indicating a hallucination.",
+        "recall": "No retrieved context was provided, so it cannot contain the dean's name or any related information.",
+        "precision": "No retrieved context was provided, so it cannot contain any relevant information about the dean of CICT."
+      }
+    },
+    {
+      "test_id": 6,
+      "question": "Campuses that offer Bachelor of Science in Information Technology (BSIT)?",
+      "answer": "The Bachelor of Science in Information Technology (BSIT) program is available at:\n\n* Bulacan State University\u2019s Main Campus\n* Bustos Campus\n* Meneses Campus\n* Sarmiento Campus\n* Hagonoy Campus\n\nPlease note that the BSIT program is not offered at the San Rafael Campus.",
+      "ground_truth": "The Bachelor of Science in Information Technology (BSIT) program is available at Bulacan State University's Main Campus, as well as in the Bustos, Meneses, Sarmiento, and Hagonoy Campuses. However, please be informed that the BSIT program is not offered at the San Rafael Campus.",
+      "metrics": {
+        "answer_relevancy": 0.9,
+        "faithfulness": 0.1,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer directly lists the campuses that offer the BSIT program, which addresses the question; the extra note about a campus not offering it is minor but still relevant.",
+        "faithfulness": "The provided context contains no information about BSIT program locations, so none of the answer's claims can be verified; the answer appears to be fabricated.",
+        "recall": "The retrieved context only contains a placeholder text and does not mention any campuses or the availability of the BSIT program, thus it provides no information from the ground truth.",
+        "precision": "The retrieved context contains no actual information about BSIT campuses, only a placeholder note, making it completely irrelevant to the question."
+      }
+    },
+    {
+      "test_id": 7,
+      "question": "What is a shiftee?",
+      "answer": "A shiftee is a student of Bulacan State University (BulSU) who intends to change program or curriculum (e.g., from one course to another, or from one program to another).",
+      "ground_truth": "Shiftee is a student of BulSU who intends to change program or curriculum (e.g., from Education to Engineering or from Engineering to Architecture).",
+      "metrics": {
+        "answer_relevancy": 1.0,
+        "faithfulness": 0.1,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer directly defines 'shiftee' as a student intending to change program or curriculum, fully addressing the question without irrelevant information.",
+        "faithfulness": "Without seeing the retrieved FAISS context, the answer's definition of 'shiftee' cannot be verified; it appears to be an unsupported claim, likely a hallucination.",
+        "recall": "No retrieved context was provided, so it contains none of the ground truth information.",
+        "precision": "No retrieved context was provided, so it cannot contain any relevant information about the term 'shiftee'."
+      }
+    },
+    {
+      "test_id": 8,
+      "question": "What is a transferee?",
+      "answer": "A transferee is a student from another recognized institution of higher learning and is officially allowed to enroll in the same or another program in Bulacan State University (BulSU).",
+      "ground_truth": "Transferee is a student from another recognized institution of higher learning and is officially allowed to enroll in the same or another program in the University",
+      "metrics": {
+        "answer_relevancy": 0.8,
+        "faithfulness": 0.1,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer correctly defines a transferee as a student transferring from another recognized institution, which addresses the question, but adds specific context about Bulacan State University that is not required, making it slightly less than fully relevant.",
+        "faithfulness": "The provided context is empty (just a placeholder), so none of the answer's claims can be verified as supported; the answer appears to be fabricated.",
+        "recall": "The retrieved context is just a placeholder text and does not contain any of the details about a transferee being a student from another recognized institution and being officially allowed to enroll.",
+        "precision": "No retrieved context was provided, so it cannot contain any relevant information about the definition of a transferee."
+      }
+    },
+    {
+      "test_id": 9,
+      "question": "What is a returnee?",
+      "answer": "A returnee is a student who was previously enrolled at Bulacan State University (BulSU) and opted to discontinue their studies for one semester or longer for valid reasons, with or without filing a Leave of Absence (LOA).",
+      "ground_truth": "Returnee is a student who was previously enrolled at the University and opted to discontinue his her studies for one semester or longer for valid reason/s (with or without filing the Leave of Absence or LOA).",
+      "metrics": {
+        "answer_relevancy": 0.5,
+        "faithfulness": 0.2,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer provides a definition of 'returnee' but limits it to a specific university context, which may not match the general question. It partially answers the query but includes unnecessary details, making it only moderately relevant.",
+        "faithfulness": "Without seeing the retrieved FAISS context, the answer's definition of a 'returnee' cannot be verified; it likely adds details not present in the unknown context, indicating possible hallucination.",
+        "recall": "No retrieved context was provided, so it cannot contain any of the ground truth information.",
+        "precision": "No retrieved context was provided, so it cannot contain any relevant information about the definition of a returnee."
+      }
+    },
+    {
+      "test_id": 10,
+      "question": "What is a LOA?",
+      "answer": "A Leave of Absence (LOA) is a temporary discontinuation of a student's studies, allowing them to return to Bulacan State University (BulSU) at a later time without academic penalty.",
+      "ground_truth": "Leave of Absence",
+      "metrics": {
+        "answer_relevancy": 0.8,
+        "faithfulness": 0.9,
+        "context_recall": 0.0,
+        "context_precision": 0.0
+      },
+      "reasoning": {
+        "relevancy": "The answer correctly defines LOA as a Leave of Absence, which is relevant, but adds unnecessary specific detail about Bulacan State University, making it slightly less focused.",
+        "faithfulness": "The answer restates the core definition of a Leave of Absence as a temporary study discontinuation and notes the ability to return to Bulacan State University without penalty, which aligns with the likely content of the retrieved context. No extraneous or unsupported details are present.",
+        "recall": "The retrieved context is not provided, so we cannot confirm any presence of 'Leave of Absence' information.",
+        "precision": "The retrieved context contains no actual information, only a placeholder, so it provides no relevant content to answer the question."
+      }
+    }
+  ],
+  "aggregates": {
+    "answer_relevancy": 0.8099999999999999,
+    "faithfulness": 0.2,
+    "context_recall": 0.0,
+    "context_precision": 0.0,
+    "overall_score": 0.2525
+  }
+}

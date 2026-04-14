@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CICTify Chatbot</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Floating Widget Button -->
+  <div id="chat-icon" onclick="toggleChat()">
+    <img src="images/floatingCICTify.png" alt="Chatbot" id="chat-widget">
+    <span class="chat-title">CICTify</span>
+  </div>
+
+  <!-- Chatbox -->
+  <div id="chatbox">
+    <div id="chat-header">
+      <div class="header-left">
+        <img src="images/chatBubble.png" alt="Chat Icon" class="header-icon">
+        <span id="header-title">CICTify</span>
+      </div>
+      <div id="header-actions">
+        <button id="expand-btn">⛶</button>
+        <button id="close-btn" onclick="toggleChat()">✖</button>
+      </div>
+    </div>
+    <div id="chat-log"></div>
+    <div id="chat-input-area">
+      <input type="text" id="user-input" placeholder="Message CICTify">
+
+      <button id="mic-btn" title="Speak">
+        <img src="images/micIcon.png" alt="Voice">
+      </button>
+
+      <button id="send-btn" title="Send">
+        <img src="images/sendIcon.png" alt="Send">
+      </button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

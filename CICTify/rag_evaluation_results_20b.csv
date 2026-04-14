@@ -1,0 +1,52 @@
+"id","question","ground_truth","expected_context_keywords","answer","relevancy","faithfulness","recall","precision"
+"1","What is the bulsu mission and vision?","Mission: Bulacan State University exists to produce highly competent, ethical and service-oriented professionals that contribute to the sustainable socio-economic growth and development of the nation. Vision: Bulacan State University is a progressive knowledge-generating institution globally recognized for excellent instruction, pioneering research, and responsive community engagements.","Bulacan State University exists to produce highly competent, ethical and service-oriented professionals that contribute to the sustainable socio-economic growth and development of the nation.Bulacan State University is a progressive knowledge-generating institution globally recognized for excellent instruction, pioneering research, and responsive community engagements.Mission, Vision","**Bulacan State University (BulSU) – Vision & Mission**
+
+**Vision**  
+Bulacan State University is a progressive, knowledge‑generating institution globally recognized for excellent instruction, pioneering research, and responsive community engagement.
+
+**Mission**  
+BulSU exists to produce highly competent, ethical, and service‑oriented professionals that contribute to the sustainable socio‑economic growth and development of the nation.","0.9","1.0","1.0","1.0"
+"2","What is the cict mission and vision?","VISION: Excellence in producing globally competitive graduates in the field of Information and Communications Technology responsive to the changing needs of the society.MISSION: To provide quality education by ensuring efficient and effective delivery of instruction through appropriate adoption of technological innovation and research in carrying out extension services.","To provide quality education by ensuring efficient and effective delivery of instruction through appropriate adoption of technological innovation and research in carrying out extension services.Excellence in producing globally competitive graduates in the field of Information and Communications Technology responsive to the changing needs of the society. College of Information and Communications Technology, CICT, Mission, Vision","I don’t have information about the CICT mission and vision in the documents I have.","0.3","0.0","1.0","1.0"
+"3","What are the programs offered under the College of Information and Communications Technology?","Bachelor of Library and Information Science (BLIS), Bachelor of Science in Information System (BSIS), and Bachelor of Science in Information Technology (BSIT)","BLIS, BSIS, BSIT, Library, Library and Information Science, Information System, Information Technology, Bachelor of Science","**Programs offered by the College of Information and Communications Technology (CICT)**  
+
+- Bachelor of Library and Information Science (BLIS)  
+- Bachelor of Science in Information System (BSIS)  
+- Bachelor of Science in Information Technology (BSIT)","0.9","1.0","0.0","1.0"
+"4","What are the different tracks or specializations offered in BSIT?","Data and Business Analytics, Infrastructure Services, Web and Mobile Applications Development.","Data and Business Analytics, Infrastructure Services, Web and Mobile Applications Development","**Tracks / Specializations in BSIT**
+
+- **New Curriculum**
+  - Data and Business Analytics  
+  - Infrastructure Services  
+  - Web and Mobile Applications Development  
+
+- **Old Curriculum**
+  - Business Analytics  
+  - Service Management  
+  - Web and Mobile Applications Development","1.0","1.0","1.0","0.0"
+"5","Who is the dean of CICT?","The dean of the BulSU College of Information and Communications Technology is Dr. Digna S. Evale.","Dr. Digna S. Evale, dean, College of Information and Communications Technology, BulSU","**Dean of CICT**
+
+- Dr. Digna S. Evale
+
+She is the current dean of the College of Information and Communications Technology at Bulacan State University.","1.0","1.0","0.0","0.0"
+"6","Campuses that offer Bachelor of Science in Information Technology (BSIT)?","The Bachelor of Science in Information Technology (BSIT) program is available at Bulacan State University's Main Campus, as well as in the Bustos, Meneses, Sarmiento, and Hagonoy Campuses. However, the BSIT program is not offered at the San Rafael Campus.","Main Campus, Bustos, Meneses, Sarmiento, Hagonoy, San Rafael, not offered","**Campuses offering the Bachelor of Science in Information Technology (BSIT)**  
+
+- Bulacan State University – Main Campus  
+- Bustos Campus  
+- Meneses Campus  
+- Sarmiento Campus  
+- Hagonoy Campus  
+
+*Note: The BSIT program is not offered at the San Rafael Campus.*","0.9","1.0","1.0","0.7"
+"7","What is a shiftee?","Shiftee is a student of BulSU who intends to change program or curriculum","student, BulSU, change program, curriculum, Shiftee, shift, different program or course","**Shiftee Definition**
+
+A *shiftee* is a Bulacan State University (BulSU) student who intends to change his or her program or curriculum—such as moving from one major to another (e.g., from Education to Engineering or from Engineering to Architecture). The student must follow the university’s shifting guidelines and submit the required application.","0.6","1.0","0.0","1.0"
+"8","What is a transferee?","Transferee is a student from another recognized institution of higher learning and is officially allowed to enroll in the same or another program in the University.","student, another institution, higher learning, enroll, University, another program, Transferee","**Transferee Definition**
+
+A *transferee* is a student who comes from another recognized institution of higher learning and is officially allowed to enroll in the same or another program at Bulacan State University.","0.9","1.0","1.0","1.0"
+"9","What is a returnee?","Returnee is a student who was previously enrolled at the University and discontinued studies for one semester or longer for valid reasons","student, previously enrolled, discontinue, semester, reasons","**Returnee Definition**
+
+A *returnee* is a student who was previously enrolled at Bulacan State University, then discontinued his or her studies for one semester or longer for a valid reason, with or without filing a Leave of Absence (LOA).","0.4","1.0","1.0","0.9"
+"10","What is a LOA?","Leave of Absence","Leave of Absence","**LOA (Leave of Absence)**  
+A Leave of Absence (LOA) is a formal, university‑issued period during which a student voluntarily suspends enrollment for a valid reason (e.g., personal, medical, or family circumstances).
+
+When a student files an LOA, the time away is not counted toward the program’s required units, and re‑admission procedures and requirements apply once the student returns.","0.7","0.3","0.9","0.0"

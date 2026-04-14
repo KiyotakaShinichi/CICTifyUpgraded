@@ -1,0 +1,26 @@
+# --- Core Flask and Async ---
+flask
+aiohttp
+asyncio
+requests
+
+# --- HTML parsing and scraping ---
+beautifulsoup4
+playwright
+
+# --- LangChain ecosystem ---
+langchain
+langchain-community
+langchain-huggingface
+sentence-transformers
+faiss-cpu
+
+# --- Local models (optional for offline use) ---
+langchain-ollama
+
+# --- Utilities ---
+python-dotenv
+PyPDF2
+openpyxl
+# --- Web serving ---
+gunicorn

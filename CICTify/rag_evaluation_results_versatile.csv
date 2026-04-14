@@ -1,0 +1,113 @@
+"id","question","ground_truth","expected_context_keywords","answer","relevancy","faithfulness","recall","precision"
+"1","What is the bulsu mission and vision?","Mission: Bulacan State University exists to produce highly competent, ethical and service-oriented professionals that contribute to the sustainable socio-economic growth and development of the nation. Vision: Bulacan State University is a progressive knowledge-generating institution globally recognized for excellent instruction, pioneering research, and responsive community engagements.","Bulacan State University exists to produce highly competent, ethical and service-oriented professionals that contribute to the sustainable socio-economic growth and development of the nation.Bulacan State University is a progressive knowledge-generating institution globally recognized for excellent instruction, pioneering research, and responsive community engagements.Mission, Vision","The Bulacan State University (BulSU) mission and vision are as follows:
+
+**Mission:**
+Bulacan State University exists to produce highly competent, ethical, and service-oriented professionals that contribute to the sustainable socio-economic growth and development of the nation.
+
+**Vision:**
+Bulacan State University is a progressive knowledge-generating institution globally recognized for excellent instruction, pioneering research, and responsive community engagements.","0.9","1.0","0.0","0.0"
+"2","What is the cict mission and vision?","VISION: Excellence in producing globally competitive graduates in the field of Information and Communications Technology responsive to the changing needs of the society.MISSION: To provide quality education by ensuring efficient and effective delivery of instruction through appropriate adoption of technological innovation and research in carrying out extension services.","To provide quality education by ensuring efficient and effective delivery of instruction through appropriate adoption of technological innovation and research in carrying out extension services.Excellence in producing globally competitive graduates in the field of Information and Communications Technology responsive to the changing needs of the society. College of Information and Communications Technology, CICT, Mission, Vision","The College of Information and Communications Technology (CICT) mission, vision, and goals are as follows:
+
+**Vision:**
+Excellence in producing globally competitive graduates in the field of Information and Communications Technology responsive to the changing needs of the society.
+
+**Mission:**
+To provide quality education by ensuring efficient and effective delivery of instruction through appropriate adoption of technological innovation and research in carrying out extension services.
+
+**Goals:**
+To realize its mission, the College of Information and Communications Technology will explore to:
+* Produce globally competitive graduates by providing comprehensive programs and up-to-date training.
+* Sustain faculty and staff development through relevant seminars, workshops, and scholarship programs.
+* Provide students with holistic training by introducing new technologies in Information and Communication Technology and allowing them to experience the actual workspace environment.
+* Inculcate discipline towards the achievements of professional competencies, integrity, moral, and ethical values.","0.9","1.0","1.0","1.0"
+"3","What are the programs offered under the College of Information and Communications Technology?","Bachelor of Library and Information Science (BLIS), Bachelor of Science in Information System (BSIS), and Bachelor of Science in Information Technology (BSIT)","BLIS, BSIS, BSIT, Library, Library and Information Science, Information System, Information Technology, Bachelor of Science","The programs offered under the College of Information and Communications Technology (CICT) are:
+
+* Bachelor of Library and Information Science (BLIS)
+* Bachelor of Science in Information System (BSIS)
+* Bachelor of Science in Information Technology (BSIT)
+
+The Bachelor of Science in Information Technology (BSIT) program has different tracks, including:
+
+* Data and Business Analytics
+* Infrastructure Services
+* Web and Mobile Applications Development (New Curriculum)
+* Business Analytics
+* Service Management
+* Web and Mobile Applications Development (Old Curriculum)","0.9","1.0","1.0","1.0"
+"4","What are the different tracks or specializations offered in BSIT?","Data and Business Analytics, Infrastructure Services, Web and Mobile Applications Development.","Data and Business Analytics, Infrastructure Services, Web and Mobile Applications Development","The different tracks or specializations offered in Bachelor of Science in Information Technology (BSIT) are:
+
+* New Curriculum:
+  * Data and Business Analytics
+  * Infrastructure Services
+  * Web and Mobile Applications Development
+* Old Curriculum:
+  * Business Analytics
+  * Service Management
+  * Web and Mobile Applications Development","0.9","1.0","0.0","0.0"
+"5","Who is the dean of CICT?","The dean of the BulSU College of Information and Communications Technology is Dr. Digna S. Evale.","Dr. Digna S. Evale, dean, College of Information and Communications Technology, BulSU","The dean of the College of Information and Communications Technology (CICT) is:
+ 
+Dr. Digna S. Evale","0.9","1.0","1.0","1.0"
+"6","Campuses that offer Bachelor of Science in Information Technology (BSIT)?","The Bachelor of Science in Information Technology (BSIT) program is available at Bulacan State University's Main Campus, as well as in the Bustos, Meneses, Sarmiento, and Hagonoy Campuses. However, the BSIT program is not offered at the San Rafael Campus.","Main Campus, Bustos, Meneses, Sarmiento, Hagonoy, San Rafael, not offered","The Bachelor of Science in Information Technology (BSIT) program is available at the following Bulacan State University campuses:
+
+* BulSU Main Campus
+* Bustos Campus
+* Meneses Campus
+* Sarmiento Campus
+* Hagonoy Campus
+
+Note: The BSIT program is not offered at the San Rafael Campus.","0.3","1.0","1.0","0.0"
+"7","What is a shiftee?","Shiftee is a student of BulSU who intends to change program or curriculum","student, BulSU, change program, curriculum, Shiftee, shift, different program or course","A shiftee is a student of Bulacan State University (BulSU) who intends to change their program or curriculum. For example, a student may want to shift from the College of Education to the College of Engineering, or from the College of Engineering to the College of Architecture. 
+
+To shift programs, you need:
+
+1. To meet the requirements set by the university and the target program
+2. To fill out the shifter's application form
+3. To take the shifter's examination (if required)
+4. To get approval from the current and target program chairs
+5. To comply with other requirements that may be specific to your situation
+
+Please note that shifting programs may have specific requirements and procedures, and it's best to check with the Admission and Orientation Services Office (AOSO) or the target program's office for more information.","0.9","0.7","0.0","1.0"
+"8","What is a transferee?","Transferee is a student from another recognized institution of higher learning and is officially allowed to enroll in the same or another program in the University.","student, another institution, higher learning, enroll, University, another program, Transferee","A transferee is a student from another recognized institution of higher learning who is officially allowed to enroll in the same or another program at Bulacan State University (BulSU).
+
+To be a transferee, you need to:
+
+1. Come from a recognized institution of higher learning
+2. Meet the admission requirements set by BulSU
+3. Have available slots in the program you want to transfer to
+4. Meet the grade requirements:
+    * For Board Programs: an overall general weighted average of at least 1.75 and no grades lower than 2.0 in all taken courses/subjects
+    * For Non-Board Programs: no grades lower than 2.5 in all taken courses/subjects and an overall general weighted average of at least 2.0
+5. Complete not more than 50% of the units required for the program
+
+Please note that transfer students may need to undergo a validation examination for each subject they are applying for credits, and they must answer correctly at least 75% of the questions for each examination.","0.7","0.9","0.0","1.0"
+"9","What is a returnee?","Returnee is a student who was previously enrolled at the University and discontinued studies for one semester or longer for valid reasons","student, previously enrolled, discontinue, semester, reasons","A returnee is a student who was previously enrolled at Bulacan State University (BulSU) but opted to discontinue their studies for one semester or longer, with or without filing a Leave of Absence (LOA). 
+
+If you are a returnee, you will need to:
+
+1. Follow the procedures for readmission
+2. Meet with your program chair or academic advisor to discuss your readmission
+3. Submit required documents, such as:
+    * Certificate of Registration and class cards
+    * Transcript of Records
+    * Other documents that may be required by the university
+4. Pay any outstanding fees or tuition
+5. Comply with other requirements that may be specific to your situation
+
+Please note that readmission is not guaranteed and is subject to the university's policies and availability of slots. It's best to check with the Admission and Orientation Services Office (AOSO) or the program's office for more information.","0.8","0.6","0.0","0.9"
+"10","What is a LOA?","Leave of Absence","Leave of Absence","A Leave of Absence (LOA) is a temporary withdrawal from the university, which allows a student to take a break from their studies for a specified period of time. 
+
+To file for an LOA, you will need to:
+
+1. Submit a written request to the university, stating the reason for the LOA and the expected duration
+2. Meet with your program chair or academic advisor to discuss your LOA
+3. Fill out the necessary forms and documentation
+4. Receive approval from the university
+
+Note that an LOA is different from discontinuing your studies or withdrawing from the university. If you are planning to take a break from your studies, it's best to file for an LOA to ensure that you can return to your studies without any issues.
+
+Here are some key things to keep in mind:
+
+* An LOA can be filed for a minimum of one semester and a maximum of two years
+* You will not be allowed to enroll in any courses during the LOA period
+* You will need to reapply for admission when you are ready to return to your studies
+* Your LOA may affect your scholarship, financial aid, or other benefits, so it's best to check with the relevant offices before filing for an LOA.","0.9","0.2","0.9","1.0"
