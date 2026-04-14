@@ -1,14 +1,21 @@
 # vision_reader.py
+import os
 import aiohttp, base64
 from typing import Optional
 
-GROQ_API_KEY = "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"
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 VISION_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct"
+
+
+def _groq_api_key() -> str:
+    return os.getenv("GROQ_API_KEY", "").strip()
 
 async def read_image_with_groq(image_bytes: bytes, question: str = "Read all text and describe this image.") -> Optional[str]:
     """Use Groq Vision to OCR and understand any image (e.g., floor plan, diagram)."""
     try:
+        api_key = _groq_api_key()
+        if not api_key:
+            return None
         img_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
         payload = {
@@ -31,7 +38,7 @@ async def read_image_with_groq(image_bytes: bytes, question: str = "Read all tex
         }
 
         headers = {
-            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
 

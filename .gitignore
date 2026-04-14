@@ -1,0 +1,7 @@
+# Local environment files
+CICTify/.env
+.env
+
+# Python cache artifacts
+__pycache__/
+*.pyc

@@ -13,6 +13,7 @@ Uses Groq API:
 
 import asyncio
 import json
+import os
 from typing import List, Dict, Optional
 import aiohttp
 from pathlib import Path
@@ -23,7 +24,7 @@ import csv
 # CONFIGURATION (API key removed for safety)
 # =====================================================
 
-GROQ_API_KEY = "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"   # Insert your key when running
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 EVALUATOR_MODEL = "openai/gpt-oss-120b"
 MAIN_MODEL = "qwen/qwen3-32b"
 
