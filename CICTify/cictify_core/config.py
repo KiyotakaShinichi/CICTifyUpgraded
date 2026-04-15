@@ -10,10 +10,12 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 GUI_DIR = BASE_DIR / "gui"
 FAISS_DIR = BASE_DIR / "vectorstore" / "faiss_index"
 FAISS_MANIFEST_PATH = BASE_DIR / "vectorstore" / "faiss_manifest.json"
+CURATED_CORPUS_PATH = BASE_DIR / "vectorstore" / "curated_corpus.json"
 DB_PATH = BASE_DIR / "vectorstore" / "cictify.db"
 KB_PDF_DIR = BASE_DIR / "knowledge_base" / "pdfs"
 FLOORPLAN_CONTEXT_PATH = BASE_DIR / "vectorstore" / "floorplan_context.json"
 SPATIAL_GRAPH_PATH = BASE_DIR / "vectorstore" / "spatial_graph.json"
+KB_CURATION_REPORT_PATH = BASE_DIR / "evaluation" / "kb_curation_report.md"
 
 # Load secrets/config from local .env file if present.
 load_dotenv(BASE_DIR / ".env")
@@ -33,11 +35,19 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
 @dataclass(frozen=True)
 class AppConfig:
     app_name: str = os.getenv("APP_NAME", "CICTify")
     routing_model: str = os.getenv("ROUTING_MODEL", "llama-3.3-70b-versatile")
-    chat_models: tuple[str, ...] = (os.getenv("ANSWER_MODEL", "openai/gpt-oss-120b"),)
+    chat_models: tuple[str, ...] = (
+        os.getenv("ANSWER_MODEL", "llama-3.3-70b-versatile"),
+        "llama-3.3-70b-versatile",
+        "mixtral-8x7b-32768",
+    )
 
     # ===== HYPERPARAMETERS =====
     # Uppercase aliases are kept for backward compatibility with older code paths.
@@ -52,6 +62,10 @@ class AppConfig:
     MEMORY_TOP_K: int = _env_int("MEMORY_TOP_K", 4)
     MEMORY_MIN_SCORE: int = _env_int("MEMORY_MIN_SCORE", 1)
 
+    SEMANTIC_CHUNKING: bool = _env_bool("SEMANTIC_CHUNKING", True)
+    SEMANTIC_BREAK_THRESHOLD: float = _env_float("SEMANTIC_BREAK_THRESHOLD", 0.45)
+    SEMANTIC_MIN_CHUNK_CHARS: int = _env_int("SEMANTIC_MIN_CHUNK_CHARS", 220)
+
     chunk_size: int = CHUNK_SIZE
     chunk_overlap: int = CHUNK_OVERLAP
     max_tokens: int = MAX_TOKENS
@@ -61,6 +75,9 @@ class AppConfig:
     rag_min_term_overlap: int = RAG_MIN_TERM_OVERLAP
     memory_top_k: int = MEMORY_TOP_K
     memory_min_score: int = MEMORY_MIN_SCORE
+    semantic_chunking: bool = SEMANTIC_CHUNKING
+    semantic_break_threshold: float = SEMANTIC_BREAK_THRESHOLD
+    semantic_min_chunk_chars: int = SEMANTIC_MIN_CHUNK_CHARS
 
     max_history_messages: int = 20
     max_memory_messages: int = 200
@@ -115,6 +132,11 @@ def pdf_paths() -> List[str]:
     guide = str(KB_PDF_DIR / "guide.pdf")
     if enhanced in paths and guide in paths:
         paths = [p for p in paths if p != guide]
+
+    room_detail = str(KB_PDF_DIR / "CICT Rooms - Pics & Desc.docx.pdf")
+    room_summary = str(KB_PDF_DIR / "CICT-Rooms.pdf")
+    if room_detail in paths and room_summary in paths:
+        paths = [p for p in paths if p != room_summary]
 
     # Remove empty files from the corpus list.
     paths = [p for p in paths if pathlib.Path(p).exists() and pathlib.Path(p).stat().st_size > 0]

@@ -8,7 +8,6 @@ from .config import CONFIG
 from .floorplan_context import FloorplanContextStore
 from .llm import GroqClient
 from .prompts import (
-    general_system_prompt,
     rag_system_prompt,
     web_system_prompt,
 )
@@ -48,8 +47,17 @@ FALLBACK_GENERAL_PATTERNS = [
     r"^(hi|hello|hey|heya|hii+|helo+|huy|hu|yo|sup|kumusta|kamusta)\b",
     r"^good\s+(morning|afternoon|evening)\b",
     r"^(who\s+are\s+you|what'?s\s+your\s+name|sino\s+ka|ano\s+(pangalan|name)\s+mo)\b",
+    r"^(where\s+are\s+you|nasaan\s+ka|nasan\s+ka)\b",
+    r"^(what\s+languages?\s+do\s+you\s+speak|anong\s+wika|language\s+mo)\b",
     r"^(thanks|thank\s+you|salamat|ok|okay|sige|bye|goodbye|ingat)\b",
 ]
+
+ACADEMIC_OVERRIDE_TERMS = {
+    "bulsu", "cict", "dean", "coordinator", "adviser", "advisor", "faculty", "registrar", "cashier",
+    "enroll", "enrollment", "requirement", "requirements", "admission", "transferee", "shiftee", "returnee",
+    "bsit", "bscs", "room", "laboratory", "lab", "acad", "schedule", "policy", "grading", "tuition",
+    "office", "announcement", "curriculum", "subject", "courses",
+}
 
 
 @dataclass
@@ -68,14 +76,25 @@ class CascadeOrchestrator:
         self.web = WebFallback()
 
     def initialize(self) -> None:
+        prewarm_timeout = max(20, CONFIG.request_timeout_sec * 3)
+
+        async def _prewarm() -> None:
+            await asyncio.wait_for(self.web.prewarm(force=False), timeout=prewarm_timeout)
+
         self.rag.load_or_build()
         try:
-            asyncio.run(self.web.prewarm(force=False))
+            asyncio.run(_prewarm())
+            print(f"[Startup] Web prewarm complete (timeout={prewarm_timeout}s)", flush=True)
+        except asyncio.TimeoutError:
+            print(f"[Startup] Web prewarm timed out after {prewarm_timeout}s; continuing startup", flush=True)
         except RuntimeError:
             # Fallback for environments where an event loop is already active.
             loop = asyncio.new_event_loop()
             try:
-                loop.run_until_complete(self.web.prewarm(force=False))
+                loop.run_until_complete(_prewarm())
+                print(f"[Startup] Web prewarm complete (timeout={prewarm_timeout}s)", flush=True)
+            except asyncio.TimeoutError:
+                print(f"[Startup] Web prewarm timed out after {prewarm_timeout}s; continuing startup", flush=True)
             finally:
                 loop.close()
 
@@ -90,17 +109,47 @@ class CascadeOrchestrator:
             timeout_sec=CONFIG.quick_timeout_sec,
         )
         label_upper = (label or "").upper()
+        q_lower = q.lower()
         if "GENERAL" in label_upper:
+            if self._looks_academic(q_lower):
+                return "ACADEMIC"
             return "GENERAL"
 
         if "ACADEMIC" in label_upper:
             return "ACADEMIC"
 
         # Safety net only if router output is missing/invalid.
-        q_lower = q.lower()
         if any(re.match(pattern, q_lower) for pattern in FALLBACK_GENERAL_PATTERNS):
+            if self._looks_academic(q_lower):
+                return "ACADEMIC"
             return "GENERAL"
         return "ACADEMIC"
+
+    @staticmethod
+    def _looks_academic(text: str) -> bool:
+        tokens = set(re.findall(r"[a-zA-Z0-9]{3,}", (text or "").lower()))
+        return any(term in tokens for term in ACADEMIC_OVERRIDE_TERMS)
+
+    @staticmethod
+    def _deterministic_general_reply(question: str) -> str:
+        q = (question or "").strip().lower()
+
+        if re.search(r"\b(hi|hello|helo|hey|huy|kumusta|kamusta|good\s+morning|good\s+afternoon|good\s+evening)\b", q):
+            return "Hello. I am CICTify, your BulSU CICT assistant."
+
+        if re.search(r"\b(who\s+are\s+you|what'?s\s+your\s+name|sino\s+ka|ano\s+(pangalan|name)\s+mo)\b", q):
+            return "I am CICTify, a virtual assistant focused on BulSU CICT information."
+
+        if re.search(r"\b(where\s+are\s+you|nasaan\s+ka|nasan\s+ka|asan\s+ka)\b", q):
+            return "I do not have a physical location. I am a virtual assistant for BulSU CICT."
+
+        if re.search(r"\b(language|languages|wika|tagalog|filipino|english|taglish)\b", q):
+            return "I can assist in English, Filipino/Tagalog, and Taglish."
+
+        if re.search(r"\b(thanks|thank\s+you|salamat|bye|goodbye|ingat)\b", q):
+            return "You are welcome."
+
+        return "I can help with BulSU CICT questions."
 
     @staticmethod
     def _expand_room_tokens(text: str) -> str:
@@ -143,7 +192,7 @@ class CascadeOrchestrator:
 
         if not content:
             return ""
-        return f"Source: {source}\n{content}"
+        return f"{content}"
 
     @staticmethod
     def _contains_followup_marker(question: str) -> bool:
@@ -167,6 +216,22 @@ class CascadeOrchestrator:
             if m:
                 return (
                     f"Transferee: {m.group(1).strip()}.\n\n"
+                    "Source: BulSU-Enhanced-Guidelines.pdf"
+                )
+
+        if "shiftee" in q:
+            m = re.search(r"Shiftee\s+is\s+([^\.]{20,260})\.", flat, flags=re.IGNORECASE)
+            if m:
+                return (
+                    f"Shiftee: {m.group(1).strip()}.\n\n"
+                    "Source: BulSU-Enhanced-Guidelines.pdf"
+                )
+
+        if "returnee" in q:
+            m = re.search(r"Returnee\s+is\s+([^\.]{20,280})\.", flat, flags=re.IGNORECASE)
+            if m:
+                return (
+                    f"Returnee: {m.group(1).strip()}.\n\n"
                     "Source: BulSU-Enhanced-Guidelines.pdf"
                 )
 
@@ -314,16 +379,7 @@ class CascadeOrchestrator:
             print("[Memory] Relevant history found for current query", flush=True)
 
         if route == "GENERAL":
-            prompt = (
-                "Conversation history:\n"
-                f"{history_text}\n\n"
-                "Relevant memory:\n"
-                f"{relevant_memory or 'None'}\n\n"
-                "User question:\n"
-                f"{question}"
-            )
-            answer = await self.llm.chat_with_fallbacks(general_system_prompt(), prompt, max_tokens=700)
-            final = answer or "Hello. I am CICTify. How can I help with BulSU CICT today?"
+            final = self._deterministic_general_reply(question)
             final = ResponseFilter.filter_response(final)
             validate = validate_model_response(final)
             if validate.blocked:
@@ -345,12 +401,12 @@ class CascadeOrchestrator:
         print(f"[Cascade] RAG chunks={rag_chunks}", flush=True)
         rag_preview = ""
         if rag_context:
-            rag_user_prompt = f"Question: {question}"
+            rag_user_prompt = f"Current Question: {question}"
             if relevant_memory:
                 rag_user_prompt = (
-                    "Relevant conversation memory:\n"
+                    "Context from previous conversation (only use if necessary to understand the current question):\n"
                     f"{relevant_memory}\n\n"
-                    f"Question: {question}"
+                    f"Current Question: {question}"
                 )
             rag_answer = await self.llm.chat_with_fallbacks(
                 rag_system_prompt(rag_context),
@@ -361,14 +417,6 @@ class CascadeOrchestrator:
                 validate = validate_model_response(rag_answer)
                 if not validate.blocked:
                     return CascadeResult(reply=rag_answer, route="RAG", context=rag_context), "ok"
-
-            direct = self._direct_fact_fallback(question, rag_context)
-            if direct:
-                return CascadeResult(reply=direct, route="RAG_DIRECT", context=rag_context), "ok"
-
-            extractive = self._extractive_rag_fallback(question, rag_context)
-            if extractive:
-                return CascadeResult(reply=extractive, route="RAG_EXTRACTIVE", context=rag_context), "ok"
 
             rag_preview = self._preview_from_rag_context(rag_context)
             if not rag_answer:
@@ -399,9 +447,8 @@ class CascadeOrchestrator:
         if rag_preview:
             return CascadeResult(
                 reply=(
-                    "May nakita akong related context sa knowledge base pero hindi ako nakabuo ng final answer ngayon. "
-                    "Try ulit in a moment.\n\n"
-                    f"{rag_preview}"
+                    "I found some related information in the knowledge base, but it might not answer your question fully:\n\n"
+                    f"> {rag_preview}"
                 ),
                 route="RAG_PREVIEW",
                 context=rag_context,

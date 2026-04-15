@@ -1,6 +1,7 @@
 import asyncio
 import os
 import pathlib
+import time
 from typing import Dict, List, Optional
 
 from flask import Flask, jsonify, request, send_file, send_from_directory
@@ -19,6 +20,8 @@ asyncio.set_event_loop(loop)
 orchestrator: Optional[CascadeOrchestrator] = None
 ocr_ingestion: Optional[OCRIngestion] = None
 chat_memory: List[Dict[str, str]] = []
+startup_ready: bool = False
+startup_error: str = ""
 
 
 def _ensure_ready() -> None:
@@ -35,6 +38,25 @@ def _ensure_ready() -> None:
         floorplan_store=orchestrator.floorplans,
         spatial_graph_store=orchestrator.spatial_graph,
     )
+
+
+def _initialize_before_serve() -> None:
+    global startup_ready, startup_error
+    if startup_ready:
+        return
+
+    t0 = time.perf_counter()
+    print("[Startup] Initializing orchestrator and stores before serving traffic...", flush=True)
+    try:
+        _ensure_ready()
+        startup_ready = True
+        startup_error = ""
+        elapsed = time.perf_counter() - t0
+        print(f"[Startup] Preload complete in {elapsed:.2f}s", flush=True)
+    except Exception as exc:
+        startup_ready = False
+        startup_error = str(exc)
+        raise
 
 
 @app.route("/")
@@ -204,12 +226,14 @@ def health_check():
     spatial_stats = orchestrator.spatial_graph.stats() if orchestrator is not None else {"nodes": 0, "edges": 0}
     return jsonify(
         {
-            "status": "online",
+            "status": "online" if startup_ready else "starting",
             "system": "CICTify",
             "architecture": "General -> Spatial RAG -> RAG -> Web (prewarmed)",
-            "model_loaded": orchestrator is not None,
+            "model_loaded": startup_ready and orchestrator is not None,
             "memory_size": len(chat_memory),
             "max_memory": CONFIG.max_memory_messages,
+            "startup_ready": startup_ready,
+            "startup_error": startup_error,
             "dependencies": {
                 "groq_api_key": key_available,
             },
@@ -246,4 +270,9 @@ if __name__ == "__main__":
     )
     print(f"[Startup] Web mode: prewarmed cache (live fallback={CONFIG.web_live_fallback})", flush=True)
     print(f"[Startup] GROQ_API_KEY configured: {bool(groq_api_key())}", flush=True)
+    try:
+        _initialize_before_serve()
+    except Exception as exc:
+        print(f"[Startup] Preload failed. Server will not start: {exc}", flush=True)
+        raise SystemExit(1)
     app.run(host=CONFIG.host, port=CONFIG.port, debug=False)

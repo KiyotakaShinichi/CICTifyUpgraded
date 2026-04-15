@@ -34,7 +34,8 @@ except Exception:
     HuggingFaceEmbeddings = None  # type: ignore[assignment]
     FAISSLocal = None  # type: ignore[assignment]
 
-from .config import CONFIG, FAISS_DIR, FAISS_MANIFEST_PATH, pdf_paths
+from .config import CONFIG, CURATED_CORPUS_PATH, FAISS_DIR, FAISS_MANIFEST_PATH, pdf_paths
+from .corpus_curation import curate_corpus
 
 try:
     import PyPDF2
@@ -95,6 +96,19 @@ class RAGStore:
 
         return boost
 
+    @staticmethod
+    def _source_family(question: str) -> List[str]:
+        q = (question or "").lower()
+        if any(term in q for term in ["dean", "coordinator", "director", "who is", "name"]):
+            return ["cictify - faqs", "faculty manual for bor"]
+        if any(term in q for term in ["shiftee", "transferee", "returnee", "loa", "admission", "change program"]):
+            return ["bulsu-enhanced-guidelines", "bulsu student handbook"]
+        if any(term in q for term in ["acad", "room", "floor", "lab", "where is", "where", "location"]):
+            return ["cict rooms - pics & desc", "cict-rooms"]
+        if any(term in q for term in ["mission", "vision", "programs offered", "tracks", "bsit", "bsis", "blis"]):
+            return ["cictify - faqs", "bulsu student handbook"]
+        return []
+
     def _manifest_payload(self) -> Dict:
         return {
             "sources": sorted(pdf_paths()),
@@ -115,15 +129,22 @@ class RAGStore:
         FAISS_MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
         FAISS_MANIFEST_PATH.write_text(json.dumps(self._manifest_payload(), ensure_ascii=True, indent=2), encoding="utf-8")
 
+    def _load_curated_cache(self) -> List[Dict]:
+        if not CURATED_CORPUS_PATH.exists() or not self._manifest_matches():
+            curated = curate_corpus(pdf_paths())
+            return curated.get("chunks", [])
+
+        try:
+            payload = json.loads(CURATED_CORPUS_PATH.read_text(encoding="utf-8"))
+            chunks = payload.get("chunks", []) if isinstance(payload, dict) else []
+            return chunks if isinstance(chunks, list) else []
+        except Exception:
+            curated = curate_corpus(pdf_paths())
+            return curated.get("chunks", [])
+
     def load_or_build(self) -> None:
         if FAISSLocal is None or self._embeddings is None:
             return
-
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=CONFIG.chunk_size,
-            chunk_overlap=CONFIG.chunk_overlap,
-            separators=["\n\n", "\n", ".", "!", "?", ",", " "],
-        )
 
         faiss_dir = str(FAISS_DIR)
         if os.path.exists(faiss_dir) and os.path.exists(f"{faiss_dir}.faiss") and self._manifest_matches():
@@ -134,17 +155,25 @@ class RAGStore:
             )
             return
 
+        curated_chunks = self._load_curated_cache()
+
         all_texts: List[str] = []
         all_meta: List[Dict] = []
-        for path in pdf_paths():
-            if not os.path.exists(path):
+        for chunk in curated_chunks:
+            content = (chunk or {}).get("content", "")
+            source_file = (chunk or {}).get("source_file", "Unknown")
+            if not content:
                 continue
-            text = self._extract_pdf_text(path)
-            if not text.strip():
-                continue
-            for chunk in text_splitter.split_text(text):
-                all_texts.append(chunk)
-                all_meta.append({"source_file": os.path.basename(path)})
+            all_texts.append(content)
+            all_meta.append(
+                {
+                    "source_file": os.path.basename(source_file),
+                    "doc_hash": (chunk or {}).get("doc_hash", ""),
+                    "chunk_hash": (chunk or {}).get("chunk_hash", ""),
+                    "section_index": (chunk or {}).get("section_index", 0),
+                    "chunk_index": (chunk or {}).get("chunk_index", 0),
+                }
+            )
 
         if not all_texts:
             return
@@ -211,6 +240,12 @@ class RAGStore:
                 seen.add(key)
             deduped_rows.append(row)
         rows = deduped_rows
+
+        family_terms = self._source_family(question)
+        if family_terms:
+            prioritized = [row for row in rows if any(term in (row.get("source", "").lower()) for term in family_terms)]
+            if prioritized:
+                rows = prioritized
 
         q_terms = query_terms(question)
         if not q_terms:
