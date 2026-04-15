@@ -44,17 +44,18 @@ class AppConfig:
     app_name: str = os.getenv("APP_NAME", "CICTify")
     routing_model: str = os.getenv("ROUTING_MODEL", "llama-3.3-70b-versatile")
     chat_models: tuple[str, ...] = (
-        os.getenv("ANSWER_MODEL", "llama-3.3-70b-versatile"),
+        os.getenv("ANSWER_MODEL", "openai/gpt-oss-120b"),
+        "openai/gpt-oss-120b",
         "llama-3.3-70b-versatile",
         "mixtral-8x7b-32768",
     )
 
     # ===== HYPERPARAMETERS =====
     # Uppercase aliases are kept for backward compatibility with older code paths.
-    CHUNK_SIZE: int = _env_int("CHUNK_SIZE", 900)
-    CHUNK_OVERLAP: int = _env_int("CHUNK_OVERLAP", 120)
-    MAX_TOKENS: int = _env_int("MAX_TOKENS", 1400)
-    TEMPERATURE: float = _env_float("TEMPERATURE", 0.2)
+    CHUNK_SIZE: int = _env_int("CHUNK_SIZE", 1500)
+    CHUNK_OVERLAP: int = _env_int("CHUNK_OVERLAP", 400)
+    MAX_TOKENS: int = _env_int("MAX_TOKENS", 2000)
+    TEMPERATURE: float = _env_float("TEMPERATURE", 1.0)
     RETRIEVAL_K: int = _env_int("RETRIEVAL_K", 12)
 
     RAG_RERANK_TOP_N: int = _env_int("RAG_RERANK_TOP_N", 5)

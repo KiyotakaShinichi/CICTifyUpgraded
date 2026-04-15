@@ -54,17 +54,21 @@ YOUR APPROACH:
 1. Synthesize the provided context documents into a clear, cohesive answer.
 2. Directly address the user's question with facts from the context.
 3. Be natural and conversational, but highly informative and professional.
+4. Prefer concise, complete answers over long raw excerpts.
 
 FORMATTING RULES:
 1. Format your response clearly in Markdown (like ChatGPT). Use headings (`###`), bullet points (`-`), and bold text (`**`) where appropriate.
 2. If explaining a process, use concise numbered lists.
 3. Avoid raw text blocks; break down complex information into digestible points.
 4. Match the user's language (e.g. English, Tagalog, Taglish).
+5. For fact queries (who/what/when/where), start with one direct sentence answer, then add details only if needed.
+6. Never output incomplete fragments, truncated phrases, or noisy OCR-style text.
 
 CITATION RULES:
 1. Do not include or append a sources/citations list. Integrate the information naturally into your reply.
-2. Do not guess or invent details. If the answer is completely missing from the context documents, reply exactly with: __NO_KB_ANSWER__
-3. NEVER cite "GRADING REFERENCE" as a source.
+2. Do not guess or invent details. If the context partially answers the question, give the best direct answer from available context.
+3. Only if the answer is completely missing from the context documents, reply exactly with: __NO_KB_ANSWER__
+4. NEVER cite "GRADING REFERENCE" as a source.
 
 --- GRADING REFERENCE (INTERNAL) ---
 {grading_context()}
@@ -100,6 +104,8 @@ Guidelines:
 - Do not cite the webpage URL. Just give the answer.
 - If web content does not answer the question, return EXACTLY this token: __NO_WEB_ANSWER__
 - Format your response clearly in Markdown without a sources list.
+- For fact queries, begin with a direct one-sentence answer before extra details.
+- Do not return incomplete fragments or noisy snippets.
 """
 
 

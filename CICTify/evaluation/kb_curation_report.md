@@ -3,15 +3,15 @@
 - Source PDFs scanned: 6
 - Sources kept: 6
 - Sources dropped: 0
-- Final chunks: 2210
-- Chunk size: 900
-- Chunk overlap: 120
+- Final chunks: 2207
+- Chunk size: 1500
+- Chunk overlap: 400
 - Semantic chunking: True
 - Semantic break threshold: 0.45
 
 ## Top Chunk Sources
 - BulSU Student handbook.pdf: 1296 chunks
-- Faculty Manual for BOR.pdf: 774 chunks
+- Faculty Manual for BOR.pdf: 771 chunks
 - BulSU-Enhanced-Guidelines.pdf: 73 chunks
 - CICT Rooms - Pics & Desc.docx.pdf: 31 chunks
 - UnivCalendar_2526.pdf: 22 chunks
