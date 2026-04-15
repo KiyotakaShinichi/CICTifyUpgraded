@@ -24,14 +24,18 @@ Task:
 Classify the user query into exactly one label:
 - GENERAL: greetings, identity, small talk, thanks, short chit-chat.
 - ACADEMIC: any BulSU/CICT information request, policies, procedures, announcements, schedules, admissions, grading, room/location, requirements, offices, faculty, or factual queries.
+- OUT_OF_SCOPE: non-BulSU general knowledge, unrelated topics, or requests outside BulSU CICT assistant scope.
 
 Rules:
 - Support multilingual input (English, Filipino/Tagalog, Taglish, French, Spanish, German, and similar variations).
-- If the query is not clearly casual, choose ACADEMIC.
-- Output exactly one token only: GENERAL or ACADEMIC.
+- If user asks for BulSU/CICT facts, policy, offices, rooms, people, requirements, procedures, mission/vision, choose ACADEMIC.
+- If user asks unrelated trivia, math, politics, history, coding, or other non-BulSU factual topics, choose OUT_OF_SCOPE.
+- Output exactly one token only: GENERAL or ACADEMIC or OUT_OF_SCOPE.
 
 Examples:
 - "hi" -> GENERAL
+- "how are you" -> GENERAL
+- "hvordan gar det" -> GENERAL
 - "huy" -> GENERAL
 - "who are you" -> GENERAL
 - "ano name mo" -> GENERAL
@@ -46,11 +50,14 @@ Examples:
 - "paano mag shift to BSIT" -> ACADEMIC
 - "sino dean ng cict" -> ACADEMIC
 - "what is the grading policy" -> ACADEMIC
+- "who is hitler" -> OUT_OF_SCOPE
+- "what is 2+2" -> OUT_OF_SCOPE
 """
 
 FALLBACK_GENERAL_PATTERNS = [
     r"^(hi|hello|hey|heya|hii+|helo+|huy|hu|yo|sup|kumusta|kamusta|bonjour|hola|salut|ciao|guten\s+tag)\b",
     r"^good\s+(morning|afternoon|evening)\b",
+    r"^(how\s+are\s+you|how\s+r\s+u|kamusta\s+ka|kumusta\s+ka|hvordan\s+gar\s+det)\b",
     r"^(who\s+are\s+you|what'?s\s+your\s+name|sino\s+ka|ano\s+(pangalan|name)\s+mo|qui\s+es-tu|wer\s+bist\s+du|chi\s+sei)\b",
     r"^(where\s+are\s+you|nasaan\s+ka|nasan\s+ka|asan\s+ka|ou\s+es-tu|wo\s+bist\s+du|dove\s+sei)\b",
     r"^(what\s+languages?\s+do\s+you\s+speak|anong\s+wika|language\s+mo|quelles\s+langues|welche\s+sprachen|quali\s+lingue)\b",
@@ -112,6 +119,12 @@ class CascadeOrchestrator:
 
     async def _route(self, question: str) -> str:
         q = (question or "").strip()
+        q_lower = q.lower()
+
+        # Minimal guard for obvious casual messages when router occasionally over-classifies as ACADEMIC.
+        if any(re.match(pattern, q_lower) for pattern in FALLBACK_GENERAL_PATTERNS) and not self._looks_academic(q_lower):
+            return "GENERAL"
+
         label = await self.llm.chat(
             ROUTER_PROMPT,
             q,
@@ -121,21 +134,41 @@ class CascadeOrchestrator:
             timeout_sec=CONFIG.quick_timeout_sec,
         )
         label_upper = (label or "").upper()
-        q_lower = q.lower()
-        if "GENERAL" in label_upper:
-            if self._looks_academic(q_lower):
-                return "ACADEMIC"
+        label_lower = (label or "").lower()
+        if "OUT_OF_SCOPE" in label_upper or re.search(r"\b(out[_\-\s]?of[_\-\s]?scope|unrelated|outside\s+scope)\b", label_lower):
+            return "OUT_OF_SCOPE"
+        if "GENERAL" in label_upper or re.search(r"\b(general|greeting|casual|small\s*talk|chit\s*chat)\b", label_lower):
             return "GENERAL"
-
-        if "ACADEMIC" in label_upper:
+        if "ACADEMIC" in label_upper or re.search(r"\b(academic|bulsu|cict)\b", label_lower):
             return "ACADEMIC"
 
-        # Safety net only if router output is missing/invalid.
         if any(re.match(pattern, q_lower) for pattern in FALLBACK_GENERAL_PATTERNS):
-            if self._looks_academic(q_lower):
-                return "ACADEMIC"
             return "GENERAL"
+
+        # If router output is malformed, default to ACADEMIC so retrieval can still attempt an answer.
         return "ACADEMIC"
+
+    async def _is_context_relevant(self, question: str, rag_context: str) -> bool:
+        context = (rag_context or "").strip()
+        if not context:
+            return False
+        judge_prompt = (
+            "You are a strict relevance judge for BulSU CICT QA. "
+            "Answer with exactly one token: RELEVANT or NOT_RELEVANT.\n"
+            "Mark RELEVANT only if the provided context directly answers the user's question "
+            "or gives clearly supporting facts. If context is only loosely related, noisy, or unrelated, "
+            "return NOT_RELEVANT."
+        )
+        user_prompt = f"Question:\n{question}\n\nContext:\n{context[:3500]}"
+        verdict = await self.llm.chat(
+            judge_prompt,
+            user_prompt,
+            model=CONFIG.routing_model,
+            max_tokens=6,
+            temperature=0.0,
+            timeout_sec=CONFIG.quick_timeout_sec,
+        )
+        return "RELEVANT" in (verdict or "").upper() and "NOT_RELEVANT" not in (verdict or "").upper()
 
     @staticmethod
     def _looks_academic(text: str) -> bool:
@@ -151,6 +184,8 @@ class CascadeOrchestrator:
             return "Hallo. Ich bin CICTify, dein BulSU CICT Assistent."
         if re.search(r"\b(hola|buenos\s+dias)\b", q):
             return "Hola. Soy CICTify, tu asistente de BulSU CICT."
+        if re.search(r"\b(how\s+are\s+you|how\s+r\s+u|kamusta\s+ka|kumusta\s+ka|hvordan\s+gar\s+det)\b", q):
+            return "I am doing well and ready to help with BulSU CICT questions."
         greeting_options = [
             "Hello. I am CICTify, your BulSU CICT assistant.",
             "Hi there. I am CICTify, ready to help with BulSU CICT concerns.",
@@ -425,7 +460,8 @@ class CascadeOrchestrator:
         # Handle "how about a grade of X" phrasing robustly.
         if q.lower().startswith("how about"):
             num = re.search(r"\b([1-5](?:\.\d+)?)\b", q)
-            if num and re.search(r"\bshift|shiftee|eligible|qualify|gwa\b", last_user, flags=re.IGNORECASE):
+            memory_scope = f"{last_user}\n{relevant_memory}"
+            if num and re.search(r"\bshift|shiftee|eligible|qualify|gwa\b", memory_scope, flags=re.IGNORECASE):
                 return f"Can I shift if my GWA is {num.group(1)}?"
 
         # Reframe "how about ..." follow-ups into explicit question form.
@@ -660,6 +696,8 @@ class CascadeOrchestrator:
                     name = CascadeOrchestrator._clean_person_name(m_assoc.group(1) or "")
                     if name:
                         return f"The associate dean is {name}."
+                # Avoid hallucinating dean/policy snippets when no associate-dean name is readable.
+                return "I could not find a clear associate dean name in the current documents."
 
             if role == "dean":
                 m_dean = re.search(
@@ -743,7 +781,7 @@ class CascadeOrchestrator:
                 except Exception:
                     pass
 
-        dean_name_query = ("dean" in q and ("name" in q or "who" in q)) or ("her name" in q) or ("his name" in q)
+        dean_name_query = (("dean" in q and ("name" in q or "who" in q)) or ("her name" in q) or ("his name" in q)) and ("associate dean" not in q)
         if dean_name_query:
             m = re.search(r"(Dr\.\s+[A-Z][A-Za-z\.\s]{2,60}?)\s*(?:-|,)?\s*Dean\b", flat)
             if not m:
@@ -755,6 +793,42 @@ class CascadeOrchestrator:
                 name = (m.group(1) or "").strip()
                 name = re.sub(r"\s+", " ", name)
                 return f"The CICT Dean is {name}."
+
+    @staticmethod
+    def _definition_keyword_fallback(question: str, rag_context: str) -> str:
+        q = (question or "").lower()
+        if not q:
+            return ""
+        context = re.sub(r"\s+", " ", rag_context or "").strip()
+        if not context:
+            return ""
+
+        def _extract(term: str, article: str) -> str:
+            patterns = [
+                rf"\b{term}\b\s*(?:is|refers\s+to|means)\s+(.{{20,280}}?)(?:\.|;|\s+[A-Z][a-z]+\s*[:\-]|$)",
+                rf"\b{term}\b\s*[:\-]\s*(.{{20,280}}?)(?:\.|;|\s+[A-Z][a-z]+\s*[:\-]|$)",
+            ]
+            for pat in patterns:
+                m = re.search(pat, context, flags=re.IGNORECASE)
+                if m:
+                    meaning = (m.group(1) or "").strip().rstrip(" .")
+                    if meaning:
+                        return f"{article} {term} is {meaning}."
+            return ""
+
+        if "shiftee" in q:
+            return _extract("shiftee", "A")
+        if "transferee" in q:
+            return _extract("transferee", "A")
+        if "returnee" in q:
+            return _extract("returnee", "A")
+        if re.search(r"\btenure|tenured\b", q):
+            hit = _extract("tenure", "Tenure") or _extract("tenured", "Tenured status")
+            if hit:
+                hit = re.sub(r"^Tenured status\s+tenured\s+is\s+", "Tenure means ", hit, flags=re.IGNORECASE)
+                hit = re.sub(r"^Tenure\s+tenure\s+is\s+", "Tenure means ", hit, flags=re.IGNORECASE)
+                return hit
+        return ""
 
         if "coordinator" in q:
             matches = re.findall(
@@ -929,7 +1003,7 @@ class CascadeOrchestrator:
         if resolved_question != normalized_question:
             print(f"[Query] resolved follow-up -> {resolved_question}", flush=True)
 
-        if self._is_out_of_scope(normalized_question, relevant_memory):
+        if route == "OUT_OF_SCOPE":
             return CascadeResult(
                 reply=self._out_of_scope_reply(normalized_question),
                 route="OUT_OF_SCOPE",
@@ -985,8 +1059,14 @@ class CascadeOrchestrator:
         rag_context = self.rag.context_for(retrieval_query)
         rag_chunks = rag_context.count("Source:") if rag_context else 0
         print(f"[Cascade] RAG chunks={rag_chunks}", flush=True)
-        rag_preview = ""
+        loc_query = any(k in rq_lower for k in {"where", "saan", "campus", "location", "located"})
+        context_relevant = await self._is_context_relevant(resolved_question, rag_context) if rag_context else False
+        if rag_context and loc_query:
+            context_relevant = True
         if rag_context:
+            print(f"[Cascade] RAG relevance={'yes' if context_relevant else 'no'}", flush=True)
+        rag_preview = ""
+        if rag_context and context_relevant:
             mv_direct = self._mission_vision_fallback(resolved_question, rag_context)
             if mv_direct and not self._looks_low_quality_answer(normalized_question, mv_direct):
                 return CascadeResult(reply=mv_direct, route="RAG_DIRECT_MV", context=rag_context), "ok"
@@ -1029,6 +1109,23 @@ class CascadeOrchestrator:
             rag_preview = self._preview_from_rag_context(rag_context)
             if not rag_answer:
                 print("[Cascade] RAG answer empty; trying WEB before fallback preview", flush=True)
+        elif rag_context and not context_relevant:
+            print("[Cascade] RAG context deemed not relevant; trying direct fallback only", flush=True)
+            mv_direct = self._mission_vision_fallback(resolved_question, rag_context)
+            if mv_direct and not self._looks_low_quality_answer(normalized_question, mv_direct):
+                return CascadeResult(reply=mv_direct, route="RAG_DIRECT_MV", context=rag_context), "ok"
+
+            keyword_def = self._definition_keyword_fallback(resolved_question, rag_context)
+            if keyword_def and not self._looks_low_quality_answer(normalized_question, keyword_def):
+                return CascadeResult(reply=keyword_def, route="RAG_DIRECT_DEF_LOWREL", context=rag_context), "ok"
+
+            direct = self._direct_fact_fallback(resolved_question, rag_context)
+            if direct and not self._looks_low_quality_answer(normalized_question, direct):
+                return CascadeResult(reply=direct, route="RAG_DIRECT_LOWREL", context=rag_context), "ok"
+
+            extractive = self._extractive_rag_fallback(resolved_question, rag_context)
+            if extractive and not self._looks_low_quality_answer(normalized_question, extractive):
+                return CascadeResult(reply=extractive, route="RAG_EXTRACTIVE_LOWREL", context=rag_context), "ok"
 
         print("[Cascade] Trying WEB", flush=True)
         web_context = await self.web.search(resolved_question)

@@ -294,6 +294,9 @@ class RAGStore:
             extra_queries.append("Definition of terms transferee shiftee returnee BulSU")
         if "acad" in q_lower or ("where" in q_lower and ("room" in q_lower or "lab" in q_lower)):
             extra_queries.append("CICT Rooms floor plan Acad 1 location")
+        if "campus" in q_lower:
+            extra_queries.append("BulSU Main Campus Bustos Campus Meneses Campus Sarmiento Campus Hagonoy Campus San Rafael Campus")
+            extra_queries.append("other campuses of bulsu")
 
         for hint in extra_queries:
             try:

@@ -2,6 +2,8 @@ import asyncio
 import os
 import pathlib
 import time
+import traceback
+import uuid
 from typing import Dict, List, Optional
 
 from flask import Flask, jsonify, request, send_file, send_from_directory
@@ -92,24 +94,32 @@ def serve_file(filepath):
 @app.route("/api/chat", methods=["POST"])
 def chat_endpoint():
     global chat_memory
+    req_id = uuid.uuid4().hex[:8]
+    t0 = time.perf_counter()
 
     data = request.get_json(force=True, silent=True)
     if not data:
+        print(f"[API][{req_id}] /api/chat -> 400 invalid-json", flush=True)
         return jsonify({"reply": "Invalid request", "model": "error"}), 400
 
     message = data.get("message", "").strip()
     if not message:
+        print(f"[API][{req_id}] /api/chat -> 400 empty-message", flush=True)
         return jsonify({"reply": "Empty message", "model": "error"}), 400
 
     try:
         _ensure_ready()
-        print(f"[Chat] User: {message}", flush=True)
+        print(f"[API][{req_id}] User: {message}", flush=True)
 
         chat_memory.append({"role": "user", "content": message})
         chat_memory = chat_memory[-CONFIG.max_memory_messages:]
 
         result, status = loop.run_until_complete(orchestrator.respond(message, chat_memory))
-        print(f"[Chat] Route={result.route} Status={status}", flush=True)
+        elapsed_ms = int((time.perf_counter() - t0) * 1000)
+        print(
+            f"[API][{req_id}] Route={result.route} Status={status} HTTP=200 ElapsedMs={elapsed_ms}",
+            flush=True,
+        )
 
         chat_memory.append({"role": "assistant", "content": result.reply})
 
@@ -119,13 +129,21 @@ def chat_endpoint():
                 "model": result.route,
                 "context": result.context,
                 "status": status,
+                "request_id": req_id,
             }
         )
-    except Exception:
+    except Exception as exc:
+        elapsed_ms = int((time.perf_counter() - t0) * 1000)
+        print(
+            f"[API][{req_id}] ERROR HTTP=500 ElapsedMs={elapsed_ms} Type={type(exc).__name__} Message={exc}",
+            flush=True,
+        )
+        print(traceback.format_exc(), flush=True)
         return jsonify(
             {
                 "reply": "An internal error occurred. Please try again.",
                 "model": "error",
+                "request_id": req_id,
             }
         ), 500
 
