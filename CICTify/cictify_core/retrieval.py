@@ -191,6 +191,86 @@ class RAGStore:
         if not self._vectorstore:
             return []
 
+        def role_seed_rows(text: str, limit: int = 4) -> List[Dict]:
+            q = (text or "").lower()
+            if not re.search(r"\b(?:who\s+is|sino\s+si|sino\s+ang)\b", q):
+                return []
+
+            role_patterns = []
+            if "associate dean" in q or "assoc dean" in q:
+                role_patterns.append(r"\bassociate\s+dean\b")
+            if "dean" in q:
+                role_patterns.append(r"\bdean\b")
+            if "program chair" in q:
+                role_patterns.append(r"\bprogram\s+chair\b")
+            if not role_patterns:
+                return []
+
+            chunks = self._load_curated_cache()
+            seeded: List[Dict] = []
+            seen = set()
+            doc_seeded: List[Dict] = []
+            for chunk in chunks:
+                content = (chunk or {}).get("content", "")
+                if not content:
+                    continue
+                normalized = re.sub(r"\s+", " ", content).strip()
+                nlower = normalized.lower()
+                if "cict" not in nlower:
+                    continue
+                if not any(re.search(pat, nlower) for pat in role_patterns):
+                    continue
+                key = nlower[:500]
+                if key in seen:
+                    continue
+                seen.add(key)
+                source_file = os.path.basename((chunk or {}).get("source_file", "Unknown"))
+                seeded.append({"content": normalized, "source": source_file})
+
+            # Some role/name entries are more complete in document-level
+            # normalized_text than in chunked snippets. Add those as seeds too.
+            if CURATED_CORPUS_PATH.exists():
+                try:
+                    payload = json.loads(CURATED_CORPUS_PATH.read_text(encoding="utf-8"))
+                    docs = payload.get("documents", []) if isinstance(payload, dict) else []
+                except Exception:
+                    docs = []
+
+                for doc in docs:
+                    content = (doc or {}).get("normalized_text", "")
+                    if not content:
+                        continue
+                    normalized = re.sub(r"\s+", " ", content).strip()
+                    nlower = normalized.lower()
+                    if "cict" not in nlower:
+                        continue
+                    if not any(re.search(pat, nlower) for pat in role_patterns):
+                        continue
+                    # Prefer rows that include likely person-name markers.
+                    if not re.search(r"\b(?:dr|mr|ms|engr)\.\s+[a-z]", nlower):
+                        continue
+                    key = nlower[:500]
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    source_file = os.path.basename((doc or {}).get("source_file", "Unknown"))
+                    doc_seeded.append({"content": normalized, "source": source_file})
+
+            # Prefer seeds that include complete honorific+name patterns.
+            def _seed_rank(row: Dict) -> int:
+                txt = (row.get("content") or "")
+                score = 0
+                if re.search(r"\b(?:Dr|Mr|Ms|Engr)\.?\s+[A-Z]", txt):
+                    score += 4
+                if re.search(r"\bdean\s*,?\s*cict\b", txt, flags=re.IGNORECASE):
+                    score += 3
+                if re.search(r"\bassociate\s+dean\s*,?\s*cict\b", txt, flags=re.IGNORECASE):
+                    score += 2
+                return score
+
+            ordered = sorted(doc_seeded, key=_seed_rank, reverse=True) + sorted(seeded, key=_seed_rank, reverse=True)
+            return ordered[:limit]
+
         def query_terms(text: str) -> List[str]:
             stop = {
                 "the", "and", "for", "with", "that", "this", "from", "have", "what", "where", "when",
@@ -228,6 +308,10 @@ class RAGStore:
             }
             for doc in docs
         ]
+
+        # Seed role/name queries directly from curated chunks to avoid missing
+        # administration entries when embedding search returns truncated variants.
+        rows = role_seed_rows(question) + rows
 
         # Remove near duplicates early to reduce repetitive fallback answers.
         deduped_rows = []

@@ -37,6 +37,13 @@ REASON: [brief]
         re.IGNORECASE,
     )
 
+    _STRICT_INAPPROPRIATE_RE = re.compile(
+        r"\b(niger|nigger|nigga|faggot|bitch|putang|tangina|gago|pakyu|"
+        r"sarap\s+mo|horny|nude|sexy|sex|"
+        r"men\s+are\s+better\s+than\s+women|women\s+are\s+better\s+than\s+men)\b",
+        re.IGNORECASE,
+    )
+
     @staticmethod
     def _is_obviously_safe(message: str) -> bool:
         msg = (message or "").strip().lower()
@@ -57,6 +64,14 @@ REASON: [brief]
                 "block": True,
                 "category": "invalid_input",
                 "reason": "Empty message",
+            }
+
+        if AdvancedSecurityGuard._STRICT_INAPPROPRIATE_RE.search(sanitized):
+            return {
+                "safe": False,
+                "block": True,
+                "category": "inappropriate",
+                "reason": "Profanity/sexual/discriminatory content is not allowed",
             }
 
         if AdvancedSecurityGuard._is_obviously_safe(sanitized):
@@ -118,6 +133,11 @@ REASON: [brief]
 
     @staticmethod
     def get_security_response(category: str) -> str:
+        if category in {"inappropriate", "hate_speech", "profanity", "sexual_content"}:
+            return (
+                "I can only assist with respectful BulSU CICT-related academic and professional questions. "
+                "If you want, I can help you with admissions, policies, grading, faculty/office concerns, or procedures."
+            )
         return "I cannot process that request due to safety and policy restrictions."
 
 

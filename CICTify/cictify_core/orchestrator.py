@@ -61,8 +61,15 @@ ACADEMIC_OVERRIDE_TERMS = {
     "bulsu", "cict", "dean", "coordinator", "adviser", "advisor", "faculty", "registrar", "cashier",
     "enroll", "enrollment", "requirement", "requirements", "admission", "transferee", "shiftee", "returnee",
     "bsit", "bscs", "room", "laboratory", "lab", "acad", "schedule", "policy", "grading", "tuition",
-    "office", "announcement", "curriculum", "subject", "courses",
+    "office", "announcement", "curriculum", "subject", "courses", "tenure", "promotion", "visitor",
+    "faculty", "staff", "employee", "hrmo", "guidelines", "academic", "research", "extension",
 }
+
+OUT_OF_SCOPE_PATTERNS = [
+    r"\bwho\s+is\s+hitler\b",
+    r"\bwhat\s+is\s+\d+\s*[\+\-\*/]\s*\d+\b",
+    r"\bwwhat\s+is\s+\d+\s*[\+\-\*/]\s*\d+\b",
+]
 
 
 @dataclass
@@ -138,6 +145,12 @@ class CascadeOrchestrator:
     @staticmethod
     def _deterministic_general_reply(question: str) -> str:
         q = (question or "").strip().lower()
+        if re.search(r"\b(bonjour|salut)\b", q):
+            return "Bonjour. Je suis CICTify, votre assistant BulSU CICT."
+        if re.search(r"\b(guten\s+tag|hallo)\b", q):
+            return "Hallo. Ich bin CICTify, dein BulSU CICT Assistent."
+        if re.search(r"\b(hola|buenos\s+dias)\b", q):
+            return "Hola. Soy CICTify, tu asistente de BulSU CICT."
         greeting_options = [
             "Hello. I am CICTify, your BulSU CICT assistant.",
             "Hi there. I am CICTify, ready to help with BulSU CICT concerns.",
@@ -167,14 +180,104 @@ class CascadeOrchestrator:
         q = (question or "").strip()
         replacements = {
             r"\bashiftee\b": "a shiftee",
+            r"\bshifteee\b": "shiftee",
             r"\btransferee\b": "transferee",
             r"\bdeen\b": "dean",
+            r"\bwwhat\b": "what",
             r"\bhow\s+a\s*bout\b": "how about",
             r"\ba\s+bout\b": "about",
         }
         for pattern, repl in replacements.items():
             q = re.sub(pattern, repl, q, flags=re.IGNORECASE)
         return q
+
+    @staticmethod
+    def _detect_language_hint(text: str) -> str:
+        t = (text or "").lower()
+        if re.search(r"\b(bonjour|salut|merci)\b", t):
+            return "fr"
+        if re.search(r"\b(oder|nicht|danke|guten)\b", t):
+            return "de"
+        if re.search(r"\b(kumusta|salamat|sino|ano|paano|pwede|wala)\b", t):
+            return "tl"
+        return "en"
+
+    @staticmethod
+    def _out_of_scope_reply(question: str) -> str:
+        lang = CascadeOrchestrator._detect_language_hint(question)
+        if lang == "fr":
+            return "Je peux seulement aider avec les questions liees a BulSU CICT et les salutations."
+        if lang == "de":
+            return "Ich kann nur bei BulSU CICT Fragen und Begruessungen helfen."
+        if lang == "tl":
+            return "BulSU CICT na tanong at greetings lang ang kaya kong sagutin."
+        return "I can only help with BulSU CICT questions and greetings."
+
+    @staticmethod
+    def _is_confirmation_followup(question: str) -> bool:
+        q = (question or "").strip().lower()
+        return bool(
+            re.search(r"\b(are\s+you\s+sure|u\s+sure|sure\s+tho|sigurado\s+ka|sure\?|bist\s+du\s+sicher)\b", q)
+        )
+
+    @staticmethod
+    def _latest_assistant_from_history(history: List[Dict]) -> str:
+        for msg in reversed(history or []):
+            if msg.get("role") == "assistant":
+                content = (msg.get("content") or "").strip()
+                if content:
+                    return content
+        return ""
+
+    @staticmethod
+    def _confirmation_without_memory(question: str) -> str:
+        lang = CascadeOrchestrator._detect_language_hint(question)
+        if lang == "fr":
+            return "Je peux confirmer si vous precisez a quelle reponse precedente vous faites reference."
+        if lang == "de":
+            return "Ich kann es bestaetigen, wenn du sagst, auf welche vorherige Antwort du dich beziehst."
+        if lang == "tl":
+            return "Mako-confirm ko iyan kung sasabihin mo kung aling naunang sagot ang tinutukoy mo."
+        return "I can confirm that if you tell me which previous answer you mean."
+
+    @staticmethod
+    def _confirmation_from_memory(relevant_memory: str, question: str) -> str:
+        if not relevant_memory:
+            return ""
+        assistant_lines = [ln for ln in relevant_memory.splitlines() if ln.startswith("Assistant:")]
+        if not assistant_lines:
+            return ""
+        last = assistant_lines[-1].replace("Assistant:", "", 1).strip()
+        if not last:
+            return ""
+        lang = CascadeOrchestrator._detect_language_hint(question)
+        if lang == "fr":
+            return f"Oui. D'apres la reponse precedente: {last}"
+        if lang == "de":
+            return f"Ja. Basierend auf der vorherigen Antwort: {last}"
+        if lang == "tl":
+            return f"Oo. Batay sa naunang sagot: {last}"
+        return f"Yes. Based on the previous answer: {last}"
+
+    @staticmethod
+    def _is_out_of_scope(question: str, relevant_memory: str) -> bool:
+        q = (question or "").strip().lower()
+        if not q:
+            return False
+        if any(re.search(pattern, q) for pattern in OUT_OF_SCOPE_PATTERNS):
+            return True
+        if CascadeOrchestrator._contains_followup_marker(q) and relevant_memory:
+            return False
+        if CascadeOrchestrator._is_confirmation_followup(q) and relevant_memory:
+            return False
+        if any(re.match(pattern, q) for pattern in FALLBACK_GENERAL_PATTERNS):
+            return False
+        if CascadeOrchestrator._looks_academic(q):
+            return False
+        # Non-BulSU factual/general-knowledge prompts should be rejected.
+        if re.search(r"\b(who\s+is|what\s+is|where\s+is|when\s+is|why\s+is|how\s+to)\b", q):
+            return True
+        return False
 
     @staticmethod
     def _expand_room_tokens(text: str) -> str:
@@ -243,6 +346,10 @@ class CascadeOrchestrator:
             if not (lead.startswith("yes") or lead.startswith("no")):
                 return True
 
+        if q.startswith(("what is", "define", "meaning of")):
+            if a.lower().startswith("definition of terms"):
+                return True
+
         if (q.startswith("who is") or q.startswith("sino")) and "dean" in q:
             has_name = bool(re.search(r"\b(?:Dr|Mr|Ms|Engr)\.?\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){0,4}\b", a))
             if not has_name and a.strip().startswith("-"):
@@ -292,6 +399,9 @@ class CascadeOrchestrator:
         if not relevant_memory:
             return q
 
+        if CascadeOrchestrator._is_confirmation_followup(q):
+            return q
+
         user_lines = [ln for ln in relevant_memory.splitlines() if ln.startswith("User:")]
         if not user_lines:
             return q
@@ -300,21 +410,93 @@ class CascadeOrchestrator:
             return q
 
         # For short follow-ups like "yes or no?", anchor to previous question.
-        if q.lower() in {"yes or no", "yes or no?", "so yes or no", "so yes or no?"}:
+        if q.lower() in {
+            "yes or no", "yes or no?", "so yes or no", "so yes or no?",
+            "yes oder nicht", "yes oder nicht?", "ja oder nein", "ja oder nein?",
+        }:
             return f"{last_user} Please answer only Yes or No and add one short reason."
+
+        # If user asks about another grade as a follow-up, keep shift/GWA intent anchored.
+        grade_match = re.search(r"\b(?:grade|gwa)\s*(?:of|is)?\s*([1-5](?:\.\d+)?)\b", q, flags=re.IGNORECASE)
+        if grade_match:
+            if re.search(r"\bshift|shiftee|eligible|qualify\b", last_user, flags=re.IGNORECASE):
+                return f"Can I shift if my GWA is {grade_match.group(1)}?"
+
+        # Handle "how about a grade of X" phrasing robustly.
+        if q.lower().startswith("how about"):
+            num = re.search(r"\b([1-5](?:\.\d+)?)\b", q)
+            if num and re.search(r"\bshift|shiftee|eligible|qualify|gwa\b", last_user, flags=re.IGNORECASE):
+                return f"Can I shift if my GWA is {num.group(1)}?"
 
         # Reframe "how about ..." follow-ups into explicit question form.
         m = re.search(r"^how\s+about\s+(.+)$", q, flags=re.IGNORECASE)
         if m:
             subject = (m.group(1) or "").strip(" ?.!")
+            subject = re.sub(r"\b(naman|nga|po|tho|lang)\b", "", subject, flags=re.IGNORECASE)
+            subject = re.sub(r"\s+", " ", subject).strip()
             if subject:
                 return f"What is {subject}?"
         return f"{last_user}\nFollow-up: {q}"
 
     @staticmethod
+    def _is_definition_query(question: str) -> bool:
+        q = (question or "").strip().lower()
+        return bool(re.search(r"\b(what\s+is|define|meaning\s+of)\b", q))
+
+    @staticmethod
+    def _definition_from_context_loose(question: str, rag_context: str) -> str:
+        q = (question or "").strip().lower()
+        flat = re.sub(r"\s+", " ", rag_context or "")
+        if not q or not flat:
+            return ""
+        m_term = re.search(r"\b(?:what\s+is|define|meaning\s+of)\s+(?:a|an|the)?\s*([a-z][a-z\-\s]{2,40})\??", q)
+        if not m_term:
+            return ""
+        term = m_term.group(1).strip()
+        term_clean = re.sub(r"\b(naman|nga|po|tho|lang)\b", "", term, flags=re.IGNORECASE).strip()
+        if not term_clean:
+            return ""
+        term_pat = re.escape(term_clean)
+        m = re.search(rf"\b{term_pat}\s+is\s+(.{{20,260}}?)(?:\.\s+[A-Z]|$)", flat, flags=re.IGNORECASE)
+        if not m:
+            return ""
+        meaning = m.group(1).strip().rstrip(". ")
+        if re.search(r"\([a-z]$", meaning, flags=re.IGNORECASE):
+            return ""
+        return f"{term_clean.capitalize()} is {meaning}."
+
+    @staticmethod
+    def _definition_from_preview_text(question: str, preview_text: str) -> str:
+        q = (question or "").lower()
+        p = re.sub(r"\s+", " ", (preview_text or "")).strip()
+        if not p:
+            return ""
+        for term in ("shiftee", "transferee", "returnee"):
+            if term in q:
+                m = re.search(rf"\b{term}\s+is\s+(.{{20,320}}?)(?:\.\s+[A-Z]|$)", p, flags=re.IGNORECASE)
+                if m:
+                    meaning = m.group(1).strip().rstrip(". ")
+                    return f"A {term} is {meaning}."
+        return ""
+
+    @staticmethod
+    def _strip_definition_preface(text: str) -> str:
+        t = re.sub(r"\s+", " ", (text or "")).strip()
+        m = re.search(r"\b([A-Za-z]{3,30})\s+is\s+(.{20,320}?)(?:\.\s+[A-Z]|$)", t, flags=re.IGNORECASE)
+        if not m:
+            return t
+        term = m.group(1).strip()
+        meaning = m.group(2).strip().rstrip(". ")
+        article = "An" if term[:1].lower() in {"a", "e", "i", "o", "u"} else "A"
+        return f"{article} {term.lower()} is {meaning}."
+
+    @staticmethod
     def _is_yes_no_followup(question: str) -> bool:
         q = (question or "").strip().lower()
-        return q in {"yes or no", "yes or no?", "so yes or no", "so yes or no?"}
+        return q in {
+            "yes or no", "yes or no?", "so yes or no", "so yes or no?",
+            "yes oder nicht", "yes oder nicht?", "ja oder nein", "ja oder nein?",
+        }
 
     @staticmethod
     def _yes_no_from_memory(relevant_memory: str) -> str:
@@ -334,8 +516,80 @@ class CascadeOrchestrator:
         return ""
 
     @staticmethod
+    def _yes_no_from_memory_lang(relevant_memory: str, question: str) -> str:
+        base = CascadeOrchestrator._yes_no_from_memory(relevant_memory)
+        if not base:
+            return ""
+        lang = CascadeOrchestrator._detect_language_hint(question)
+        if lang == "de":
+            if base.lower().startswith("yes"):
+                return "Ja. Basierend auf der vorherigen Antwort erfuellst du die Voraussetzung."
+            return "Nein. Basierend auf der vorherigen Antwort erfuellst du die Voraussetzung nicht."
+        if lang == "fr":
+            if base.lower().startswith("yes"):
+                return "Oui. D'apres la reponse precedente, vous etes eligible."
+            return "Non. D'apres la reponse precedente, vous n'etes pas eligible."
+        if lang == "tl":
+            if base.lower().startswith("yes"):
+                return "Oo. Batay sa naunang sagot, qualified ka."
+            return "Hindi. Batay sa naunang sagot, hindi ka qualified."
+        return base
+
+    @staticmethod
+    def _mission_vision_fallback(question: str, rag_context: str) -> str:
+        q = (question or "").lower()
+        if "mission" not in q or "vision" not in q:
+            return ""
+        cict_vision = (
+            "Excellence in producing globally competitive graduates in the field of "
+            "Information and Communications Technology responsive to the changing needs of society."
+        )
+        cict_mission = (
+            "To provide quality education by ensuring efficient and effective delivery of instruction "
+            "through appropriate adoption of technological innovation and research in carrying out extension services."
+        )
+        bulsu_vision = (
+            "Bulacan State University is a progressive knowledge-generating institution globally recognized "
+            "for excellent instruction, pioneering research, and responsive community engagements."
+        )
+        bulsu_mission = (
+            "Bulacan State University exists to produce highly competent, ethical, and service-oriented professionals "
+            "that contribute to the sustainable socio-economic growth and development of the nation."
+        )
+
+        if "cict" in q:
+            return "\n".join(
+                [
+                    "CICT Vision and Mission:",
+                    f"- Vision: {cict_vision}",
+                    f"- Mission: {cict_mission}",
+                ]
+            )
+
+        if "bulsu" in q or "bulacan state university" in q or "university" in q:
+            return "\n".join(
+                [
+                    "BulSU Vision and Mission:",
+                    f"- Vision: {bulsu_vision}",
+                    f"- Mission: {bulsu_mission}",
+                ]
+            )
+
+        return "\n".join(
+            [
+                "Here are both references for clarity:",
+                f"- CICT Vision: {cict_vision}",
+                f"- CICT Mission: {cict_mission}",
+                f"- BulSU Vision: {bulsu_vision}",
+                f"- BulSU Mission: {bulsu_mission}",
+            ]
+        )
+
+    @staticmethod
     def _clean_person_name(candidate: str) -> str:
         raw = re.sub(r"\s+", " ", (candidate or "")).strip(" .,-")
+        raw = re.sub(r"\b\S+\.pdf\b", "", raw, flags=re.IGNORECASE)
+        raw = re.sub(r"\b(source|from|file)\b", "", raw, flags=re.IGNORECASE)
         raw = re.sub(r"\b(Associate|Assistant|Acting|Officer|Office|College|University|CICT|BulSU)\b", "", raw, flags=re.IGNORECASE)
         raw = re.sub(r"\s+", " ", raw).strip(" .,-")
         if not raw:
@@ -357,11 +611,15 @@ class CascadeOrchestrator:
 
         phrase_markers = [
             "what about", "so ibig", "ibig sabihin", "pwede pa", "pano naman", "how about", "so yes", "so no",
+            "are you sure", "u sure", "sure tho", "sigurado ka", "yes oder nicht", "ja oder nein",
         ]
         if any(m in q for m in phrase_markers):
             return True
 
-        if q in {"yes or no", "yes or no?", "so yes or no", "so yes or no?"}:
+        if q in {
+            "yes or no", "yes or no?", "so yes or no", "so yes or no?",
+            "yes oder nicht", "yes oder nicht?", "ja oder nein", "ja oder nein?",
+        }:
             return True
 
         token_markers = {"only", "that", "those", "it", "they", "them", "her", "his", "she", "he", "yun", "iyon", "ganon", "ganoon"}
@@ -372,7 +630,14 @@ class CascadeOrchestrator:
     def _direct_fact_fallback(question: str, rag_context: str) -> str:
         q = (question or "").lower()
         flat = re.sub(r"\s+", " ", rag_context or "")
+        context_lines = [
+            ln.strip()
+            for ln in (rag_context or "").splitlines()
+            if ln.strip() and not ln.strip().lower().startswith("source:") and ln.strip() != "---"
+        ]
+        flat_no_sources = re.sub(r"\s+", " ", " ".join(context_lines))
         normalized_flat = unicodedata.normalize("NFKD", flat)
+        normalized_flat_no_sources = unicodedata.normalize("NFKD", flat_no_sources)
         if not flat:
             return ""
 
@@ -381,14 +646,51 @@ class CascadeOrchestrator:
             role = who_match.group(1).strip().strip("?.")
             role = re.sub(r"\s+", " ", role)
             role = role.replace("assoc ", "associate ")
-            role_pat = re.escape(role).replace("\\ ", r"\\s+")
-            m = re.search(rf"([A-Z][A-Za-z\.\s,IVX]{{2,100}})\s*[\-–|,:]\s*{role_pat}\b", normalized_flat, flags=re.IGNORECASE)
-            if not m:
-                m = re.search(rf"{role_pat}\b\s*[\-–|,:]?\s*([A-Z][A-Za-z\.\s,IVX]{{2,100}})", normalized_flat, flags=re.IGNORECASE)
-            if m:
-                name = CascadeOrchestrator._clean_person_name(m.group(1) or "")
-                if name and not re.search(r"\b(page|rule|guideline|office|designation|vice presidents)\b", name, flags=re.IGNORECASE):
-                    return f"The {role} is {name}."
+            role = re.sub(r"\b(of|ng|sa)\s+(the\s+)?cict\b", "", role, flags=re.IGNORECASE).strip()
+            role = re.sub(r"\s+", " ", role)
+
+            honorific_name = r"((?:Dr|Mr|Ms|Engr)\.?\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z\.]+){0,6}(?:\s+[IVX]+)?(?:,\s*[A-Z]{2,6})?)"
+            if role == "associate dean":
+                m_assoc = re.search(
+                    rf"{honorific_name}\s*[^A-Za-z]{{0,10}}\s*Associate\s+Dean\s*,?\s*CICT",
+                    normalized_flat_no_sources,
+                    flags=re.IGNORECASE,
+                )
+                if m_assoc:
+                    name = CascadeOrchestrator._clean_person_name(m_assoc.group(1) or "")
+                    if name:
+                        return f"The associate dean is {name}."
+
+            if role == "dean":
+                m_dean = re.search(
+                    rf"{honorific_name}\s*[^A-Za-z]{{0,10}}\s*Dean\s*,?\s*CICT",
+                    normalized_flat_no_sources,
+                    flags=re.IGNORECASE,
+                )
+                if m_dean:
+                    name = CascadeOrchestrator._clean_person_name(m_dean.group(1) or "")
+                    if name:
+                        return f"The dean is {name}."
+                m_surname = re.search(r"\b([A-Z][a-z]{2,30})\s+Dean\s*,?\s*CICT\b", normalized_flat_no_sources)
+                if m_surname:
+                    return f"The dean is {m_surname.group(1)}."
+
+            role_variants = [role]
+            if role == "dean":
+                role_variants.extend(["dean, cict", "cict dean"])
+            if role in {"associate dean", "assoc dean"}:
+                role = "associate dean"
+                role_variants = ["associate dean", "assoc dean", "associate dean, cict"]
+
+            for rv in role_variants:
+                role_pat = re.escape(rv).replace("\\ ", r"\\s+")
+                m = re.search(rf"([A-Z][A-Za-z\.\s,IVX]{{2,100}})\s*[\-–|,:]?\s*{role_pat}\b", normalized_flat_no_sources, flags=re.IGNORECASE)
+                if not m:
+                    m = re.search(rf"{role_pat}\b\s*[\-–|,:]?\s*([A-Z][A-Za-z\.\s,IVX]{{2,100}})", normalized_flat_no_sources, flags=re.IGNORECASE)
+                if m:
+                    name = CascadeOrchestrator._clean_person_name(m.group(1) or "")
+                    if name and not re.search(r"\b(page|rule|guideline|office|designation|vice presidents)\b", name, flags=re.IGNORECASE):
+                        return f"The {role} is {name}."
 
         term_match = re.search(r"\b(?:what\s+is|define|meaning\s+of)\s+(?:a|an|the)?\s*([a-z][a-z\-\s]{2,40})\??", q)
         if term_match:
@@ -541,6 +843,8 @@ class CascadeOrchestrator:
 
         q_lower = (question or "").strip().lower()
         if q_lower.startswith("what is") or q_lower.startswith("who is") or q_lower.startswith("sino"):
+            if "definition of terms" in unique_sentences[0].lower():
+                return CascadeOrchestrator._strip_definition_preface(unique_sentences[0])
             return unique_sentences[0]
 
         lines = [f"- {sentence}" for sentence in unique_sentences]
@@ -563,7 +867,7 @@ class CascadeOrchestrator:
         q_terms = set(self._keywords(question))
         followup = self._contains_followup_marker(question)
         candidates: List[Tuple[int, int, int, str]] = []
-        recent = history[-CONFIG.max_history_messages:]
+        recent = history[:-1][-CONFIG.max_history_messages:]
 
         for idx, msg in enumerate(recent):
             if msg.get("role") != "user":
@@ -625,10 +929,33 @@ class CascadeOrchestrator:
         if resolved_question != normalized_question:
             print(f"[Query] resolved follow-up -> {resolved_question}", flush=True)
 
+        if self._is_out_of_scope(normalized_question, relevant_memory):
+            return CascadeResult(
+                reply=self._out_of_scope_reply(normalized_question),
+                route="OUT_OF_SCOPE",
+                context="",
+            ), "ok"
+
+        if self._is_confirmation_followup(normalized_question):
+            confirm = self._confirmation_from_memory(relevant_memory, normalized_question)
+            if confirm:
+                return CascadeResult(reply=confirm, route="MEMORY_CONFIRM", context=""), "ok"
+            latest_assistant = self._latest_assistant_from_history(history)
+            if latest_assistant:
+                confirm = self._confirmation_from_memory(f"Assistant: {latest_assistant}", normalized_question)
+                if confirm:
+                    return CascadeResult(reply=confirm, route="MEMORY_CONFIRM", context=""), "ok"
+            return CascadeResult(reply=self._confirmation_without_memory(normalized_question), route="CONFIRM_CLARIFY", context=""), "ok"
+
         if self._is_yes_no_followup(normalized_question):
-            memory_yes_no = self._yes_no_from_memory(relevant_memory)
+            memory_yes_no = self._yes_no_from_memory_lang(relevant_memory, normalized_question)
             if memory_yes_no:
                 return CascadeResult(reply=memory_yes_no, route="MEMORY_FOLLOWUP", context=""), "ok"
+            latest_assistant = self._latest_assistant_from_history(history)
+            if latest_assistant:
+                quick_yes_no = self._yes_no_from_memory_lang(f"Assistant: {latest_assistant}", normalized_question)
+                if quick_yes_no:
+                    return CascadeResult(reply=quick_yes_no, route="MEMORY_FOLLOWUP", context=""), "ok"
 
         if route == "GENERAL":
             final = self._deterministic_general_reply(normalized_question)
@@ -660,6 +987,10 @@ class CascadeOrchestrator:
         print(f"[Cascade] RAG chunks={rag_chunks}", flush=True)
         rag_preview = ""
         if rag_context:
+            mv_direct = self._mission_vision_fallback(resolved_question, rag_context)
+            if mv_direct and not self._looks_low_quality_answer(normalized_question, mv_direct):
+                return CascadeResult(reply=mv_direct, route="RAG_DIRECT_MV", context=rag_context), "ok"
+
             rag_user_prompt = f"Current Question: {resolved_question}"
             if relevant_memory:
                 rag_user_prompt = (
@@ -671,6 +1002,13 @@ class CascadeOrchestrator:
                 rag_system_prompt(rag_context),
                 rag_user_prompt,
             )
+
+            # Prefer concise deterministic extraction for definition-style queries.
+            if self._is_definition_query(resolved_question):
+                direct_def = self._direct_fact_fallback(resolved_question, rag_context)
+                if direct_def and not self._looks_low_quality_answer(normalized_question, direct_def):
+                    return CascadeResult(reply=direct_def, route="RAG_DIRECT", context=rag_context), "ok"
+
             if rag_answer and "__NO_KB_ANSWER__" not in rag_answer:
                 rag_answer = ResponseFilter.filter_response(rag_answer)
                 validate = validate_model_response(rag_answer)
@@ -715,6 +1053,17 @@ class CascadeOrchestrator:
                     return CascadeResult(reply=web_answer, route="WEB", context=web_context), "ok"
 
         if rag_preview:
+            if self._is_definition_query(resolved_question):
+                loose_def = self._definition_from_context_loose(resolved_question, rag_context)
+                if loose_def and not self._looks_low_quality_answer(normalized_question, loose_def):
+                    return CascadeResult(reply=loose_def, route="RAG_DIRECT_LOOSE", context=rag_context), "ok"
+                preview_def = self._definition_from_preview_text(resolved_question, rag_preview)
+                if preview_def and not self._looks_low_quality_answer(normalized_question, preview_def):
+                    return CascadeResult(reply=preview_def, route="RAG_DIRECT_PREVIEW", context=rag_context), "ok"
+                if "definition of terms" in rag_preview.lower() and " is " in rag_preview.lower():
+                    trimmed = self._strip_definition_preface(rag_preview)
+                    if trimmed and not self._looks_low_quality_answer(normalized_question, trimmed):
+                        return CascadeResult(reply=trimmed, route="RAG_DIRECT_TRIMMED", context=rag_context), "ok"
             if normalized_question.lower().startswith(("who is", "sino")):
                 return CascadeResult(
                     reply="I could not find a clear person name for that role in the current documents.",
