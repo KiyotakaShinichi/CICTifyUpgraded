@@ -1,5 +1,6 @@
 import asyncio
 import re
+import unicodedata
 from dataclasses import dataclass
 from typing import List, Dict, Tuple
 
@@ -13,6 +14,7 @@ from .prompts import (
 )
 from .retrieval import RAGStore
 from .safety import AdvancedSecurityGuard, ResponseFilter, validate_model_response
+from .spatial_graph import SpatialGraphStore
 from .web_search import WebFallback
 
 
@@ -62,6 +64,7 @@ class CascadeOrchestrator:
         self.llm = GroqClient()
         self.rag = RAGStore()
         self.floorplans = FloorplanContextStore()
+        self.spatial_graph = SpatialGraphStore()
         self.web = WebFallback()
 
     def initialize(self) -> None:
@@ -100,6 +103,16 @@ class CascadeOrchestrator:
         return "ACADEMIC"
 
     @staticmethod
+    def _expand_room_tokens(text: str) -> str:
+        raw = text or ""
+        pairs = re.findall(r"\b([a-zA-Z]+)(\d+)\b", raw)
+        if not pairs:
+            return raw
+
+        expansions = [f"{letters} {digits}" for letters, digits in pairs]
+        return raw + "\n" + " ".join(expansions)
+
+    @staticmethod
     def _history_to_text(history: List[Dict]) -> str:
         recent = history[-CONFIG.max_history_messages:]
         lines = []
@@ -136,10 +149,103 @@ class CascadeOrchestrator:
     def _contains_followup_marker(question: str) -> bool:
         q = (question or "").strip().lower()
         markers = [
-            "so", "only", "that", "those", "it", "they", "them", "what about",
+            "so", "only", "that", "those", "it", "they", "them", "what about", "her", "his", "she", "he",
             "yun", "iyon", "ganon", "ganoon", "so ibig", "ibig sabihin", "pwede pa", "pano naman",
         ]
         return any(m in q for m in markers)
+
+    @staticmethod
+    def _direct_fact_fallback(question: str, rag_context: str) -> str:
+        q = (question or "").lower()
+        flat = re.sub(r"\s+", " ", rag_context or "")
+        normalized_flat = unicodedata.normalize("NFKD", flat)
+        if not flat:
+            return ""
+
+        if "transferee" in q:
+            m = re.search(r"Transferee\s+is\s+([^\.]{20,260})\.", flat, flags=re.IGNORECASE)
+            if m:
+                return (
+                    f"Transferee: {m.group(1).strip()}.\n\n"
+                    "Source: BulSU-Enhanced-Guidelines.pdf"
+                )
+
+        dean_name_query = ("dean" in q and ("name" in q or "who" in q)) or ("her name" in q) or ("his name" in q)
+        if dean_name_query:
+            m = re.search(r"(Dr\.\s+[A-Z][A-Za-z\.\s]{2,60}?)\s*(?:-|,)?\s*Dean\b", flat)
+            if not m:
+                # OCR may drop punctuation around role labels.
+                m = re.search(r"Dean\s*,?\s*CICT\s*[\.|,\-]?\s*(Dr\.\s+[A-Z][A-Za-z\.\s]{2,60})", flat)
+            if m:
+                name = (m.group(1) or "").strip()
+                name = re.sub(r"\s+", " ", name)
+                return f"CICT Dean: {name}.\n\nSource: CICTify - FAQs.pdf"
+
+        if "coordinator" in q:
+            matches = re.findall(
+                r"((?:Dr|Mr|Ms|Engr)\s*\.\s*[A-Z][A-Za-z0-9\.\s]{2,80})[^\.\n]{0,100}?Program\s*Coordinator\s*,?\s*([A-Za-z&\-\s]{3,90})",
+                normalized_flat,
+                flags=re.IGNORECASE,
+            )
+            if matches:
+                seen = set()
+                lines = []
+                for name, track in matches:
+                    clean_name = re.sub(r"\s+", " ", name).strip()
+                    clean_track = re.sub(r"\s+", " ", track).strip(" .,")
+                    key = (clean_name.lower(), clean_track.lower())
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    lines.append(f"- {clean_name}: {clean_track}")
+                if lines:
+                    return "CICT BSIT Program Coordinators:\n" + "\n".join(lines[:5]) + "\n\nSource: CICTify - FAQs.pdf"
+
+        if ("acad" in q or "room" in q) and "where" in q:
+            m = re.search(r"(Acad\s*1\s*[\-–]\s*[^\.]{20,220})", flat, flags=re.IGNORECASE)
+            if m:
+                return m.group(1).strip() + "."
+
+        return ""
+
+    @staticmethod
+    def _extractive_rag_fallback(question: str, rag_context: str, max_sentences: int = 3) -> str:
+        if not rag_context:
+            return ""
+
+        expanded_q = CascadeOrchestrator._expand_room_tokens(question)
+        q_terms = set(re.findall(r"[a-zA-Z0-9]{2,}", expanded_q.lower()))
+        if not q_terms:
+            return ""
+
+        blocks = rag_context.split("\n\n---\n\n")
+        scored = []
+        for block in blocks:
+            lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+            source = "Unknown"
+            body = " ".join(lines)
+            if lines and lines[0].startswith("Source:"):
+                source = lines[0].replace("Source:", "", 1).strip() or "Unknown"
+                body = " ".join(lines[1:])
+
+            sentences = re.split(r"(?<=[.!?])\s+", body)
+            for sent in sentences:
+                sent_clean = sent.strip()
+                if len(sent_clean) < 20:
+                    continue
+                s_lower = sent_clean.lower()
+                score = sum(1 for term in q_terms if term in s_lower)
+                if score > 0:
+                    scored.append((score, source, sent_clean))
+
+        if not scored:
+            return ""
+
+        scored.sort(key=lambda item: item[0], reverse=True)
+        picked = scored[:max_sentences]
+        lines = [f"- {sentence}" for _, _, sentence in picked]
+        primary_source = picked[0][1]
+        return "\n".join(lines) + f"\n\nSource: {primary_source}"
 
     @staticmethod
     def _keywords(text: str) -> List[str]:
@@ -156,7 +262,7 @@ class CascadeOrchestrator:
             return ""
 
         q_terms = set(self._keywords(question))
-        followup = self._contains_followup_marker(question) or len((question or "").split()) <= 5
+        followup = self._contains_followup_marker(question)
         candidates: List[Tuple[int, int, str]] = []
         recent = history[:-1][-CONFIG.max_history_messages:]
 
@@ -224,11 +330,15 @@ class CascadeOrchestrator:
                 final = "I can only provide safe BulSU CICT assistance."
             return CascadeResult(reply=final, route="GENERAL", context=""), "ok"
 
+        spatial_reply = self.spatial_graph.answer_navigation_query(question)
+        if spatial_reply:
+            return CascadeResult(reply=spatial_reply, route="SPATIAL_RAG", context="spatial_graph"), "ok"
+
         # Cascading workflow: GENERAL -> RAG -> WEB
         print("[Cascade] Trying RAG", flush=True)
-        retrieval_query = question
+        retrieval_query = self._expand_room_tokens(question)
         if relevant_memory:
-            retrieval_query = f"{question}\n\nRelevant previous conversation:\n{relevant_memory}"
+            retrieval_query = f"{self._expand_room_tokens(question)}\n\nRelevant previous conversation:\n{relevant_memory}"
 
         rag_context = self.rag.context_for(retrieval_query)
         rag_chunks = rag_context.count("Source:") if rag_context else 0
@@ -251,6 +361,15 @@ class CascadeOrchestrator:
                 validate = validate_model_response(rag_answer)
                 if not validate.blocked:
                     return CascadeResult(reply=rag_answer, route="RAG", context=rag_context), "ok"
+
+            direct = self._direct_fact_fallback(question, rag_context)
+            if direct:
+                return CascadeResult(reply=direct, route="RAG_DIRECT", context=rag_context), "ok"
+
+            extractive = self._extractive_rag_fallback(question, rag_context)
+            if extractive:
+                return CascadeResult(reply=extractive, route="RAG_EXTRACTIVE", context=rag_context), "ok"
+
             rag_preview = self._preview_from_rag_context(rag_context)
             if not rag_answer:
                 print("[Cascade] RAG answer empty; trying WEB before fallback preview", flush=True)

@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 from flask import Flask, jsonify, request, send_file, send_from_directory
 
 from cictify_core import CascadeOrchestrator, OCRIngestion
-from cictify_core.config import CONFIG
+from cictify_core.config import CONFIG, groq_api_key
 
 
 BASE_DIR = pathlib.Path(__file__).parent.resolve()
@@ -30,7 +30,11 @@ def _ensure_ready() -> None:
     orchestrator.initialize()
 
     # Reuse orchestrator stores to avoid duplicate embedding model load.
-    ocr_ingestion = OCRIngestion(orchestrator.rag, floorplan_store=orchestrator.floorplans)
+    ocr_ingestion = OCRIngestion(
+        orchestrator.rag,
+        floorplan_store=orchestrator.floorplans,
+        spatial_graph_store=orchestrator.spatial_graph,
+    )
 
 
 @app.route("/")
@@ -108,6 +112,8 @@ def chat_endpoint():
 def ingest_image():
     try:
         _ensure_ready()
+        if not groq_api_key():
+            return jsonify({"status": "error", "message": "GROQ_API_KEY is missing. Set it in CICTify/.env to enable vision ingestion."}), 503
         if "file" not in request.files:
             return jsonify({"status": "error", "message": "Missing image file"}), 400
 
@@ -116,11 +122,33 @@ def ingest_image():
         if not image_bytes:
             return jsonify({"status": "error", "message": "Empty file"}), 400
 
-        extracted = loop.run_until_complete(ocr_ingestion.ingest_image(image_bytes))
-        if not extracted:
-            return jsonify({"status": "error", "message": "OCR extraction failed"}), 500
+        title = (request.form.get("title") or uploaded.filename or "Image").strip()
+        building = (request.form.get("building") or "Unknown Building").strip()
+        floor = (request.form.get("floor") or "Unknown Floor").strip()
 
-        return jsonify({"status": "success", "ocr_text": extracted})
+        result = loop.run_until_complete(
+            ocr_ingestion.ingest_image_auto(
+                image_bytes,
+                title=title,
+                building=building,
+                floor=floor,
+                source_file=uploaded.filename or "uploaded_image",
+            )
+        )
+        image_type = result.get("image_type", {})
+
+        if image_type.get("type") == "floor_plan" and not result.get("record"):
+            return jsonify({"status": "error", "message": "Floorplan detected but ingestion failed", "image_type": image_type}), 500
+
+        return jsonify(
+            {
+                "status": "success",
+                "image_type": image_type,
+                "record": result.get("record"),
+                "ocr_text": result.get("ocr_text"),
+                "status_update": result.get("status_update"),
+            }
+        )
     except Exception:
         return jsonify({"status": "error", "message": "OCR endpoint failed"}), 500
 
@@ -129,6 +157,8 @@ def ingest_image():
 def ingest_floorplan():
     try:
         _ensure_ready()
+        if not groq_api_key():
+            return jsonify({"status": "error", "message": "GROQ_API_KEY is missing. Set it in CICTify/.env to enable floorplan ingestion."}), 503
         if "file" not in request.files:
             return jsonify({"status": "error", "message": "Missing floorplan image file"}), 400
 
@@ -140,6 +170,16 @@ def ingest_floorplan():
         title = (request.form.get("title") or uploaded.filename or "Floorplan").strip()
         building = (request.form.get("building") or "Unknown Building").strip()
         floor = (request.form.get("floor") or "Unknown Floor").strip()
+
+        image_type = loop.run_until_complete(ocr_ingestion.classify_image(image_bytes))
+        if image_type.get("type") != "floor_plan" and float(image_type.get("confidence", 0.0)) >= 0.6:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "Uploaded image is likely not a floor plan",
+                    "image_type": image_type,
+                }
+            ), 400
 
         record = loop.run_until_complete(
             ocr_ingestion.ingest_floorplan(
@@ -153,21 +193,27 @@ def ingest_floorplan():
         if not record:
             return jsonify({"status": "error", "message": "Floorplan OCR ingestion failed"}), 500
 
-        return jsonify({"status": "success", "record": record})
+        return jsonify({"status": "success", "image_type": image_type, "record": record})
     except Exception:
         return jsonify({"status": "error", "message": "Floorplan endpoint failed"}), 500
 
 
 @app.route("/api/health", methods=["GET"])
 def health_check():
+    key_available = bool(groq_api_key())
+    spatial_stats = orchestrator.spatial_graph.stats() if orchestrator is not None else {"nodes": 0, "edges": 0}
     return jsonify(
         {
             "status": "online",
             "system": "CICTify",
-            "architecture": "General -> RAG -> Web (prewarmed)",
+            "architecture": "General -> Spatial RAG -> RAG -> Web (prewarmed)",
             "model_loaded": orchestrator is not None,
             "memory_size": len(chat_memory),
             "max_memory": CONFIG.max_memory_messages,
+            "dependencies": {
+                "groq_api_key": key_available,
+            },
+            "spatial_graph": spatial_stats,
         }
     )
 
@@ -199,4 +245,5 @@ if __name__ == "__main__":
         flush=True,
     )
     print(f"[Startup] Web mode: prewarmed cache (live fallback={CONFIG.web_live_fallback})", flush=True)
+    print(f"[Startup] GROQ_API_KEY configured: {bool(groq_api_key())}", flush=True)
     app.run(host=CONFIG.host, port=CONFIG.port, debug=False)

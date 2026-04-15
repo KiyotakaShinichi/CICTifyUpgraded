@@ -9,9 +9,11 @@ from dotenv import load_dotenv
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 GUI_DIR = BASE_DIR / "gui"
 FAISS_DIR = BASE_DIR / "vectorstore" / "faiss_index"
+FAISS_MANIFEST_PATH = BASE_DIR / "vectorstore" / "faiss_manifest.json"
 DB_PATH = BASE_DIR / "vectorstore" / "cictify.db"
 KB_PDF_DIR = BASE_DIR / "knowledge_base" / "pdfs"
 FLOORPLAN_CONTEXT_PATH = BASE_DIR / "vectorstore" / "floorplan_context.json"
+SPATIAL_GRAPH_PATH = BASE_DIR / "vectorstore" / "spatial_graph.json"
 
 # Load secrets/config from local .env file if present.
 load_dotenv(BASE_DIR / ".env")
@@ -39,14 +41,14 @@ class AppConfig:
 
     # ===== HYPERPARAMETERS =====
     # Uppercase aliases are kept for backward compatibility with older code paths.
-    CHUNK_SIZE: int = _env_int("CHUNK_SIZE", 1000)
-    CHUNK_OVERLAP: int = _env_int("CHUNK_OVERLAP", 200)
+    CHUNK_SIZE: int = _env_int("CHUNK_SIZE", 900)
+    CHUNK_OVERLAP: int = _env_int("CHUNK_OVERLAP", 120)
     MAX_TOKENS: int = _env_int("MAX_TOKENS", 1400)
     TEMPERATURE: float = _env_float("TEMPERATURE", 0.2)
-    RETRIEVAL_K: int = _env_int("RETRIEVAL_K", 10)
+    RETRIEVAL_K: int = _env_int("RETRIEVAL_K", 12)
 
-    RAG_RERANK_TOP_N: int = _env_int("RAG_RERANK_TOP_N", 6)
-    RAG_MIN_TERM_OVERLAP: int = _env_int("RAG_MIN_TERM_OVERLAP", 1)
+    RAG_RERANK_TOP_N: int = _env_int("RAG_RERANK_TOP_N", 5)
+    RAG_MIN_TERM_OVERLAP: int = _env_int("RAG_MIN_TERM_OVERLAP", 2)
     MEMORY_TOP_K: int = _env_int("MEMORY_TOP_K", 4)
     MEMORY_MIN_SCORE: int = _env_int("MEMORY_MIN_SCORE", 1)
 
@@ -107,5 +109,14 @@ def pdf_paths() -> List[str]:
             extra_str = str(extra)
             if extra_str not in paths:
                 paths.append(extra_str)
+
+    # Avoid duplicated guideline content when both files are present.
+    enhanced = str(KB_PDF_DIR / "BulSU-Enhanced-Guidelines.pdf")
+    guide = str(KB_PDF_DIR / "guide.pdf")
+    if enhanced in paths and guide in paths:
+        paths = [p for p in paths if p != guide]
+
+    # Remove empty files from the corpus list.
+    paths = [p for p in paths if pathlib.Path(p).exists() and pathlib.Path(p).stat().st_size > 0]
 
     return paths
