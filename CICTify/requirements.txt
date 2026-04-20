@@ -1,7 +1,6 @@
 # --- Core Flask and Async ---
 flask
 aiohttp
-asyncio
 requests
 
 # --- HTML parsing and scraping ---
@@ -22,5 +21,6 @@ langchain-ollama
 python-dotenv
 PyPDF2
 openpyxl
+Pillow
 # --- Web serving ---
 gunicorn
