@@ -518,6 +518,14 @@ class CascadeOrchestrator:
         if not last_user:
             return q
 
+        # Resolve pronoun-based location follow-ups to explicit landmark queries.
+        if re.search(r"\b(where\s+is\s+it\s+near|what\s+is\s+it\s+near|near\s+to\s+it|nearby\s+to\s+it)\b", q, flags=re.IGNORECASE):
+            last_loc = re.search(r"\b(?:where\s+is|nasaan\s+ang|nasaan|asan|nasan)\s+(.+)$", last_user, flags=re.IGNORECASE)
+            if last_loc:
+                target = last_loc.group(1).strip(" ?!.,")
+                if target:
+                    return f"What is near {target}?"
+
         # For short follow-ups like "yes or no?", anchor to previous question.
         if q.lower() in {
             "yes or no", "yes or no?", "so yes or no", "so yes or no?",

@@ -6,7 +6,7 @@ from datetime import datetime
 from heapq import heappop, heappush
 from typing import Dict, List, Optional, Tuple
 
-from .config import CURATED_CORPUS_PATH, SPATIAL_GRAPH_PATH
+from .config import CURATED_CORPUS_PATH, FLOORPLAN_CONTEXT_PATH, SPATIAL_GRAPH_PATH
 
 
 class SpatialGraphStore:
@@ -540,6 +540,67 @@ class SpatialGraphStore:
                     }
         return best
 
+    def _landmarks_for_building(self, building: str, max_items: int = 4) -> List[str]:
+        if not FLOORPLAN_CONTEXT_PATH.exists() or not building:
+            return []
+        try:
+            payload = json.loads(FLOORPLAN_CONTEXT_PATH.read_text(encoding="utf-8"))
+            records = payload.get("records", []) if isinstance(payload, dict) else []
+        except Exception:
+            return []
+
+        target_norm = self._norm_for_match(building)
+        if not target_norm:
+            return []
+
+        known_tokens = {
+            "park",
+            "gate",
+            "court",
+            "library",
+            "canteen",
+            "gym",
+            "gymnasium",
+            "coop",
+            "parking",
+            "tank",
+            "office",
+            "center",
+        }
+
+        found: List[str] = []
+        seen = set()
+        for rec in records:
+            if not isinstance(rec, dict):
+                continue
+            text = str(rec.get("ocr_text") or "")
+            if not text:
+                continue
+            text_norm = self._norm_for_match(text)
+            if target_norm not in text_norm:
+                continue
+
+            for line in text.splitlines():
+                item = re.sub(r"^[\s*\-\u2022\d\.\)]+", "", line).strip(" :.-")
+                if not item:
+                    continue
+                item_low = item.lower()
+                if item_low.startswith("building/hall") or item_low.startswith("wayfinding"):
+                    continue
+                if self._norm_for_match(item) == target_norm:
+                    continue
+
+                if any(tok in item_low for tok in known_tokens) or "hall" in item_low or "building" in item_low:
+                    clean = re.sub(r"\s+", " ", item).strip()
+                    norm = self._norm_for_match(clean)
+                    if norm and norm != target_norm and norm not in seen:
+                        seen.add(norm)
+                        found.append(clean)
+                        if len(found) >= max_items:
+                            return found
+
+        return found
+
     @staticmethod
     def _looks_building_hint(text: str) -> bool:
         low = str(text or "").strip().lower()
@@ -697,71 +758,93 @@ class SpatialGraphStore:
         if near_match:
             left_hint = near_match.group(1).strip(" ?!.,")
             right_hint = near_match.group(2).strip(" ?!.,")
-            left_building = self._match_building_name(left_hint)
-            right_building = self._match_building_name(right_hint)
-            building_mode = self._looks_building_hint(left_hint) or self._looks_building_hint(right_hint)
+            if not re.fullmatch(r"(?:what|which|where)(?:\s+is)?", left_hint.lower()):
+                left_building = self._match_building_name(left_hint)
+                right_building = self._match_building_name(right_hint)
+                building_mode = self._looks_building_hint(left_hint) or self._looks_building_hint(right_hint)
 
-            if building_mode:
-                if left_building and right_building:
-                    if left_building.lower() == right_building.lower():
-                        return f"Yes. {left_building} and {right_building} refer to the same building."
+                if building_mode:
+                    if left_building and right_building:
+                        if left_building.lower() == right_building.lower():
+                            return f"Yes. {left_building} and {right_building} refer to the same building."
 
-                    building_route = self._best_route_between_buildings(left_building, right_building)
-                    if building_route:
-                        route = building_route["route"]
-                        is_near = route["distance"] <= 4.0
-                        if is_near:
+                        building_route = self._best_route_between_buildings(left_building, right_building)
+                        if building_route:
+                            route = building_route["route"]
+                            is_near = route["distance"] <= 4.0
+                            if is_near:
+                                return (
+                                    f"Yes, they are relatively near in the mapped campus graph. "
+                                    f"Closest mapped path between {left_building} and {right_building}: {' -> '.join(route['path_names'])}\n"
+                                    f"Estimated path cost: {route['distance']}"
+                                )
                             return (
-                                f"Yes, they are relatively near in the mapped campus graph. "
+                                f"They are connected in the mapped campus graph but not immediately near. "
                                 f"Closest mapped path between {left_building} and {right_building}: {' -> '.join(route['path_names'])}\n"
                                 f"Estimated path cost: {route['distance']}"
                             )
+
                         return (
-                            f"They are connected in the mapped campus graph but not immediately near. "
-                            f"Closest mapped path between {left_building} and {right_building}: {' -> '.join(route['path_names'])}\n"
-                            f"Estimated path cost: {route['distance']}"
+                            f"I know both buildings ({left_building} and {right_building}) but there is no inter-building connector in the current graph yet. "
+                            "Upload or ingest campus pathways/floorplans to enable step-by-step cross-building directions."
                         )
 
-                    return (
-                        f"I know both buildings ({left_building} and {right_building}) but there is no inter-building connector in the current graph yet. "
-                        "Upload or ingest campus pathways/floorplans to enable step-by-step cross-building directions."
-                    )
-
-                known_buildings = sorted({str(n.get("building") or "").strip() for n in self._nodes.values() if str(n.get("building") or "").strip()})
-                unknown = right_hint if left_building and not right_building else left_hint
-                if left_building or right_building:
-                    return (
-                        f"I could not find '{unknown}' as a mapped building yet. "
-                        f"Known buildings: {', '.join(known_buildings)}."
-                    )
-
-            left_id = self._match_node_id(left_hint)
-            right_id = self._match_node_id(right_hint)
-            if left_id and right_id:
-                path = self.shortest_path(left_id, right_id)
-                left_name = self._nodes[left_id].get("name", left_id)
-                right_name = self._nodes[right_id].get("name", right_id)
-                if path:
-                    is_near = path["distance"] <= 2.2 or len(path["path_ids"]) <= 3
-                    if is_near:
+                    known_buildings = sorted({str(n.get("building") or "").strip() for n in self._nodes.values() if str(n.get("building") or "").strip()})
+                    unknown = right_hint if left_building and not right_building else left_hint
+                    if left_building or right_building:
                         return (
-                            f"Yes. {left_name} is near {right_name}.\n"
+                            f"I could not find '{unknown}' as a mapped building yet. "
+                            f"Known buildings: {', '.join(known_buildings)}."
+                        )
+
+                left_id = self._match_node_id(left_hint)
+                right_id = self._match_node_id(right_hint)
+                if left_id and right_id:
+                    path = self.shortest_path(left_id, right_id)
+                    left_name = self._nodes[left_id].get("name", left_id)
+                    right_name = self._nodes[right_id].get("name", right_id)
+                    if path:
+                        is_near = path["distance"] <= 2.2 or len(path["path_ids"]) <= 3
+                        if is_near:
+                            return (
+                                f"Yes. {left_name} is near {right_name}.\n"
+                                f"Estimated path cost: {path['distance']}\n"
+                                f"Route: {' -> '.join(path['path_names'])}"
+                            )
+                        return (
+                            f"Not immediately near. {left_name} and {right_name} are connected but farther apart.\n"
                             f"Estimated path cost: {path['distance']}\n"
                             f"Route: {' -> '.join(path['path_names'])}"
                         )
+                    left_node = self._nodes.get(left_id, {})
+                    right_node = self._nodes.get(right_id, {})
+                    left_loc = f"{left_node.get('building', 'Unknown Building')}, {left_node.get('floor', 'Unknown Floor')}"
+                    right_loc = f"{right_node.get('building', 'Unknown Building')}, {right_node.get('floor', 'Unknown Floor')}"
                     return (
-                        f"Not immediately near. {left_name} and {right_name} are connected but farther apart.\n"
-                        f"Estimated path cost: {path['distance']}\n"
-                        f"Route: {' -> '.join(path['path_names'])}"
+                        f"I cannot confirm direct nearness yet because the graph has no connected path between {left_name} and {right_name}. "
+                        f"Known locations: {left_name} ({left_loc}); {right_name} ({right_loc})."
                     )
-                left_node = self._nodes.get(left_id, {})
-                right_node = self._nodes.get(right_id, {})
-                left_loc = f"{left_node.get('building', 'Unknown Building')}, {left_node.get('floor', 'Unknown Floor')}"
-                right_loc = f"{right_node.get('building', 'Unknown Building')}, {right_node.get('floor', 'Unknown Floor')}"
-                return (
-                    f"I cannot confirm direct nearness yet because the graph has no connected path between {left_name} and {right_name}. "
-                    f"Known locations: {left_name} ({left_loc}); {right_name} ({right_loc})."
-                )
+
+        single_near_match = re.search(r"(?:what|which|where)\s+(?:is|are)?\s*(?:near|nearby\s+to|close\s+to)\s+([a-z0-9/\-\s']+)", q, flags=re.IGNORECASE)
+        if single_near_match:
+            target_hint = single_near_match.group(1).strip(" ?!.,")
+            target_building = self._match_building_name(target_hint)
+            if target_building:
+                landmarks = self._landmarks_for_building(target_building)
+                if landmarks:
+                    return f"Nearby landmarks around {target_building} (from campus map references): {', '.join(landmarks)}."
+                return f"I recognize {target_building}, but I do not have enough nearby landmark links yet in the current graph."
+
+            target_id = self._match_node_id(target_hint)
+            if target_id:
+                neighbors = [
+                    self._nodes.get(nxt, {}).get("name", nxt)
+                    for nxt, _ in sorted(self._adjacency().get(target_id, []), key=lambda item: item[1])[:4]
+                ]
+                target_name = self._nodes.get(target_id, {}).get("name", target_id)
+                if neighbors:
+                    return f"Nearby places around {target_name}: {', '.join(neighbors)}."
+                return f"I recognize {target_name}, but no nearby nodes are linked yet in the current graph."
 
         if where_query:
             where_match = re.search(r"(?:where\s+is|nasaan\s+ang|nasaan|asan|nasan)\s+(.+)$", q, flags=re.IGNORECASE)
@@ -769,7 +852,13 @@ class SpatialGraphStore:
             target_building = self._match_building_name(target_hint)
             if target_building and self._looks_building_hint(target_hint):
                 floors = sorted({str(n.get("floor") or "Unknown Floor") for n in self._nodes.values() if str(n.get("building") or "").strip().lower() == target_building.lower()})
+                landmarks = self._landmarks_for_building(target_building)
                 floor_text = ", ".join(floors) if floors else "Unknown Floor"
+                if landmarks:
+                    return (
+                        f"{target_building} appears in the spatial graph with mapped areas on: {floor_text}. "
+                        f"Nearby landmarks (campus map): {', '.join(landmarks)}."
+                    )
                 return f"{target_building} appears in the spatial graph with mapped areas on: {floor_text}."
 
             target_id = self._match_node_id(target_hint)
