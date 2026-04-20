@@ -8,6 +8,60 @@ let abortController = null;
 let recognizing = false;
 let recognition;
 
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatInlineMarkdown(text) {
+  let html = String(text || "");
+  html = html.replace(/\*\*\*([^*]+)\*\*\*/g, "<strong><em>$1</em></strong>");
+  html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  html = html.replace(/__([^_]+)__/g, "<strong>$1</strong>");
+  html = html.replace(/_([^_]+)_/g, "<em>$1</em>");
+  return html;
+}
+
+function renderRichText(raw) {
+  const safe = escapeHtml(raw).replace(/\r\n?/g, "\n");
+  const lines = safe.split("\n");
+
+  const out = [];
+  let listItems = [];
+  const flushList = () => {
+    if (!listItems.length) return;
+    out.push(`<ul>${listItems.map((item) => `<li>${formatInlineMarkdown(item)}</li>`).join("")}</ul>`);
+    listItems = [];
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushList();
+      out.push("<br>");
+      continue;
+    }
+
+    const bulletMatch = trimmed.match(/^[-*]\s+(.+)$/);
+    if (bulletMatch) {
+      listItems.push(bulletMatch[1]);
+      continue;
+    }
+
+    flushList();
+    out.push(formatInlineMarkdown(trimmed));
+  }
+
+  flushList();
+  const html = out.join("<br>").replace(/(?:<br>){3,}/g, "<br><br>");
+  return html;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const chatLogEl = document.getElementById("chat-log");
   if (!chatLogEl) return;
@@ -80,8 +134,9 @@ async function sendMessage() {
   userMsg.classList.add("chat-message", "user-message");
   userMsg.innerHTML = `
     <img src="images/CICTify_ChatLogo.png" alt="User Avatar">
-    <div class="text">${message}</div>
+    <div class="text"></div>
   `;
+  userMsg.querySelector(".text").textContent = message;
   chatLog.appendChild(userMsg);
   chatLog.scrollTop = chatLog.scrollHeight;
 
@@ -108,8 +163,9 @@ async function sendMessage() {
     botMsg.classList.add("chat-message", "bot-message");
     botMsg.innerHTML = `
       <img src="images/CICTify_ChatLogo.png" alt="Bot Avatar">
-      <div class="text">${botReply}</div>
+      <div class="text"></div>
     `;
+    botMsg.querySelector(".text").innerHTML = renderRichText(botReply);
 
     // 🔊 Listen button
     const listenBtn = document.createElement("button");

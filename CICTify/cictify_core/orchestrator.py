@@ -1,4 +1,5 @@
 import asyncio
+import json
 import random
 import re
 import unicodedata
@@ -15,6 +16,7 @@ from .prompts import (
 from .retrieval import RAGStore
 from .safety import AdvancedSecurityGuard, ResponseFilter, validate_model_response
 from .spatial_graph import SpatialGraphStore
+from .spatial_tool import SpatialAwarenessTool
 from .web_search import WebFallback
 
 
@@ -23,35 +25,13 @@ ROUTER_PROMPT = """You are a multilingual intent router for BulSU CICT assistant
 Task:
 Classify the user query into exactly one label:
 - GENERAL: greetings, identity, small talk, thanks, short chit-chat.
-- ACADEMIC: any BulSU/CICT information request, policies, procedures, announcements, schedules, admissions, grading, room/location, requirements, offices, faculty, or factual queries.
-- OUT_OF_SCOPE: non-BulSU general knowledge, unrelated topics, or requests outside BulSU CICT assistant scope.
+- ACADEMIC: all other user questions that may require knowledge lookup from BulSU CICT documents or approved web pages.
 
 Rules:
 - Support multilingual input (English, Filipino/Tagalog, Taglish, French, Spanish, German, and similar variations).
-- If user asks for BulSU/CICT facts, policy, offices, rooms, people, requirements, procedures, mission/vision, choose ACADEMIC.
-- If user asks unrelated trivia, math, politics, history, coding, or other non-BulSU factual topics, choose OUT_OF_SCOPE.
-- Output exactly one token only: GENERAL or ACADEMIC or OUT_OF_SCOPE.
-
-Examples:
-- "hi" -> GENERAL
-- "how are you" -> GENERAL
-- "hvordan gar det" -> GENERAL
-- "huy" -> GENERAL
-- "who are you" -> GENERAL
-- "ano name mo" -> GENERAL
-- "salamat" -> GENERAL
-- "good morning" -> GENERAL
-- "bonjour" -> GENERAL
-- "hola" -> GENERAL
-- "guten tag" -> GENERAL
-- "ciao" -> GENERAL
-- "ano requirements sa enrollment" -> ACADEMIC
-- "where is the dean's office" -> ACADEMIC
-- "paano mag shift to BSIT" -> ACADEMIC
-- "sino dean ng cict" -> ACADEMIC
-- "what is the grading policy" -> ACADEMIC
-- "who is hitler" -> OUT_OF_SCOPE
-- "what is 2+2" -> OUT_OF_SCOPE
+- For any factual/policy/procedure/location/people/schedule/admission/academic query, output ACADEMIC.
+- Do not reject based on language, slang, or typo quality.
+- Output exactly one token only: GENERAL or ACADEMIC.
 """
 
 FALLBACK_GENERAL_PATTERNS = [
@@ -62,6 +42,7 @@ FALLBACK_GENERAL_PATTERNS = [
     r"^(where\s+are\s+you|nasaan\s+ka|nasan\s+ka|asan\s+ka|ou\s+es-tu|wo\s+bist\s+du|dove\s+sei)\b",
     r"^(what\s+languages?\s+do\s+you\s+speak|anong\s+wika|language\s+mo|quelles\s+langues|welche\s+sprachen|quali\s+lingue)\b",
     r"^(thanks|thank\s+you|salamat|ok|okay|sige|bye|goodbye|ingat|merci|danke|grazie)\b",
+    r"^(ah|oh|okay|ok|sige|noted|gets)?[\s,!.]*(thanks|thank\s+you|salamat|merci|danke|grazie)\b",
 ]
 
 ACADEMIC_OVERRIDE_TERMS = {
@@ -70,14 +51,15 @@ ACADEMIC_OVERRIDE_TERMS = {
     "bsit", "bscs", "room", "laboratory", "lab", "acad", "schedule", "policy", "grading", "tuition",
     "office", "announcement", "curriculum", "subject", "courses", "tenure", "promotion", "visitor",
     "faculty", "staff", "employee", "hrmo", "guidelines", "academic", "research", "extension",
+    "pimentel", "nstp", "building", "hall", "hostel", "dorm", "location", "directions", "route", "near",
 }
 
 OUT_OF_SCOPE_PATTERNS = [
     r"\bwho\s+is\s+hitler\b",
+    r"\bwho\s+is\s+napoleon\b",
     r"\bwhat\s+is\s+\d+\s*[\+\-\*/]\s*\d+\b",
     r"\bwwhat\s+is\s+\d+\s*[\+\-\*/]\s*\d+\b",
 ]
-
 
 @dataclass
 class CascadeResult:
@@ -92,6 +74,7 @@ class CascadeOrchestrator:
         self.rag = RAGStore()
         self.floorplans = FloorplanContextStore()
         self.spatial_graph = SpatialGraphStore()
+        self.spatial_tool = SpatialAwarenessTool(self.spatial_graph)
         self.web = WebFallback()
 
     def initialize(self) -> None:
@@ -121,6 +104,10 @@ class CascadeOrchestrator:
         q = (question or "").strip()
         q_lower = q.lower()
 
+        # Keep short gratitude acknowledgements conversational.
+        if re.search(r"\b(thanks|thank\s*you|salamat|merci|danke|grazie)\b", q_lower) and len(q_lower.split()) <= 10:
+            return "GENERAL"
+
         # Minimal guard for obvious casual messages when router occasionally over-classifies as ACADEMIC.
         if any(re.match(pattern, q_lower) for pattern in FALLBACK_GENERAL_PATTERNS) and not self._looks_academic(q_lower):
             return "GENERAL"
@@ -135,8 +122,6 @@ class CascadeOrchestrator:
         )
         label_upper = (label or "").upper()
         label_lower = (label or "").lower()
-        if "OUT_OF_SCOPE" in label_upper or re.search(r"\b(out[_\-\s]?of[_\-\s]?scope|unrelated|outside\s+scope)\b", label_lower):
-            return "OUT_OF_SCOPE"
         if "GENERAL" in label_upper or re.search(r"\b(general|greeting|casual|small\s*talk|chit\s*chat)\b", label_lower):
             return "GENERAL"
         if "ACADEMIC" in label_upper or re.search(r"\b(academic|bulsu|cict)\b", label_lower):
@@ -205,14 +190,14 @@ class CascadeOrchestrator:
         if re.search(r"\b(language|languages|wika|tagalog|filipino|english|taglish|french|spanish|german|italian)\b", q):
             return "I can assist in English, Filipino/Tagalog, Taglish, and basic multilingual greetings."
 
-        if re.search(r"\b(thanks|thank\s+you|salamat|bye|goodbye|ingat)\b", q):
+        if re.search(r"\b(thanks|thank\s+you|salamat|bye|goodbye|ingat|merci|danke|grazie)\b", q):
             return "You are welcome."
 
         return "I can help with BulSU CICT questions."
 
     @staticmethod
     def _normalize_question(question: str) -> str:
-        q = (question or "").strip()
+        q = unicodedata.normalize("NFKC", (question or "")).strip()
         replacements = {
             r"\bashiftee\b": "a shiftee",
             r"\bshifteee\b": "shiftee",
@@ -221,10 +206,97 @@ class CascadeOrchestrator:
             r"\bwwhat\b": "what",
             r"\bhow\s+a\s*bout\b": "how about",
             r"\ba\s+bout\b": "about",
+            r"\bu\b": "you",
+            r"\bur\b": "your",
+            r"\bpls\b": "please",
+            r"\bpls\.?\b": "please",
+            r"\breqs\b": "requirements",
+            r"\benrol\b": "enroll",
+            r"\benrollmnt\b": "enrollment",
         }
         for pattern, repl in replacements.items():
             q = re.sub(pattern, repl, q, flags=re.IGNORECASE)
+        q = re.sub(r"([a-zA-Z])\1{2,}", r"\1\1", q)
+        q = re.sub(r"\s+", " ", q).strip()
         return q
+
+    @staticmethod
+    def _coalesce_queries(*items: str) -> str:
+        seen = set()
+        parts: List[str] = []
+        for item in items:
+            chunk = (item or "").strip()
+            if not chunk:
+                continue
+            key = chunk.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            parts.append(chunk)
+        return "\n".join(parts)
+
+    @staticmethod
+    def _merge_contexts(contexts: List[str], max_blocks: int = 10) -> str:
+        merged_blocks: List[str] = []
+        seen = set()
+        for ctx in contexts:
+            for block in (ctx or "").split("\n\n---\n\n"):
+                b = block.strip()
+                if not b:
+                    continue
+                key = re.sub(r"\s+", " ", b.lower())[:700]
+                if key in seen:
+                    continue
+                seen.add(key)
+                merged_blocks.append(b)
+                if len(merged_blocks) >= max_blocks:
+                    return "\n\n---\n\n".join(merged_blocks)
+        return "\n\n---\n\n".join(merged_blocks)
+
+    async def _prepare_query_variants(self, question: str) -> Dict[str, str]:
+        q = (question or "").strip()
+        if not q:
+            return {"corrected_query": "", "english_query": "", "slang_expansion": ""}
+
+        prompt = (
+            "Normalize this user query for robust retrieval over BulSU CICT KB and approved web pages. "
+            "Fix typos, expand slang/abbreviations, and produce an English variant while preserving original meaning. "
+            "Return strict JSON only with keys: corrected_query, english_query, slang_expansion."
+        )
+        raw = await self.llm.chat(
+            "You are a strict JSON generator.",
+            f"{prompt}\n\nQuery:\n{q}",
+            model=CONFIG.routing_model,
+            max_tokens=200,
+            temperature=0.0,
+            timeout_sec=CONFIG.quick_timeout_sec,
+        )
+
+        payload: Dict[str, str] = {
+            "corrected_query": q,
+            "english_query": q,
+            "slang_expansion": q,
+        }
+        if not raw:
+            return payload
+
+        candidate = (raw or "").strip()
+        if "{" in candidate and "}" in candidate:
+            start = candidate.find("{")
+            end = candidate.rfind("}")
+            candidate = candidate[start : end + 1]
+
+        try:
+            parsed = json.loads(candidate)
+            if isinstance(parsed, dict):
+                for key in ("corrected_query", "english_query", "slang_expansion"):
+                    val = str(parsed.get(key, "") or "").strip()
+                    if val:
+                        payload[key] = val
+        except Exception:
+            pass
+
+        return payload
 
     @staticmethod
     def _detect_language_hint(text: str) -> str:
@@ -308,6 +380,8 @@ class CascadeOrchestrator:
         if any(re.match(pattern, q) for pattern in FALLBACK_GENERAL_PATTERNS):
             return False
         if CascadeOrchestrator._looks_academic(q):
+            return False
+        if re.search(r"\b(where\s+is|nasaan|asan|nasan|near|nearby|beside|route|path|directions|papunta|paano\s+pumunta)\b", q):
             return False
         # Non-BulSU factual/general-knowledge prompts should be rejected.
         if re.search(r"\b(who\s+is|what\s+is|where\s+is|when\s+is|why\s+is|how\s+to)\b", q):
@@ -648,6 +722,7 @@ class CascadeOrchestrator:
         phrase_markers = [
             "what about", "so ibig", "ibig sabihin", "pwede pa", "pano naman", "how about", "so yes", "so no",
             "are you sure", "u sure", "sure tho", "sigurado ka", "yes oder nicht", "ja oder nein",
+            "how many minutes", "how mins", "how long", "ilang minuto", "gaano katagal",
         ]
         if any(m in q for m in phrase_markers):
             return True
@@ -658,9 +733,50 @@ class CascadeOrchestrator:
         }:
             return True
 
-        token_markers = {"only", "that", "those", "it", "they", "them", "her", "his", "she", "he", "yun", "iyon", "ganon", "ganoon"}
+        token_markers = {"only", "that", "those", "it", "they", "them", "her", "his", "she", "he", "there", "doon", "dito", "yun", "iyon", "ganon", "ganoon"}
         tokens = set(re.findall(r"[a-zA-Z0-9]+", q))
         return any(marker in tokens for marker in token_markers)
+
+    @staticmethod
+    def _is_travel_time_followup(question: str) -> bool:
+        q = (question or "").strip().lower()
+        if not q:
+            return False
+        return bool(
+            re.search(
+                r"\b(how\s+many\s+minutes?|how\s+mins?|how\s+long|ilang\s+minuto|gaano\s+katagal|estimated\s+time|travel\s+time)\b",
+                q,
+            )
+        )
+
+    @staticmethod
+    def _estimate_minutes_from_memory(relevant_memory: str) -> str:
+        if not relevant_memory:
+            return ""
+
+        text = str(relevant_memory)
+        cost_hits = list(re.finditer(r"Estimated\s+path\s+cost:\s*([0-9]+(?:\.[0-9]+)?)", text, flags=re.IGNORECASE))
+        if not cost_hits:
+            return ""
+        m_cost = cost_hits[-1]
+
+        try:
+            cost = float(m_cost.group(1))
+        except Exception:
+            return ""
+
+        low_min = max(1, int(round(cost * 2.0)))
+        high_min = max(low_min, int(round(cost * 4.0)))
+
+        pair_match = re.search(r"between\s+(.+?)\s+and\s+(.+?):", text, flags=re.IGNORECASE)
+        pair_text = ""
+        if pair_match:
+            pair_text = f" for {pair_match.group(1).strip()} to {pair_match.group(2).strip()}"
+
+        return (
+            f"Based on the latest mapped route{pair_text}, the walking estimate is about {low_min}-{high_min} minutes. "
+            f"(Path cost: {cost})"
+        )
 
     @staticmethod
     def _direct_fact_fallback(question: str, rag_context: str) -> str:
@@ -1003,13 +1119,6 @@ class CascadeOrchestrator:
         if resolved_question != normalized_question:
             print(f"[Query] resolved follow-up -> {resolved_question}", flush=True)
 
-        if route == "OUT_OF_SCOPE":
-            return CascadeResult(
-                reply=self._out_of_scope_reply(normalized_question),
-                route="OUT_OF_SCOPE",
-                context="",
-            ), "ok"
-
         if self._is_confirmation_followup(normalized_question):
             confirm = self._confirmation_from_memory(relevant_memory, normalized_question)
             if confirm:
@@ -1031,6 +1140,16 @@ class CascadeOrchestrator:
                 if quick_yes_no:
                     return CascadeResult(reply=quick_yes_no, route="MEMORY_FOLLOWUP", context=""), "ok"
 
+        if self._is_travel_time_followup(normalized_question):
+            from_memory = self._estimate_minutes_from_memory(relevant_memory)
+            if from_memory:
+                return CascadeResult(reply=from_memory, route="SPATIAL_TIME_FOLLOWUP", context="memory_route"), "ok"
+            latest_assistant = self._latest_assistant_from_history(history)
+            if latest_assistant:
+                quick_time = self._estimate_minutes_from_memory(f"Assistant: {latest_assistant}")
+                if quick_time:
+                    return CascadeResult(reply=quick_time, route="SPATIAL_TIME_FOLLOWUP", context="memory_route"), "ok"
+
         if route == "GENERAL":
             final = self._deterministic_general_reply(normalized_question)
             final = ResponseFilter.filter_response(final)
@@ -1039,13 +1158,29 @@ class CascadeOrchestrator:
                 final = "I can only provide safe BulSU CICT assistance."
             return CascadeResult(reply=final, route="GENERAL", context=""), "ok"
 
-        spatial_reply = self.spatial_graph.answer_navigation_query(normalized_question)
+        # Block clearly unrelated topics early.
+        if self._is_out_of_scope(normalized_question, relevant_memory):
+            return CascadeResult(
+                reply="I can only answer queries related to BulSU CICT.",
+                route="OUT_OF_SCOPE",
+                context="",
+            ), "ok"
+
+        query_variants = await self._prepare_query_variants(resolved_question)
+        corrected_query = query_variants.get("corrected_query", "")
+        english_query = query_variants.get("english_query", "")
+        slang_expansion = query_variants.get("slang_expansion", "")
+
+        spatial_probe = corrected_query or resolved_question
+        spatial_reply = self.spatial_tool.run(spatial_probe)
         if spatial_reply:
-            return CascadeResult(reply=spatial_reply, route="SPATIAL_RAG", context="spatial_graph"), "ok"
+            print("[Tool] Spatial tool handled query", flush=True)
+            return CascadeResult(reply=spatial_reply, route="SPATIAL_TOOL", context="spatial_graph"), "ok"
 
         # Cascading workflow: GENERAL -> RAG -> WEB
         print("[Cascade] Trying RAG", flush=True)
-        retrieval_query = self._expand_room_tokens(resolved_question)
+        retrieval_query = self._coalesce_queries(resolved_question, corrected_query, slang_expansion, english_query)
+        retrieval_query = self._expand_room_tokens(retrieval_query)
         rq_lower = resolved_question.lower()
         if "gwa" in rq_lower and any(k in rq_lower for k in {"shift", "shiftee", "qualify", "eligible", "can i"}):
             retrieval_query += "\n\ngrade requirements at least gwa shiftee shifting eligibility"
@@ -1056,7 +1191,15 @@ class CascadeOrchestrator:
                 if last_user:
                     retrieval_query = f"{retrieval_query}\n\nFollow-up context: {last_user}"
 
-        rag_context = self.rag.context_for(retrieval_query)
+        rag_context_candidates: List[str] = []
+        for probe in [retrieval_query, corrected_query, english_query]:
+            probe_query = (probe or "").strip()
+            if not probe_query:
+                continue
+            ctx = self.rag.context_for(probe_query)
+            if ctx:
+                rag_context_candidates.append(ctx)
+        rag_context = self._merge_contexts(rag_context_candidates, max_blocks=max(8, CONFIG.rag_rerank_top_n + 3))
         rag_chunks = rag_context.count("Source:") if rag_context else 0
         print(f"[Cascade] RAG chunks={rag_chunks}", flush=True)
         loc_query = any(k in rq_lower for k in {"where", "saan", "campus", "location", "located"})
@@ -1128,7 +1271,8 @@ class CascadeOrchestrator:
                 return CascadeResult(reply=extractive, route="RAG_EXTRACTIVE_LOWREL", context=rag_context), "ok"
 
         print("[Cascade] Trying WEB", flush=True)
-        web_context = await self.web.search(resolved_question)
+        web_query = corrected_query or english_query or resolved_question
+        web_context = await self.web.search(web_query)
         web_hits = web_context.count("From https://") if web_context else 0
         print(f"[Cascade] WEB hits={web_hits}", flush=True)
         if web_context:
@@ -1177,7 +1321,7 @@ class CascadeOrchestrator:
             ), "ok"
 
         return CascadeResult(
-            reply="Wala sa knowledge ko ngayon ang sagot sa tanong na iyan based on my BulSU CICT knowledge base and prewarmed web sources.",
+            reply="I can only answer queries related to BulSU CICT.",
             route="NO_RESULT",
             context="",
         ), "ok"

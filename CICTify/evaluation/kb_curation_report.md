@@ -1,9 +1,9 @@
 # KB Curation Report
 
-- Source PDFs scanned: 6
-- Sources kept: 6
+- Source PDFs scanned: 7
+- Sources kept: 7
 - Sources dropped: 0
-- Final chunks: 2207
+- Final chunks: 2208
 - Chunk size: 1500
 - Chunk overlap: 400
 - Semantic chunking: True
@@ -16,3 +16,4 @@
 - CICT Rooms - Pics & Desc.docx.pdf: 31 chunks
 - UnivCalendar_2526.pdf: 22 chunks
 - CICTify - FAQs.pdf: 14 chunks
+- CICT-Rooms.pdf: 1 chunks

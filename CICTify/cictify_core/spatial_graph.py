@@ -6,7 +6,7 @@ from datetime import datetime
 from heapq import heappop, heappush
 from typing import Dict, List, Optional, Tuple
 
-from .config import SPATIAL_GRAPH_PATH
+from .config import CURATED_CORPUS_PATH, SPATIAL_GRAPH_PATH
 
 
 class SpatialGraphStore:
@@ -15,6 +15,10 @@ class SpatialGraphStore:
         self._nodes: Dict[str, Dict] = {}
         self._edges: List[Dict] = []
         self._load()
+        if not self._nodes:
+            boot = self._bootstrap_from_curated_corpus()
+            if boot.get("added_nodes", 0) or boot.get("added_edges", 0):
+                self._save()
 
     def _load(self) -> None:
         if not self._path.exists():
@@ -45,6 +49,28 @@ class SpatialGraphStore:
         return re.sub(r"[^a-z0-9]+", "-", (text or "").strip().lower()).strip("-")
 
     @staticmethod
+    def _room_aliases(name: str) -> List[str]:
+        aliases = set()
+        clean = re.sub(r"\s+", " ", (name or "").strip())
+        if not clean:
+            return []
+        aliases.add(clean)
+        compact = clean.replace(" ", "")
+        aliases.add(compact)
+
+        for letters, digits in re.findall(r"\b([A-Za-z]{1,8})\s*(\d{1,3})\b", clean):
+            aliases.add(f"{letters}{digits}")
+            aliases.add(f"{letters} {digits}")
+
+        lowered = clean.lower()
+        if lowered.startswith("cict "):
+            aliases.add(clean[5:].strip())
+        if "office" in lowered:
+            aliases.add(lowered.replace("office", "").strip().title())
+
+        return sorted(a for a in aliases if a)
+
+    @staticmethod
     def _as_bool(value) -> bool:
         if isinstance(value, bool):
             return value
@@ -63,8 +89,8 @@ class SpatialGraphStore:
             alias_str = str(alias).strip()
             if alias_str:
                 aliases.add(alias_str)
-        if room_name:
-            aliases.add(room_name)
+        for alias in self._room_aliases(room_name):
+            aliases.add(alias)
 
         merged = {
             "id": node_id,
@@ -81,6 +107,228 @@ class SpatialGraphStore:
         }
         self._nodes[node_id] = merged
         return node_id
+
+    @staticmethod
+    def _looks_room_like(name: str) -> bool:
+        text = (name or "").strip().lower()
+        if not text:
+            return False
+        if len(text) > 70:
+            return False
+        if text in {"references", "pimentel hall", "rooms", "room", "hallway", "building"}:
+            return False
+        room_keywords = {
+            "room", "lab", "office", "hall", "avr", "acad", "dean", "faculty", "ojt",
+            "networking", "server", "ideation", "conference", "center", "ct", "sdl", "it", "a",
+        }
+        if any(word in text for word in room_keywords):
+            return True
+        return bool(re.search(r"\d", text))
+
+    @staticmethod
+    def _normalize_room_name(name: str) -> str:
+        text = (name or "").replace("\u2019", "'")
+        text = re.sub(r"^[\u25cf\u2022\-*\s]+", "", text)
+        text = re.sub(r"\s+", " ", text).strip(" .,:;-")
+        return text
+
+    @staticmethod
+    def _floor_label(text: str) -> str:
+        match = re.search(r"\b(\d)(?:st|nd|rd|th)\s+floor\b", (text or "").lower())
+        if match:
+            return f"{match.group(1)}F"
+        return "Unknown Floor"
+
+    @staticmethod
+    def _floor_index(label: str) -> Optional[int]:
+        match = re.search(r"(\d+)", str(label or ""))
+        if not match:
+            return None
+        try:
+            return int(match.group(1))
+        except Exception:
+            return None
+
+    def _add_edge(self, frm: str, to: str, weight: float, source_file: str, door: str = "") -> None:
+        if not frm or not to or frm == to:
+            return
+        if frm not in self._nodes or to not in self._nodes:
+            return
+        key_a = (frm, to, door)
+        key_b = (to, frm, door)
+        for edge in self._edges:
+            existing = (str(edge.get("from", "")), str(edge.get("to", "")), str(edge.get("door", "")))
+            if existing == key_a or existing == key_b:
+                return
+        self._edges.append(
+            {
+                "from": frm,
+                "to": to,
+                "door": door,
+                "weight": max(0.1, float(weight)),
+                "source_file": source_file,
+            }
+        )
+
+    def _extract_relation_targets(self, description: str) -> List[Tuple[str, str, float]]:
+        text = (description or "").replace("\u2019", "'")
+        relations: List[Tuple[str, str, float]] = []
+
+        between = re.search(
+            r"\bbetween\s+([A-Za-z0-9/\- ]{1,50}?)\s+and\s+([A-Za-z0-9/\- ]{1,50})(?:\b|[.,;])",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if between:
+            relations.append(("between", self._normalize_room_name(between.group(1)), 1.2))
+            relations.append(("between", self._normalize_room_name(between.group(2)), 1.2))
+
+        for pat in [r"\bbeside\s+([A-Za-z0-9/\- ]{1,50})(?:\b|[.,;])", r"\bnext\s+to\s+([A-Za-z0-9/\- ]{1,50})(?:\b|[.,;])"]:
+            for match in re.finditer(pat, text, flags=re.IGNORECASE):
+                relations.append(("adjacent", self._normalize_room_name(match.group(1)), 1.0))
+
+        for pat in [r"\binside\s+the\s+([A-Za-z0-9/\- ]{1,50})(?:\b|[.,;])", r"\binside\s+([A-Za-z0-9/\- ]{1,50})(?:\b|[.,;])"]:
+            for match in re.finditer(pat, text, flags=re.IGNORECASE):
+                relations.append(("inside", self._normalize_room_name(match.group(1)), 0.8))
+
+        return [(kind, target, w) for kind, target, w in relations if self._looks_room_like(target)]
+
+    def _bootstrap_from_curated_corpus(self) -> Dict:
+        if not CURATED_CORPUS_PATH.exists():
+            return {"added_nodes": 0, "added_edges": 0, "total_nodes": len(self._nodes), "total_edges": len(self._edges)}
+
+        try:
+            payload = json.loads(CURATED_CORPUS_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            return {"added_nodes": 0, "added_edges": 0, "total_nodes": len(self._nodes), "total_edges": len(self._edges)}
+
+        chunks = payload.get("chunks", []) if isinstance(payload, dict) else []
+        docs = payload.get("documents", []) if isinstance(payload, dict) else []
+
+        texts: List[Tuple[str, str]] = []
+        for doc in docs:
+            if not isinstance(doc, dict):
+                continue
+            source = str(doc.get("source_file") or "")
+            title = str(doc.get("title") or "").lower()
+            if "cict rooms" in source.lower() or "cict rooms" in title or "floor plan" in title:
+                body = str(doc.get("normalized_text") or "")
+                if body:
+                    texts.append((source, body))
+
+        for chunk in chunks:
+            if not isinstance(chunk, dict):
+                continue
+            source = str(chunk.get("source_file") or "")
+            content = str(chunk.get("content") or "")
+            if not content:
+                continue
+            low = content.lower()
+            source_low = source.lower()
+            if (
+                "cict rooms" in source_low
+                or "cict-rooms" in source_low
+                or ("student handbook" in source_low and "evacuation" in low)
+            ):
+                texts.append((source, content))
+
+        before_nodes = len(self._nodes)
+        before_edges = len(self._edges)
+        current_building = "Pimentel Hall"
+        current_floor = "Unknown Floor"
+        stair_nodes: Dict[Tuple[str, str], List[str]] = defaultdict(list)
+
+        for source, text in texts:
+            normalized = text.replace("\u25cf", "\n\u25cf ").replace("\u2022", "\n\u2022 ")
+            lines = [ln.strip() for ln in normalized.splitlines() if ln.strip()]
+            for line in lines:
+                lower = line.lower()
+                if "pimentel hall" in lower:
+                    current_building = "Pimentel Hall"
+                if "nstp building" in lower:
+                    current_building = "NSTP Building"
+
+                floor_label = self._floor_label(line)
+                if floor_label != "Unknown Floor":
+                    current_floor = floor_label
+
+                room_match = re.match(r"^[\u25cf\u2022\-*\s]*([A-Za-z][A-Za-z0-9/ .'-]{1,60}?)\s*[\u2013\-]\s*(.+)$", line)
+                if not room_match:
+                    continue
+
+                room_name = self._normalize_room_name(room_match.group(1))
+                desc = self._normalize_room_name(room_match.group(2))
+                if not self._looks_room_like(room_name):
+                    continue
+
+                explicit_floor = self._floor_label(desc)
+                floor = explicit_floor if explicit_floor != "Unknown Floor" else current_floor
+                building = current_building
+                if "nstp building" in desc.lower():
+                    building = "NSTP Building"
+                elif "pimentel hall" in desc.lower():
+                    building = "Pimentel Hall"
+
+                room_id = self._merge_node(
+                    {
+                        "name": room_name,
+                        "building": building,
+                        "floor": floor,
+                        "kind": "lab" if "lab" in room_name.lower() else "room",
+                        "aliases": self._room_aliases(room_name),
+                    },
+                    source,
+                )
+
+                for _, target_name, weight in self._extract_relation_targets(desc):
+                    target_id = self._merge_node(
+                        {
+                            "name": target_name,
+                            "building": building,
+                            "floor": floor,
+                            "kind": "lab" if "lab" in target_name.lower() else "room",
+                            "aliases": self._room_aliases(target_name),
+                        },
+                        source,
+                    )
+                    self._add_edge(room_id, target_id, weight, source)
+
+                stair_kind = ""
+                if "central stairs" in lower or "central stairs" in desc.lower():
+                    stair_kind = "central"
+                elif "rear stairs" in lower or "rear stairs" in desc.lower():
+                    stair_kind = "rear"
+                elif "staircase" in lower or "stairs" in lower or "stairs" in desc.lower():
+                    stair_kind = "main"
+
+                if stair_kind:
+                    stairs_name = f"{building} {floor} {stair_kind.title()} Stairs"
+                    stairs_id = self._merge_node(
+                        {
+                            "name": stairs_name,
+                            "building": building,
+                            "floor": floor,
+                            "kind": "stairs",
+                            "aliases": [f"{stair_kind} stairs", "stairs", f"{building} stairs"],
+                        },
+                        source,
+                    )
+                    self._add_edge(room_id, stairs_id, 1.1, source)
+                    stair_nodes[(building, stair_kind)].append(stairs_id)
+
+        for (building, stair_kind), node_ids in stair_nodes.items():
+            unique_ids = sorted(set(node_ids), key=lambda node_id: self._floor_index(self._nodes.get(node_id, {}).get("floor", "")) or 99)
+            for idx in range(len(unique_ids) - 1):
+                a = unique_ids[idx]
+                b = unique_ids[idx + 1]
+                self._add_edge(a, b, 2.0, f"bootstrap:{building}:{stair_kind}")
+
+        return {
+            "added_nodes": len(self._nodes) - before_nodes,
+            "added_edges": len(self._edges) - before_edges,
+            "total_nodes": len(self._nodes),
+            "total_edges": len(self._edges),
+        }
 
     def add_graph(self, graph: Dict, *, source_file: str) -> Dict:
         nodes = graph.get("nodes", []) if isinstance(graph, dict) else []
@@ -142,22 +390,162 @@ class SpatialGraphStore:
     def _terms(text: str) -> List[str]:
         return re.findall(r"[a-zA-Z0-9]{2,}", (text or "").lower())
 
+    @staticmethod
+    def _norm_for_match(text: str) -> str:
+        return re.sub(r"[^a-z0-9]", "", (text or "").lower())
+
     def _match_node_id(self, hint: str) -> Optional[str]:
         hint = (hint or "").strip()
         if not hint:
             return None
+        hint_clean = re.sub(r"\s+", " ", hint).strip()
+        hint_lower = hint_clean.lower()
+        hint_norm = self._norm_for_match(hint_clean)
+
+        # 1) Exact match against aliases/names (case-insensitive).
+        for node_id, node in self._nodes.items():
+            candidates = [node.get("name", "")] + list(node.get("aliases", []))
+            for alias in candidates:
+                alias_text = str(alias or "").strip()
+                if not alias_text:
+                    continue
+                if alias_text.lower() == hint_lower:
+                    return node_id
+
+        # 2) Exact normalized match (ignores spaces/punctuation).
+        for node_id, node in self._nodes.items():
+            candidates = [node.get("name", "")] + list(node.get("aliases", []))
+            for alias in candidates:
+                alias_text = str(alias or "").strip()
+                if not alias_text:
+                    continue
+                if self._norm_for_match(alias_text) == hint_norm:
+                    return node_id
+
         terms = self._terms(hint)
         if not terms:
             return None
 
         best: Tuple[int, Optional[str]] = (-1, None)
         for node_id, node in self._nodes.items():
-            hay = " ".join([node.get("name", "")] + list(node.get("aliases", []))).lower()
-            score = sum(2 if term == hay else 1 for term in terms if term in hay)
+            alias_pool = [str(node.get("name", "") or "")] + [str(a or "") for a in node.get("aliases", [])]
+            hay = " ".join(alias_pool).lower()
+            hay_terms = set(self._terms(hay))
+
+            score = 0
+            for term in terms:
+                # Whole-token match is stronger than substring match.
+                if term in hay_terms:
+                    score += 3
+                elif term in hay:
+                    score += 1
+
+            # Bonus when normalized query is contained as contiguous sequence.
+            if hint_norm and any(hint_norm in self._norm_for_match(alias) for alias in alias_pool):
+                score += 3
+
             if score > best[0]:
                 best = (score, node_id)
 
         return best[1] if best[0] > 0 else None
+
+    def _building_aliases(self) -> Dict[str, str]:
+        aliases: Dict[str, str] = {}
+        for node in self._nodes.values():
+            building = str(node.get("building") or "").strip()
+            if not building:
+                continue
+            norm = self._norm_for_match(building)
+            if norm:
+                aliases[norm] = building
+
+            parts = [p for p in re.split(r"\s+", building.lower()) if p and p not in {"building", "hall"}]
+            for part in parts:
+                part_norm = self._norm_for_match(part)
+                if len(part_norm) >= 4:
+                    aliases[part_norm] = building
+
+        # Handbook/campus map derived building aliases (pages 101-110 in paper handbook).
+        handbook_buildings = {
+            "Pimentel Hall": ["pimentel hall", "pimentel"],
+            "NSTP Building": ["nstp building", "nstp"],
+            "Alvarado Hall": ["alvarado hall", "alvarado"],
+            "Valencia Hall": ["valencia hall", "valencia"],
+            "Federizo Hall": ["federizo hall", "federizo"],
+            "Flores Hall": ["flores hall", "administration hall", "admin building", "administration building"],
+            "Carpio Hall": ["carpio hall", "carpio"],
+            "Natividad Hall": ["natividad hall", "natividad"],
+            "Alumni Building": ["alumni building"],
+            "Academic Building": ["academic building"],
+            "Round Hall": ["round hall"],
+            "Laboratory Building": ["laboratory building", "lab building"],
+            "Activity Center": ["activity center"],
+            "Hostel": ["hostel", "dorm", "dormitory"],
+        }
+        for canonical, alias_list in handbook_buildings.items():
+            aliases[self._norm_for_match(canonical)] = canonical
+            for alias in alias_list:
+                aliases[self._norm_for_match(alias)] = canonical
+
+        # Helpful manual aliases for common wording.
+        if "pimentelhall" in aliases:
+            aliases["pimentel"] = aliases["pimentelhall"]
+        if "nstpbuilding" in aliases:
+            aliases["nstp"] = aliases["nstpbuilding"]
+
+        return aliases
+
+    def _match_building_name(self, hint: str) -> Optional[str]:
+        hint_norm = self._norm_for_match(hint)
+        if not hint_norm:
+            return None
+        aliases = self._building_aliases()
+
+        if hint_norm in aliases:
+            return aliases[hint_norm]
+
+        for alias_norm, building in aliases.items():
+            if alias_norm and (alias_norm in hint_norm or hint_norm in alias_norm):
+                return building
+        return None
+
+    def _nodes_for_building(self, building: str) -> List[str]:
+        target = (building or "").strip().lower()
+        if not target:
+            return []
+        return [
+            node_id
+            for node_id, node in self._nodes.items()
+            if str(node.get("building") or "").strip().lower() == target
+        ]
+
+    def _best_route_between_buildings(self, building_a: str, building_b: str) -> Optional[Dict]:
+        ids_a = self._nodes_for_building(building_a)
+        ids_b = self._nodes_for_building(building_b)
+        if not ids_a or not ids_b:
+            return None
+
+        best: Optional[Dict] = None
+        for a in ids_a:
+            for b in ids_b:
+                route = self.shortest_path(a, b)
+                if not route:
+                    continue
+                if best is None or route["distance"] < best["distance"]:
+                    best = {
+                        "distance": route["distance"],
+                        "from_id": a,
+                        "to_id": b,
+                        "route": route,
+                    }
+        return best
+
+    @staticmethod
+    def _looks_building_hint(text: str) -> bool:
+        low = str(text or "").strip().lower()
+        if not low:
+            return False
+        return any(token in low for token in ["building", "hall", "hostel", "dorm", "campus", "pimentel", "nstp"])
 
     def upsert_room_status(self, *, room_name: str, building: str, floor: str, has_open_pc: bool, source_file: str) -> Dict:
         existing_id = self._match_node_id(room_name)
@@ -246,12 +634,16 @@ class SpatialGraphStore:
 
         nearest_terms = ["nearest", "closest", "pinakamalapit", "malapit"]
         pc_terms = ["pc", "computer", "available pc", "open pc", "bakanteng pc", "vacant pc"]
-        route_terms = ["path", "route", "how do i get", "how to get", "papunta", "paano pumunta"]
+        route_terms = ["path", "route", "how do i get", "how to get", "papunta", "paano pumunta", "directions"]
+        near_terms = ["near", "nearby", "beside", "next to", "katabi", "malapit"]
+        where_terms = ["where is", "nasaan", "asan", "nasan"]
 
         nearest_lab_query = (any(t in q for t in nearest_terms) and "lab" in q) and any(t in q for t in pc_terms)
         route_query = any(t in q for t in route_terms)
+        near_query = any(t in q for t in near_terms)
+        where_query = any(t in q for t in where_terms)
 
-        if not nearest_lab_query and not route_query:
+        if not nearest_lab_query and not route_query and not near_query and not where_query:
             return None
 
         start_hint = ""
@@ -297,19 +689,157 @@ class SpatialGraphStore:
                 f"Route: {' -> '.join(route['path_names'])}"
             )
 
+        near_match = re.search(
+            r"(?:is|are)?\s*([a-z0-9/\-\s']+?)\s+(?:near|nearby|beside|next\s+to|katabi(?:\s+ng)?|malapit(?:\s+sa)?)\s+([a-z0-9/\-\s']+)",
+            q,
+            flags=re.IGNORECASE,
+        )
+        if near_match:
+            left_hint = near_match.group(1).strip(" ?!.,")
+            right_hint = near_match.group(2).strip(" ?!.,")
+            left_building = self._match_building_name(left_hint)
+            right_building = self._match_building_name(right_hint)
+            building_mode = self._looks_building_hint(left_hint) or self._looks_building_hint(right_hint)
+
+            if building_mode:
+                if left_building and right_building:
+                    if left_building.lower() == right_building.lower():
+                        return f"Yes. {left_building} and {right_building} refer to the same building."
+
+                    building_route = self._best_route_between_buildings(left_building, right_building)
+                    if building_route:
+                        route = building_route["route"]
+                        is_near = route["distance"] <= 4.0
+                        if is_near:
+                            return (
+                                f"Yes, they are relatively near in the mapped campus graph. "
+                                f"Closest mapped path between {left_building} and {right_building}: {' -> '.join(route['path_names'])}\n"
+                                f"Estimated path cost: {route['distance']}"
+                            )
+                        return (
+                            f"They are connected in the mapped campus graph but not immediately near. "
+                            f"Closest mapped path between {left_building} and {right_building}: {' -> '.join(route['path_names'])}\n"
+                            f"Estimated path cost: {route['distance']}"
+                        )
+
+                    return (
+                        f"I know both buildings ({left_building} and {right_building}) but there is no inter-building connector in the current graph yet. "
+                        "Upload or ingest campus pathways/floorplans to enable step-by-step cross-building directions."
+                    )
+
+                known_buildings = sorted({str(n.get("building") or "").strip() for n in self._nodes.values() if str(n.get("building") or "").strip()})
+                unknown = right_hint if left_building and not right_building else left_hint
+                if left_building or right_building:
+                    return (
+                        f"I could not find '{unknown}' as a mapped building yet. "
+                        f"Known buildings: {', '.join(known_buildings)}."
+                    )
+
+            left_id = self._match_node_id(left_hint)
+            right_id = self._match_node_id(right_hint)
+            if left_id and right_id:
+                path = self.shortest_path(left_id, right_id)
+                left_name = self._nodes[left_id].get("name", left_id)
+                right_name = self._nodes[right_id].get("name", right_id)
+                if path:
+                    is_near = path["distance"] <= 2.2 or len(path["path_ids"]) <= 3
+                    if is_near:
+                        return (
+                            f"Yes. {left_name} is near {right_name}.\n"
+                            f"Estimated path cost: {path['distance']}\n"
+                            f"Route: {' -> '.join(path['path_names'])}"
+                        )
+                    return (
+                        f"Not immediately near. {left_name} and {right_name} are connected but farther apart.\n"
+                        f"Estimated path cost: {path['distance']}\n"
+                        f"Route: {' -> '.join(path['path_names'])}"
+                    )
+                left_node = self._nodes.get(left_id, {})
+                right_node = self._nodes.get(right_id, {})
+                left_loc = f"{left_node.get('building', 'Unknown Building')}, {left_node.get('floor', 'Unknown Floor')}"
+                right_loc = f"{right_node.get('building', 'Unknown Building')}, {right_node.get('floor', 'Unknown Floor')}"
+                return (
+                    f"I cannot confirm direct nearness yet because the graph has no connected path between {left_name} and {right_name}. "
+                    f"Known locations: {left_name} ({left_loc}); {right_name} ({right_loc})."
+                )
+
+        if where_query:
+            where_match = re.search(r"(?:where\s+is|nasaan\s+ang|nasaan|asan|nasan)\s+(.+)$", q, flags=re.IGNORECASE)
+            target_hint = where_match.group(1).strip(" ?!.,") if where_match else ""
+            target_building = self._match_building_name(target_hint)
+            if target_building and self._looks_building_hint(target_hint):
+                floors = sorted({str(n.get("floor") or "Unknown Floor") for n in self._nodes.values() if str(n.get("building") or "").strip().lower() == target_building.lower()})
+                floor_text = ", ".join(floors) if floors else "Unknown Floor"
+                return f"{target_building} appears in the spatial graph with mapped areas on: {floor_text}."
+
+            target_id = self._match_node_id(target_hint)
+            if target_id:
+                node = self._nodes.get(target_id, {})
+                neighbors = [self._nodes.get(nxt, {}).get("name", nxt) for nxt, _ in sorted(self._adjacency().get(target_id, []), key=lambda item: item[1])[:3]]
+                neighbor_text = f" Nearby: {', '.join(neighbors)}." if neighbors else ""
+                return (
+                    f"{node.get('name', target_id)} is in {node.get('building', 'Unknown Building')}, {node.get('floor', 'Unknown Floor')}."
+                    f"{neighbor_text}"
+                )
+            if target_building:
+                floors = sorted({str(n.get("floor") or "Unknown Floor") for n in self._nodes.values() if str(n.get("building") or "").strip().lower() == target_building.lower()})
+                floor_text = ", ".join(floors) if floors else "Unknown Floor"
+                return f"{target_building} appears in the spatial graph with mapped areas on: {floor_text}."
+
         # Generic route request: try to infer destination after 'to'.
-        to_match = re.search(r"to\s+([a-zA-Z0-9\-\s]+)", q)
-        if not to_match:
+        target_hint = ""
+        from_to_match = re.search(r"from\s+([a-zA-Z0-9/\-\s]+?)\s+to\s+([a-zA-Z0-9/\-\s]+)", q, flags=re.IGNORECASE)
+        if from_to_match:
+            start_hint = from_to_match.group(1).strip()
+            target_hint = from_to_match.group(2).strip()
+            start_id = self._match_node_id(start_hint) or start_id
+        else:
+            to_match = re.search(r"to\s+([a-zA-Z0-9/\-\s]+)", q, flags=re.IGNORECASE)
+            if to_match:
+                target_hint = to_match.group(1).strip()
+
+        if not target_hint:
             return None
 
-        target_hint = to_match.group(1).strip()
         target_id = self._match_node_id(target_hint)
+
+        start_building = self._match_building_name(start_hint) if start_hint else None
+        target_building = self._match_building_name(target_hint) if target_hint else None
+        building_route_mode = self._looks_building_hint(start_hint) or self._looks_building_hint(target_hint)
+
+        if building_route_mode and start_building and target_building:
+            building_route = self._best_route_between_buildings(start_building, target_building)
+            if not building_route:
+                return (
+                    f"Route unavailable between {start_building} and {target_building} in the current graph. "
+                    "Upload or ingest campus pathways/floorplans to enable cross-building directions."
+                )
+            route = building_route["route"]
+            return (
+                f"Best mapped route from {start_building} to {target_building}: {' -> '.join(route['path_names'])}\n"
+                f"Estimated path cost: {route['distance']}"
+            )
+
+        if building_route_mode and (start_building or target_building) and not (start_building and target_building):
+            known_buildings = sorted({str(n.get("building") or "").strip() for n in self._nodes.values() if str(n.get("building") or "").strip()})
+            missing_hint = target_hint if start_building and not target_building else start_hint
+            return f"I could not find '{missing_hint}' as a mapped building yet. Known buildings: {', '.join(known_buildings)}."
+
         if not target_id:
             return None
 
         route = self.shortest_path(start_id, target_id)
         if not route:
-            return "I could not find a connected path between those rooms in the current floorplan graph."
+            start_node = self._nodes.get(start_id, {})
+            target_node = self._nodes.get(target_id, {})
+            start_name = start_node.get("name", start_id)
+            target_name = target_node.get("name", target_id)
+            start_loc = f"{start_node.get('building', 'Unknown Building')}, {start_node.get('floor', 'Unknown Floor')}"
+            target_loc = f"{target_node.get('building', 'Unknown Building')}, {target_node.get('floor', 'Unknown Floor')}"
+            return (
+                f"Route unavailable between {start_name} and {target_name} in the current floorplan graph. "
+                f"Known locations: {start_name} ({start_loc}); {target_name} ({target_loc})."
+            )
 
         target = self._nodes.get(target_id, {})
         return (

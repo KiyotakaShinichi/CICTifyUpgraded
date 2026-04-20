@@ -1,14 +1,37 @@
 # vision_reader.py
+import asyncio
 import base64
+import io
 import json
 import os
 import re
 from typing import Dict, Optional
 
-import aiohttp
+import requests
+from dotenv import load_dotenv
+
+try:
+    from PIL import Image
+except Exception:
+    Image = None
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-VISION_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct"
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
+
+def _vision_models() -> list[str]:
+    env_value = os.getenv("VISION_MODEL", "").strip()
+    if env_value:
+        # Supports comma-separated model list via env override.
+        items = [m.strip() for m in env_value.split(",") if m.strip()]
+        if items:
+            return items
+    return [
+        "meta-llama/llama-4-scout-17b-16e-instruct",
+        "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "llama-3.2-11b-vision-preview",
+        "llama-3.2-90b-vision-preview",
+    ]
 
 
 def _groq_api_key() -> str:
@@ -20,41 +43,82 @@ async def read_image_with_groq(image_bytes: bytes, question: str = "Read all tex
         api_key = _groq_api_key()
         if not api_key:
             return None
-        img_b64 = base64.b64encode(image_bytes).decode("utf-8")
-
-        payload = {
-            "model": VISION_MODEL,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are an advanced OCR and visual reasoning assistant. "
-                               "Extract text, room labels, and layout descriptions from images and floor plans."
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": question},
-                        {"type": "image_url", "image_url": f"data:image/png;base64,{img_b64}"}
-                    ]
-                }
-            ],
-            "max_tokens": 1000,
-        }
+        payload_variants = [image_bytes]
+        if Image is not None:
+            try:
+                # Fallback variant: normalized PNG for cases where raw bytes are unsupported.
+                img = Image.open(io.BytesIO(image_bytes))
+                if img.mode not in {"RGB", "RGBA"}:
+                    img = img.convert("RGB")
+                out = io.BytesIO()
+                img.save(out, format="PNG")
+                png_bytes = out.getvalue()
+                if png_bytes and png_bytes != image_bytes:
+                    payload_variants.append(png_bytes)
+            except Exception:
+                pass
 
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(GROQ_API_URL, headers=headers, json=payload) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    return data["choices"][0]["message"]["content"].strip()
-                else:
-                    print(f"[Groq Vision] Bad status {resp.status}")
-                    print(await resp.text())
-                    return None
+        for payload_bytes in payload_variants:
+            img_b64 = base64.b64encode(payload_bytes).decode("utf-8")
+            for model in _vision_models():
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are an advanced OCR and visual reasoning assistant. "
+                            "Extract text, room labels, and layout descriptions from images and floor plans.",
+                        },
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": question},
+                                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{img_b64}"}},
+                            ],
+                        },
+                    ],
+                    "max_tokens": 1000,
+                }
+
+                def _post() -> requests.Response:
+                    return requests.post(
+                        GROQ_API_URL,
+                        headers=headers,
+                        json=payload,
+                        timeout=90,
+                    )
+
+                resp = await asyncio.to_thread(_post)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    try:
+                        content = data["choices"][0]["message"]["content"]
+                        clean = (content or "").strip()
+                        if clean:
+                            return clean
+                        continue
+                    except Exception:
+                        print(f"[Groq Vision] model={model} returned malformed success payload")
+                        print(str(data)[:800])
+                        continue
+
+                body = resp.text
+                print(f"[Groq Vision] model={model} status={resp.status_code}")
+                print(body)
+
+                # Try next model when unavailable/unsupported.
+                if resp.status_code in {400, 404} and ("model_not_found" in body or "does not exist" in body):
+                    continue
+
+                # Other failures are likely request/auth issues; stop early.
+                return None
+
+        return None
     except Exception as e:
         print(f"[Groq Vision Error] {e}")
         return None

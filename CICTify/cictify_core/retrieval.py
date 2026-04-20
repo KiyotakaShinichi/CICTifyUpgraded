@@ -52,7 +52,7 @@ class RAGStore:
         self._embeddings = None
         if HuggingFaceEmbeddings is not None:
             self._embeddings = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/all-MiniLM-L6-v2",
+                model_name=CONFIG.embedding_model,
                 model_kwargs={"device": "cpu"},
                 encode_kwargs={"normalize_embeddings": True},
             )
@@ -114,6 +114,7 @@ class RAGStore:
             "sources": sorted(pdf_paths()),
             "chunk_size": CONFIG.chunk_size,
             "chunk_overlap": CONFIG.chunk_overlap,
+            "embedding_model": CONFIG.embedding_model,
         }
 
     def _manifest_matches(self) -> bool:

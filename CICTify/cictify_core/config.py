@@ -49,6 +49,10 @@ class AppConfig:
         "llama-3.3-70b-versatile",
         "mixtral-8x7b-32768",
     )
+    embedding_model: str = os.getenv(
+        "EMBEDDING_MODEL",
+        "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    )
 
     # ===== HYPERPARAMETERS =====
     # Uppercase aliases are kept for backward compatibility with older code paths.
@@ -88,6 +92,8 @@ class AppConfig:
     web_cache_ttl_hours: int = _env_int("WEB_CACHE_TTL_HOURS", 12)
     web_cache_max_chars_per_page: int = _env_int("WEB_CACHE_MAX_CHARS", 2600)
     web_live_fallback: bool = os.getenv("WEB_LIVE_FALLBACK", "false").lower() == "true"
+    spatial_tool_enabled: bool = _env_bool("SPATIAL_TOOL_ENABLED", True)
+    spatial_tool_strict_intent: bool = _env_bool("SPATIAL_TOOL_STRICT_INTENT", True)
 
     host: str = os.getenv("HOST", "0.0.0.0")
     port: int = _env_int("PORT", _env_int("APP_PORT", 5000))
@@ -133,11 +139,6 @@ def pdf_paths() -> List[str]:
     guide = str(KB_PDF_DIR / "guide.pdf")
     if enhanced in paths and guide in paths:
         paths = [p for p in paths if p != guide]
-
-    room_detail = str(KB_PDF_DIR / "CICT Rooms - Pics & Desc.docx.pdf")
-    room_summary = str(KB_PDF_DIR / "CICT-Rooms.pdf")
-    if room_detail in paths and room_summary in paths:
-        paths = [p for p in paths if p != room_summary]
 
     # Remove empty files from the corpus list.
     paths = [p for p in paths if pathlib.Path(p).exists() and pathlib.Path(p).stat().st_size > 0]

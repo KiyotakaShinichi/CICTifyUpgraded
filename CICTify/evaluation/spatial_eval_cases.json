@@ -1,0 +1,62 @@
+[
+  {
+    "id": "route-1",
+    "query": "route from dean's office to it2",
+    "expect_contains": ["route", "dean", "it2"]
+  },
+  {
+    "id": "route-2",
+    "query": "how do i get from it1 to sdl2",
+    "expect_contains": ["route", "it1", "sdl2"]
+  },
+  {
+    "id": "route-3",
+    "query": "directions from ct6 to acad 1",
+    "expect_contains": ["route", "ct6", "acad"]
+  },
+  {
+    "id": "near-1",
+    "query": "is it1 near it2",
+    "expect_contains": ["it1", "it2"]
+  },
+  {
+    "id": "near-2",
+    "query": "is networking lab 1 near server room",
+    "expect_contains": ["networking lab 1", "server room"]
+  },
+  {
+    "id": "near-3",
+    "query": "is acad 1 near avr",
+    "expect_contains": ["acad", "avr"]
+  },
+  {
+    "id": "where-1",
+    "query": "where is dean's office",
+    "expect_contains": ["dean", "pimentel", "3f"]
+  },
+  {
+    "id": "where-2",
+    "query": "where is ct6",
+    "expect_contains": ["ct6", "pimentel", "4f"]
+  },
+  {
+    "id": "where-3",
+    "query": "nasaan ang cict acad 2",
+    "expect_contains": ["acad 2", "nstp"]
+  },
+  {
+    "id": "where-4",
+    "query": "where is prog lab 3",
+    "expect_contains": ["prog lab 3", "pimentel", "3f"]
+  },
+  {
+    "id": "route-4",
+    "query": "route from prog lab 1 to prog lab 3",
+    "expect_contains": ["route", "prog lab 1", "prog lab 3"]
+  },
+  {
+    "id": "near-4",
+    "query": "is sdl1 beside sdl2",
+    "expect_contains": ["sdl1", "sdl2"]
+  }
+]

@@ -33,14 +33,30 @@ REASON: [brief]
         r"\b(ignore\s+instructions|system\s*prompt|drop\s*table|<script|"
         r"bomb|weapon|hack|steal|kill|"
         r"fuck|fck|fuk|shit|bitch|nigga|nigger|faggot|"
-        r"pakyu|gago|tanga|putang|tangina|bading|nude|horny)\b",
+        r"pakyu|gago|tanga|bobo|ulol|putang|putangina|tangina|tanginamo|"
+        r"bading|nude|horny)\b",
         re.IGNORECASE,
     )
 
-    _STRICT_INAPPROPRIATE_RE = re.compile(
-        r"\b(niger|nigger|nigga|faggot|bitch|putang|tangina|gago|pakyu|"
-        r"sarap\s+mo|horny|nude|sexy|sex|"
-        r"men\s+are\s+better\s+than\s+women|women\s+are\s+better\s+than\s+men)\b",
+    _PROFANITY_RE = re.compile(
+        r"\b(fuck|fck|fuk|shit|bitch|asshole|motherfucker|"
+        r"gago|bobo|tanga|ulol|pakyu|punyeta|leche|"
+        r"putangina|putanginamo|putang\s*ina\s*mo|"
+        r"tangina|tanginamo|tang\s*ina\s*mo)\b",
+        re.IGNORECASE,
+    )
+
+    _HATE_SPEECH_RE = re.compile(
+        r"\b(niger|nigger|nigga|faggot|kike|chink|spic|"
+        r"kill\s+all\s+(women|men|gays|lesbians|muslims|christians|asians|blacks|whites))\b",
+        re.IGNORECASE,
+    )
+
+    _SEXIST_RE = re.compile(
+        r"\b(men\s+are\s+better\s+than\s+women|women\s+are\s+better\s+than\s+men|"
+        r"women\s+belong\s+in\s+the\s+kitchen|"
+        r"babae\s+lang\s+yan|lalaki\s+lang\s+ang\s+dapat|"
+        r"girls?\s+are\s+stupid|women\s+are\s+stupid|men\s+are\s+stupid)\b",
         re.IGNORECASE,
     )
 
@@ -66,15 +82,34 @@ REASON: [brief]
                 "reason": "Empty message",
             }
 
-        if AdvancedSecurityGuard._STRICT_INAPPROPRIATE_RE.search(sanitized):
+        normalized = re.sub(r"\s+", " ", sanitized)
+
+        # Always block disrespectful content even when mixed with valid academic queries.
+        if AdvancedSecurityGuard._PROFANITY_RE.search(normalized):
+            return {
+                "safe": False,
+                "block": True,
+                "category": "profanity",
+                "reason": "Disrespectful/profane language is not allowed",
+            }
+
+        if AdvancedSecurityGuard._HATE_SPEECH_RE.search(normalized):
+            return {
+                "safe": False,
+                "block": True,
+                "category": "hate_speech",
+                "reason": "Hateful/discriminatory content is not allowed",
+            }
+
+        if AdvancedSecurityGuard._SEXIST_RE.search(normalized):
             return {
                 "safe": False,
                 "block": True,
                 "category": "inappropriate",
-                "reason": "Profanity/sexual/discriminatory content is not allowed",
+                "reason": "Sexist/disrespectful content is not allowed",
             }
 
-        if AdvancedSecurityGuard._is_obviously_safe(sanitized):
+        if AdvancedSecurityGuard._is_obviously_safe(normalized):
             return {
                 "safe": True,
                 "block": False,
@@ -82,7 +117,7 @@ REASON: [brief]
                 "reason": "Safe fast-pass",
             }
 
-        if re.search(r"(?i)(drop\s+table|delete\s+from.*where|<script)", sanitized):
+        if re.search(r"(?i)(drop\s+table|delete\s+from.*where|<script)", normalized):
             return {
                 "safe": False,
                 "block": True,
@@ -90,7 +125,7 @@ REASON: [brief]
                 "reason": "Obvious injection pattern",
             }
 
-        prompt = AdvancedSecurityGuard.SECURITY_INTENT_PROMPT.format(message=sanitized)
+        prompt = AdvancedSecurityGuard.SECURITY_INTENT_PROMPT.format(message=normalized)
         try:
             response = await llm_client.call_quick_llm(prompt, max_tokens=150, temperature=0.0)
             if response:

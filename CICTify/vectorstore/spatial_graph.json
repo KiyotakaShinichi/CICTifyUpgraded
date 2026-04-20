@@ -1,0 +1,1351 @@
+{
+  "updated_at": "2026-04-20T12:18:08.985501",
+  "nodes": [
+    {
+      "id": "a1",
+      "name": "A1",
+      "building": "Pimentel Hall",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "A 1",
+        "A1"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767748"
+    },
+    {
+      "id": "a2",
+      "name": "A2",
+      "building": "Pimentel Hall",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "A 2",
+        "A2"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767838"
+    },
+    {
+      "id": "a1-on-the-right-wing-before-the-stairs",
+      "name": "A1 on the right wing before the stairs",
+      "building": "Pimentel Hall",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "A 1",
+        "A1",
+        "A1 on the right wing before the stairs",
+        "A1ontherightwingbeforethestairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767901"
+    },
+    {
+      "id": "nstp-building-1f-main-stairs",
+      "name": "NSTP Building 1F Main Stairs",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "NSTP Building 1F Main Stairs",
+        "NSTP Building stairs",
+        "NSTPBuilding1FMainStairs",
+        "main stairs",
+        "stairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.763930"
+    },
+    {
+      "id": "a3",
+      "name": "A3",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "A 3",
+        "A3"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.764010"
+    },
+    {
+      "id": "a4",
+      "name": "A4",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "A 4",
+        "A4"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.763973"
+    },
+    {
+      "id": "it13",
+      "name": "IT13",
+      "building": "Pimentel Hall",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "IT 13",
+        "IT13"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767985"
+    },
+    {
+      "id": "a4-near-the-end-of-the-right-hallway",
+      "name": "A4 near the end of the right hallway",
+      "building": "Pimentel Hall",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "A 4",
+        "A4",
+        "A4 near the end of the right hallway",
+        "A4neartheendoftherighthallway"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768047"
+    },
+    {
+      "id": "it14",
+      "name": "IT14",
+      "building": "Pimentel Hall",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "IT 14",
+        "IT14"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768096"
+    },
+    {
+      "id": "the-rear-stairs",
+      "name": "the rear stairs",
+      "building": "Pimentel Hall",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "the rear stairs",
+        "therearstairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768145"
+    },
+    {
+      "id": "pimentel-hall-1f-rear-stairs",
+      "name": "Pimentel Hall 1F Rear Stairs",
+      "building": "Pimentel Hall",
+      "floor": "1F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Pimentel Hall 1F Rear Stairs",
+        "Pimentel Hall stairs",
+        "PimentelHall1FRearStairs",
+        "rear stairs",
+        "stairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768170"
+    },
+    {
+      "id": "ojt-office-of-the-department-heads",
+      "name": "OJT/Office of the Department Heads",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "OJT/Office of the Department Heads",
+        "OJT/OfficeoftheDepartmentHeads",
+        "Ojt/ Of The Department Heads"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768250"
+    },
+    {
+      "id": "the-dean",
+      "name": "the Dean",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "the Dean",
+        "theDean"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768296"
+    },
+    {
+      "id": "faculty-room",
+      "name": "Faculty Room",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Faculty Room",
+        "FacultyRoom"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768348"
+    },
+    {
+      "id": "the-ojt-office",
+      "name": "the OJT Office",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "The Ojt",
+        "the OJT Office",
+        "theOJTOffice"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768397"
+    },
+    {
+      "id": "it1",
+      "name": "IT1",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "IT 1",
+        "IT1"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768447"
+    },
+    {
+      "id": "the-faculty-room",
+      "name": "the Faculty Room",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "the Faculty Room",
+        "theFacultyRoom"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768503"
+    },
+    {
+      "id": "it2",
+      "name": "IT2",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "IT 2",
+        "IT2"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768597"
+    },
+    {
+      "id": "pimentel-hall-3f-central-stairs",
+      "name": "Pimentel Hall 3F Central Stairs",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Pimentel Hall 3F Central Stairs",
+        "Pimentel Hall stairs",
+        "PimentelHall3FCentralStairs",
+        "central stairs",
+        "stairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768802"
+    },
+    {
+      "id": "it1-and-next-to-the-central-stairs",
+      "name": "IT1 and next to the central stairs",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "IT 1",
+        "IT1",
+        "IT1 and next to the central stairs",
+        "IT1andnexttothecentralstairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768664"
+    },
+    {
+      "id": "the-central-stairs",
+      "name": "the central stairs",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "the central stairs",
+        "thecentralstairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768691"
+    },
+    {
+      "id": "sdl1",
+      "name": "SDL1",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "SDL 1",
+        "SDL1"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768765"
+    },
+    {
+      "id": "sdl2",
+      "name": "SDL2",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "SDL 2",
+        "SDL2"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.765071"
+    },
+    {
+      "id": "sdl3",
+      "name": "SDL3",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "SDL 3",
+        "SDL3"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.765032"
+    },
+    {
+      "id": "sdl4",
+      "name": "SDL4",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "SDL 4",
+        "SDL4"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.765118"
+    },
+    {
+      "id": "prog-lab-1",
+      "name": "Prog Lab 1",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "lab",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Lab 1",
+        "Lab1",
+        "Prog Lab 1",
+        "ProgLab1"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769005"
+    },
+    {
+      "id": "pimentel-hall-3f-main-stairs",
+      "name": "Pimentel Hall 3F Main Stairs",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Pimentel Hall 3F Main Stairs",
+        "Pimentel Hall stairs",
+        "PimentelHall3FMainStairs",
+        "main stairs",
+        "stairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.768899"
+    },
+    {
+      "id": "prog-lab-2",
+      "name": "Prog Lab 2",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "lab",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Lab 2",
+        "Lab2",
+        "Prog Lab 2",
+        "ProgLab2"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769111"
+    },
+    {
+      "id": "prog-lab-3",
+      "name": "Prog Lab 3",
+      "building": "Pimentel Hall",
+      "floor": "3F",
+      "kind": "lab",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Lab 3",
+        "Lab3",
+        "Prog Lab 3",
+        "ProgLab3"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769064"
+    },
+    {
+      "id": "ideation-room",
+      "name": "Ideation Room",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Ideation Room",
+        "IdeationRoom"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769172"
+    },
+    {
+      "id": "conference-room",
+      "name": "Conference Room",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Conference Room",
+        "ConferenceRoom"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.765584"
+    },
+    {
+      "id": "the-ideation-room",
+      "name": "the Ideation Room",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "the Ideation Room",
+        "theIdeationRoom"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.765765"
+    },
+    {
+      "id": "networking-lab-2",
+      "name": "Networking Lab 2",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "lab",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Lab 2",
+        "Lab2",
+        "Networking Lab 2",
+        "NetworkingLab2"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769332"
+    },
+    {
+      "id": "server-room",
+      "name": "Server Room",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Server Room",
+        "ServerRoom"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769243"
+    },
+    {
+      "id": "the-networking-lab-1",
+      "name": "the Networking Lab 1",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "lab",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Lab 1",
+        "Lab1",
+        "the Networking Lab 1",
+        "theNetworkingLab1"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769301"
+    },
+    {
+      "id": "networking-lab-1",
+      "name": "Networking Lab 1",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "lab",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Lab 1",
+        "Lab1",
+        "Networking Lab 1",
+        "NetworkingLab1"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769393"
+    },
+    {
+      "id": "the-server-room",
+      "name": "the Server Room",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "the Server Room",
+        "theServerRoom"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769441"
+    },
+    {
+      "id": "pimentel-hall-4f-central-stairs",
+      "name": "Pimentel Hall 4F Central Stairs",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Pimentel Hall 4F Central Stairs",
+        "Pimentel Hall stairs",
+        "PimentelHall4FCentralStairs",
+        "central stairs",
+        "stairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769561"
+    },
+    {
+      "id": "ct6",
+      "name": "CT6",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "CT 6",
+        "CT6"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769523"
+    },
+    {
+      "id": "ct7",
+      "name": "CT7",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "CT 7",
+        "CT7"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.766309"
+    },
+    {
+      "id": "ct8",
+      "name": "CT8",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "CT 8",
+        "CT8"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.766272"
+    },
+    {
+      "id": "acad-1",
+      "name": "Acad 1",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 1",
+        "Acad1"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769617"
+    },
+    {
+      "id": "avr",
+      "name": "AVR",
+      "building": "NSTP Building",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "AVR"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769687"
+    },
+    {
+      "id": "cict-acad-2",
+      "name": "CICT Acad 2",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 2",
+        "Acad2",
+        "CICT Acad 2",
+        "CICTAcad2"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769797"
+    },
+    {
+      "id": "cict-acad-3-and-near-the-exit",
+      "name": "CICT Acad 3 and near the exit",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 3",
+        "Acad 3 and near the exit",
+        "Acad3",
+        "CICT Acad 3 and near the exit",
+        "CICTAcad3andneartheexit"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769860"
+    },
+    {
+      "id": "cict-acad-3",
+      "name": "CICT Acad 3",
+      "building": "NSTP Building",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 3",
+        "Acad3",
+        "CICT Acad 3",
+        "CICTAcad3"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.766707"
+    },
+    {
+      "id": "the-staircase",
+      "name": "the staircase",
+      "building": "NSTP Building",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "the staircase",
+        "thestaircase"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.766749"
+    },
+    {
+      "id": "nstp-building-4f-main-stairs",
+      "name": "NSTP Building 4F Main Stairs",
+      "building": "NSTP Building",
+      "floor": "4F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "NSTP Building 4F Main Stairs",
+        "NSTP Building stairs",
+        "NSTPBuilding4FMainStairs",
+        "main stairs",
+        "stairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.766782"
+    },
+    {
+      "id": "cict-acad-4",
+      "name": "CICT Acad 4",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 4",
+        "Acad4",
+        "CICT Acad 4",
+        "CICTAcad4"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769925"
+    },
+    {
+      "id": "cict-acad-5",
+      "name": "CICT Acad 5",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 5",
+        "Acad5",
+        "CICT Acad 5",
+        "CICTAcad5"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.769995"
+    },
+    {
+      "id": "cict-acad-6",
+      "name": "CICT Acad 6",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 6",
+        "Acad6",
+        "CICT Acad 6",
+        "CICTAcad6"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.770066"
+    },
+    {
+      "id": "acad-5",
+      "name": "Acad 5",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 5",
+        "Acad5"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.770109"
+    },
+    {
+      "id": "cict-acad-7",
+      "name": "CICT Acad 7",
+      "building": "NSTP Building",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 7",
+        "Acad7",
+        "CICT Acad 7",
+        "CICTAcad7"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767077"
+    },
+    {
+      "id": "acad-6",
+      "name": "Acad 6",
+      "building": "NSTP Building",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 6",
+        "Acad6"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767117"
+    },
+    {
+      "id": "cict-acad-8",
+      "name": "CICT Acad 8",
+      "building": "NSTP Building",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 8",
+        "Acad8",
+        "CICT Acad 8",
+        "CICTAcad8"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767176"
+    },
+    {
+      "id": "acad-7",
+      "name": "Acad 7",
+      "building": "NSTP Building",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 7",
+        "Acad7"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767231"
+    },
+    {
+      "id": "the-1st-entrance-hallway",
+      "name": "the 1st entrance hallway",
+      "building": "NSTP Building",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "the 1st entrance hallway",
+        "the1stentrancehallway"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767270"
+    },
+    {
+      "id": "lsc-student-center-office",
+      "name": "LSC/Student Center Office",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "LSC/Student Center Office",
+        "LSC/StudentCenterOffice",
+        "Lsc/Student Center"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.770181"
+    },
+    {
+      "id": "acad-4-and-near-the-exit",
+      "name": "Acad 4 and near the exit",
+      "building": "NSTP Building",
+      "floor": "1F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Acad 4",
+        "Acad 4 and near the exit",
+        "Acad4",
+        "Acad4andneartheexit"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.770238"
+    },
+    {
+      "id": "with-its-strategic-location-and-well",
+      "name": "With its strategic location and well",
+      "building": "Pimentel Hall",
+      "floor": "4F",
+      "kind": "room",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "With its strategic location and well",
+        "Withitsstrategiclocationandwell"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767670"
+    },
+    {
+      "id": "pimentel-hall-1f-main-stairs",
+      "name": "Pimentel Hall 1F Main Stairs",
+      "building": "Pimentel Hall",
+      "floor": "1F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Pimentel Hall 1F Main Stairs",
+        "Pimentel Hall stairs",
+        "PimentelHall1FMainStairs",
+        "main stairs",
+        "stairs"
+      ],
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
+      "updated_at": "2026-04-20T11:30:11.767926"
+    }
+  ],
+  "edges": [
+    {
+      "from": "a1",
+      "to": "a2",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "a2",
+      "to": "a1-on-the-right-wing-before-the-stairs",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "a2",
+      "to": "nstp-building-1f-main-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "a3",
+      "to": "nstp-building-1f-main-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "a4",
+      "to": "a3",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "it13",
+      "to": "a4-near-the-end-of-the-right-hallway",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "it14",
+      "to": "the-rear-stairs",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "it14",
+      "to": "pimentel-hall-1f-rear-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "ojt-office-of-the-department-heads",
+      "to": "the-dean",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "faculty-room",
+      "to": "the-ojt-office",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "it1",
+      "to": "the-faculty-room",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "it1",
+      "to": "it2",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "it1",
+      "to": "pimentel-hall-3f-central-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "it2",
+      "to": "it1-and-next-to-the-central-stairs",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "it2",
+      "to": "the-central-stairs",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "it2",
+      "to": "pimentel-hall-3f-central-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "sdl1",
+      "to": "pimentel-hall-3f-central-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "sdl2",
+      "to": "sdl1",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "sdl3",
+      "to": "sdl2",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "prog-lab-1",
+      "to": "pimentel-hall-3f-main-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "prog-lab-2",
+      "to": "prog-lab-1",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "prog-lab-3",
+      "to": "prog-lab-2",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "conference-room",
+      "to": "ideation-room",
+      "door": "",
+      "weight": 0.8,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "conference-room",
+      "to": "the-ideation-room",
+      "door": "",
+      "weight": 0.8,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "networking-lab-2",
+      "to": "the-ideation-room",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "server-room",
+      "to": "the-networking-lab-1",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "server-room",
+      "to": "networking-lab-2",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "networking-lab-1",
+      "to": "the-server-room",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "networking-lab-1",
+      "to": "pimentel-hall-4f-central-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "ct6",
+      "to": "pimentel-hall-4f-central-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "ct7",
+      "to": "ct6",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "ct8",
+      "to": "ct7",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "cict-acad-2",
+      "to": "cict-acad-3-and-near-the-exit",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "cict-acad-3",
+      "to": "the-staircase",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "cict-acad-3",
+      "to": "nstp-building-4f-main-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "cict-acad-6",
+      "to": "acad-5",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "cict-acad-7",
+      "to": "acad-6",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "cict-acad-8",
+      "to": "acad-7",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "cict-acad-8",
+      "to": "the-1st-entrance-hallway",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "lsc-student-center-office",
+      "to": "acad-4-and-near-the-exit",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "a2",
+      "to": "pimentel-hall-1f-main-stairs",
+      "door": "",
+      "weight": 1.1,
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf"
+    },
+    {
+      "from": "nstp-building-1f-main-stairs",
+      "to": "nstp-building-4f-main-stairs",
+      "door": "",
+      "weight": 2.0,
+      "source_file": "bootstrap:NSTP Building:main"
+    },
+    {
+      "from": "pimentel-hall-3f-central-stairs",
+      "to": "pimentel-hall-4f-central-stairs",
+      "door": "",
+      "weight": 2.0,
+      "source_file": "bootstrap:Pimentel Hall:central"
+    },
+    {
+      "from": "pimentel-hall-1f-main-stairs",
+      "to": "pimentel-hall-3f-main-stairs",
+      "door": "",
+      "weight": 2.0,
+      "source_file": "bootstrap:Pimentel Hall:main"
+    }
+  ]
+}

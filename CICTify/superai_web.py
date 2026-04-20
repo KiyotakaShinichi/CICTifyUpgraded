@@ -125,7 +125,7 @@ def chat_endpoint():
 
         return jsonify(
             {
-                "reply": result.reply.replace("\n", "<br>"),
+                "reply": result.reply,
                 "model": result.route,
                 "context": result.context,
                 "status": status,

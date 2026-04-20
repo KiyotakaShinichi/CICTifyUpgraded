@@ -1,0 +1,210 @@
+{
+  "timestamp": "2026-04-20T12:25:51.242284",
+  "cases_path": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\evaluation\\spatial_eval_cases.json",
+  "spatial_graph_stats": {
+    "nodes": 61,
+    "edges": 44
+  },
+  "summary": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "accuracy_percent": 100.0
+  },
+  "results": [
+    {
+      "id": "route-1",
+      "query": "route from dean's office to it2",
+      "expected": [
+        "route",
+        "dean",
+        "it2"
+      ],
+      "answer": "Route unavailable between the Dean and IT2 in the current floorplan graph. Known locations: the Dean (Pimentel Hall, 3F); IT2 (Pimentel Hall, 3F).",
+      "matched": [
+        "route",
+        "dean",
+        "it2"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "route-2",
+      "query": "how do i get from it1 to sdl2",
+      "expected": [
+        "route",
+        "it1",
+        "sdl2"
+      ],
+      "answer": "Best route to SDL2: IT1 -> Pimentel Hall 3F Central Stairs -> SDL1 -> SDL2\nEstimated path cost: 3.2",
+      "matched": [
+        "route",
+        "it1",
+        "sdl2"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "route-3",
+      "query": "directions from ct6 to acad 1",
+      "expected": [
+        "route",
+        "ct6",
+        "acad"
+      ],
+      "answer": "Route unavailable between CT6 and Acad 1 in the current floorplan graph. Known locations: CT6 (Pimentel Hall, 4F); Acad 1 (Pimentel Hall, 4F).",
+      "matched": [
+        "route",
+        "ct6",
+        "acad"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "near-1",
+      "query": "is it1 near it2",
+      "expected": [
+        "it1",
+        "it2"
+      ],
+      "answer": "Yes. IT1 is near IT2.\nEstimated path cost: 1.2\nRoute: IT1 -> IT2",
+      "matched": [
+        "it1",
+        "it2"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "near-2",
+      "query": "is networking lab 1 near server room",
+      "expected": [
+        "networking lab 1",
+        "server room"
+      ],
+      "answer": "I cannot confirm direct nearness yet because the graph has no connected path between Networking Lab 1 and Server Room. Known locations: Networking Lab 1 (Pimentel Hall, 4F); Server Room (Pimentel Hall, 4F).",
+      "matched": [
+        "networking lab 1",
+        "server room"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "near-3",
+      "query": "is acad 1 near avr",
+      "expected": [
+        "acad",
+        "avr"
+      ],
+      "answer": "I cannot confirm direct nearness yet because the graph has no connected path between Acad 1 and AVR. Known locations: Acad 1 (Pimentel Hall, 4F); AVR (NSTP Building, 4F).",
+      "matched": [
+        "acad",
+        "avr"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "where-1",
+      "query": "where is dean's office",
+      "expected": [
+        "dean",
+        "pimentel",
+        "3f"
+      ],
+      "answer": "OJT/Office of the Department Heads is in Pimentel Hall, 3F. Nearby: the Dean.",
+      "matched": [
+        "dean",
+        "pimentel",
+        "3f"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "where-2",
+      "query": "where is ct6",
+      "expected": [
+        "ct6",
+        "pimentel",
+        "4f"
+      ],
+      "answer": "CT6 is in Pimentel Hall, 4F. Nearby: CT7, Pimentel Hall 4F Central Stairs.",
+      "matched": [
+        "ct6",
+        "pimentel",
+        "4f"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "where-3",
+      "query": "nasaan ang cict acad 2",
+      "expected": [
+        "acad 2",
+        "nstp"
+      ],
+      "answer": "CICT Acad 2 is in NSTP Building, 1F. Nearby: CICT Acad 3 and near the exit.",
+      "matched": [
+        "acad 2",
+        "nstp"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "where-4",
+      "query": "where is prog lab 3",
+      "expected": [
+        "prog lab 3",
+        "pimentel",
+        "3f"
+      ],
+      "answer": "Prog Lab 3 is in Pimentel Hall, 3F. Nearby: Prog Lab 2.",
+      "matched": [
+        "prog lab 3",
+        "pimentel",
+        "3f"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "route-4",
+      "query": "route from prog lab 1 to prog lab 3",
+      "expected": [
+        "route",
+        "prog lab 1",
+        "prog lab 3"
+      ],
+      "answer": "Best route to Prog Lab 3: Prog Lab 1 -> Prog Lab 2 -> Prog Lab 3\nEstimated path cost: 2.0",
+      "matched": [
+        "route",
+        "prog lab 1",
+        "prog lab 3"
+      ],
+      "missing": [],
+      "passed": true
+    },
+    {
+      "id": "near-4",
+      "query": "is sdl1 beside sdl2",
+      "expected": [
+        "sdl1",
+        "sdl2"
+      ],
+      "answer": "Yes. SDL1 is near SDL2.\nEstimated path cost: 1.0\nRoute: SDL1 -> SDL2",
+      "matched": [
+        "sdl1",
+        "sdl2"
+      ],
+      "missing": [],
+      "passed": true
+    }
+  ]
+}

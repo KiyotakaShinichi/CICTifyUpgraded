@@ -53,6 +53,15 @@
       "text_hash": "1ce7b8bf305d53655ea18f5e4db7e8d9e077ed8676243e7a4e20d044da1a6076",
       "char_count": 4587,
       "word_count": 769
+    },
+    {
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT-Rooms.pdf",
+      "title": "CICT-Rooms",
+      "raw_text": " \n \n \n \nCollege of Information and  \nCommunication s Technology  \n   \n \n   \n \nPIME NTEL HALL AND NSTP BUILDING  FLOO R PLAN  \n  \n \n \n \nFigure 1  \n1st Floor Pimentel Hall  \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n\n \n \n \n \nCollege of Information and  \nCommunication s Technology  \n  \n \n \n \n \n \nFigure 2 \n3rd Floor Pimentel Hall  \n \n  \n\n \n \n \n \nCollege of Information and  \nCommunication s Technology  \n  \n \n \n \n \nFigure 3 \n4th Floor Pimentel Hall  \n  \n\n \n \n \n \nCollege of Information and  \nCommunication s Technology  \n  \n \n \n \n \n \nFigure 4 \n1st Floor NSTP Building  \n \n",
+      "normalized_text": "College of Information and Communication s Technology PIME NTEL HALL AND NSTP BUILDING FLOO R PLAN Figure 1 1st Floor Pimentel Hall College of Information and Communication s Technology Figure 2 3rd Floor Pimentel Hall College of Information and Communication s Technology Figure 3 4th Floor Pimentel Hall College of Information and Communication s Technology Figure 4 1st Floor NSTP Building",
+      "text_hash": "a74299681bf7892addfba4784ae6491fd027dfc82e755812d446aed09849d060",
+      "char_count": 392,
+      "word_count": 61
     }
   ],
   "chunks": [
@@ -19918,13 +19927,22 @@
       "chunk_hash": "a84580342dc19aac37dc743785cac1b1f618a6b51f522a14822c7afde1b65747",
       "chunk_index": 0,
       "section_index": 46
+    },
+    {
+      "content": "College of Information and Communication s Technology PIME NTEL HALL AND NSTP BUILDING FLOO R PLAN Figure 1 1st Floor Pimentel Hall College of Information and Communication s Technology Figure 2 3rd Floor Pimentel Hall College of Information and Communication s Technology Figure 3 4th Floor Pimentel Hall College of Information and Communication s Technology Figure 4 1st Floor NSTP Building",
+      "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT-Rooms.pdf",
+      "title": "CICT-Rooms",
+      "doc_hash": "a74299681bf7892addfba4784ae6491fd027dfc82e755812d446aed09849d060",
+      "chunk_hash": "8b1e0e4dfb1437a5c0eea65b2e4cbe89d2ee9a7cba6a09f2d696e7054df6bff1",
+      "chunk_index": 0,
+      "section_index": 0
     }
   ],
   "report": {
-    "source_total": 6,
-    "source_kept": 6,
+    "source_total": 7,
+    "source_kept": 7,
     "source_dropped": 0,
-    "chunk_total": 2207,
+    "chunk_total": 2208,
     "chunk_size": 1500,
     "chunk_overlap": 400,
     "semantic_chunking": true,
@@ -19953,6 +19971,10 @@
       [
         "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICTify - FAQs.pdf",
         14
+      ],
+      [
+        "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT-Rooms.pdf",
+        1
       ]
     ]
   }
