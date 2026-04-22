@@ -260,6 +260,80 @@ def health_check():
     )
 
 
+@app.route("/api/route", methods=["POST"])
+def route_endpoint():
+    global chat_memory
+    try:
+        _ensure_ready()
+        data = request.get_json(force=True, silent=True) or {}
+        start_hint = str(data.get("from") or "").strip()
+        target_hint = str(data.get("to") or "").strip()
+        start_id = str(data.get("from_id") or "").strip()
+        target_id = str(data.get("to_id") or "").strip()
+        start_label = str(data.get("from_label") or start_hint or start_id).strip()
+        target_label = str(data.get("to_label") or target_hint or target_id).strip()
+        algorithm = str(data.get("algorithm") or "astar").strip().lower()
+
+        if not (start_id and target_id) and not (start_hint and target_hint):
+            return jsonify({"status": "error", "message": "Provide either from/to ids or from/to names."}), 400
+
+        if algorithm not in {"astar", "dijkstra"}:
+            algorithm = "astar"
+
+        if start_id and target_id:
+            route = orchestrator.spatial_graph.compute_route_by_ids(start_id, target_id, algorithm=algorithm)
+        else:
+            route = orchestrator.spatial_graph.compute_route(start_hint, target_hint, algorithm=algorithm)
+        if not route:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "Route not found. Check place names or ingest more floorplan graph data.",
+                }
+            ), 404
+
+        directions = route.get("directions", [])
+        if directions:
+            guide_lines = "\n".join(f"{idx}. {step}" for idx, step in enumerate(directions, start=1))
+            reply = (
+                f"Sure. Here is the best mapped route from {route.get('start', {}).get('name', start_label)} "
+                f"to {route.get('target', {}).get('name', target_label)}.\n"
+                f"{guide_lines}\n"
+                f"Estimated path cost: {route.get('distance', 'n/a')}"
+            )
+        else:
+            path_names = route.get("path_names", [])
+            path_text = " -> ".join(path_names) if path_names else "No detailed path available."
+            reply = (
+                f"I found a route from {start_label} to {target_label}.\n"
+                f"Path: {path_text}\n"
+                f"Estimated path cost: {route.get('distance', 'n/a')}"
+            )
+
+        synthetic_user = f"How do I get from {start_label} to {target_label}?"
+        chat_memory.append({"role": "user", "content": synthetic_user})
+        chat_memory.append({"role": "assistant", "content": reply})
+        chat_memory = chat_memory[-CONFIG.max_memory_messages:]
+
+        return jsonify({"status": "success", "route": route, "reply": reply})
+    except Exception as exc:
+        print(f"[API][route] ERROR Type={type(exc).__name__} Message={exc}", flush=True)
+        print(traceback.format_exc(), flush=True)
+        return jsonify({"status": "error", "message": "Route endpoint failed"}), 500
+
+
+@app.route("/api/route/options", methods=["GET"])
+def route_options_endpoint():
+    try:
+        _ensure_ready()
+        options = orchestrator.spatial_graph.route_options()
+        return jsonify({"status": "success", "options": options})
+    except Exception as exc:
+        print(f"[API][route-options] ERROR Type={type(exc).__name__} Message={exc}", flush=True)
+        print(traceback.format_exc(), flush=True)
+        return jsonify({"status": "error", "message": "Route options endpoint failed"}), 500
+
+
 @app.route("/api/reset", methods=["POST"])
 def reset_conversation():
     global chat_memory

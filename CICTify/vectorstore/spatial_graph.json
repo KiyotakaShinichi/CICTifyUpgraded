@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-20T12:18:08.985501",
+  "updated_at": "2026-04-22T12:36:33.173173",
   "nodes": [
     {
       "id": "a1",
@@ -214,6 +214,10 @@
       "x": null,
       "y": null,
       "aliases": [
+        "Dean Office",
+        "Dean's Office",
+        "Deans Office",
+        "Office of the Dean",
         "the Dean",
         "theDean"
       ],
@@ -431,7 +435,9 @@
         "Lab 1",
         "Lab1",
         "Prog Lab 1",
-        "ProgLab1"
+        "ProgLab1",
+        "Programming Lab 1",
+        "Programming Laboratory 1"
       ],
       "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
       "updated_at": "2026-04-20T11:30:11.769005"
@@ -468,7 +474,9 @@
         "Lab 2",
         "Lab2",
         "Prog Lab 2",
-        "ProgLab2"
+        "ProgLab2",
+        "Programming Lab 2",
+        "Programming Laboratory 2"
       ],
       "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
       "updated_at": "2026-04-20T11:30:11.769111"
@@ -486,7 +494,9 @@
         "Lab 3",
         "Lab3",
         "Prog Lab 3",
-        "ProgLab3"
+        "ProgLab3",
+        "Programming Lab 3",
+        "Programming Laboratory 3"
       ],
       "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
       "updated_at": "2026-04-20T11:30:11.769064"
@@ -1036,6 +1046,636 @@
       ],
       "source_file": "C:\\Users\\L\\Downloads\\CICTifyUpgraded\\CICTify\\knowledge_base\\pdfs\\CICT Rooms - Pics & Desc.docx.pdf",
       "updated_at": "2026-04-20T11:30:11.767926"
+    },
+    {
+      "id": "pimentel-hall-2f-main-stairs",
+      "name": "Pimentel Hall 2F Main Stairs",
+      "building": "Pimentel Hall",
+      "floor": "2F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Pimentel Hall 2F Main Stairs",
+        "Pimentel Hall stairs",
+        "PimentelHall2FMainStairs",
+        "main stairs",
+        "stairs"
+      ],
+      "source_file": "inferred:Pimentel Hall:main:virtual-floor",
+      "updated_at": "2026-04-22T12:31:12.098349"
+    },
+    {
+      "id": "nstp-building-2f-main-stairs",
+      "name": "NSTP Building 2F Main Stairs",
+      "building": "NSTP Building",
+      "floor": "2F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "NSTP Building 2F Main Stairs",
+        "NSTP Building stairs",
+        "NSTPBuilding2FMainStairs",
+        "main stairs",
+        "stairs"
+      ],
+      "source_file": "inferred:NSTP Building:main:virtual-floor",
+      "updated_at": "2026-04-22T12:31:12.098511"
+    },
+    {
+      "id": "nstp-building-3f-main-stairs",
+      "name": "NSTP Building 3F Main Stairs",
+      "building": "NSTP Building",
+      "floor": "3F",
+      "kind": "stairs",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "NSTP Building 3F Main Stairs",
+        "NSTP Building stairs",
+        "NSTPBuilding3FMainStairs",
+        "main stairs",
+        "stairs"
+      ],
+      "source_file": "inferred:NSTP Building:main:virtual-floor",
+      "updated_at": "2026-04-22T12:31:12.098537"
+    },
+    {
+      "id": "campus-main-hub",
+      "name": "BulSU Main Campus Hub",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "BulSU Main Campus Hub",
+        "BulSUMainCampusHub",
+        "bulsu main campus",
+        "campus hub",
+        "main campus"
+      ],
+      "source_file": "inferred:campus-hub",
+      "updated_at": "2026-04-22T12:36:33.138092"
+    },
+    {
+      "id": "building-hall-names-and-wayfinding-landmarks-at-bulsu-main-campus",
+      "name": "Building/Hall Names and Wayfinding Landmarks at BulSU Main Campus",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Building/Hall Names and Wayfinding Landmarks at BulSU Main Campus",
+        "Building/Hall Names and Wayfinding Landmarks at BulSU Main Campus**",
+        "Building/HallNamesandWayfindingLandmarksatBulSUMainCampus",
+        "Building/HallNamesandWayfindingLandmarksatBulSUMainCampus**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
+      "updated_at": "2026-04-22T12:36:33.139803"
+    },
+    {
+      "id": "buildings-halls",
+      "name": "### Buildings/Halls",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "### Buildings/Halls",
+        "###Buildings/Halls",
+        "Buildings/Halls:**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
+      "updated_at": "2026-04-22T12:36:33.139902"
+    },
+    {
+      "id": "round-hall",
+      "name": "Round Hall",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Round Hall",
+        "Round Hall**",
+        "RoundHall",
+        "RoundHall**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
+      "updated_at": "2026-04-22T12:36:33.139980"
+    },
+    {
+      "id": "center-for-libraries-and-information-services-clis",
+      "name": "Center for Libraries and Information Services (CLIS)",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Center for Libraries and Information Services (CLIS)",
+        "Center for Libraries and Information Services (CLIS)**",
+        "CenterforLibrariesandInformationServices(CLIS)",
+        "CenterforLibrariesandInformationServices(CLIS)**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
+      "updated_at": "2026-04-22T12:36:33.140075"
+    },
+    {
+      "id": "bulsu-gym",
+      "name": "BulSU Gym",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "BulSU Gym",
+        "BulSU Gym**",
+        "BulSUGym",
+        "BulSUGym**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
+      "updated_at": "2026-04-22T12:36:33.140149"
+    },
+    {
+      "id": "bulsu-e-library",
+      "name": "BulSU E-Library",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "BulSU E-Library",
+        "BulSU E-Library**",
+        "BulSUE-Library",
+        "BulSUE-Library**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
+      "updated_at": "2026-04-22T12:36:33.140213"
+    },
+    {
+      "id": "main-gate-gate-1-and-gate-2",
+      "name": "Main Gate (Gate 1 and Gate 2)",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Gate 1",
+        "Gate 2",
+        "Gate1",
+        "Gate2",
+        "Main Gate (Gate 1 and Gate 2)",
+        "Main Gate (Gate 1 and Gate 2)**",
+        "MainGate(Gate1andGate2)",
+        "MainGate(Gate1andGate2)**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
+      "updated_at": "2026-04-22T12:36:33.140268"
+    },
+    {
+      "id": "main-gate-gate-1-and-gate-2-two-primary-entrance-points-to-the-campus",
+      "name": "Main Gate (Gate 1 and Gate 2)**: Two primary entrance points to the campus",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Gate 1",
+        "Gate 2",
+        "Gate1",
+        "Gate2",
+        "Main Gate (Gate 1 and Gate 2)**: Two primary entrance points to the campus",
+        "MainGate(Gate1andGate2)**:Twoprimaryentrancepointstothecampus"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
+      "updated_at": "2026-04-22T12:36:08.696478"
+    },
+    {
+      "id": "building-hall-names",
+      "name": "Building/Hall Names",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Building/Hall Names",
+        "Building/Hall Names:**",
+        "Building/HallNames",
+        "Building/HallNames:**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
+      "updated_at": "2026-04-22T12:36:33.142098"
+    },
+    {
+      "id": "federizo-hall",
+      "name": "Federizo Hall",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Federizo Hall",
+        "FederizoHall"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117",
+      "updated_at": "2026-04-22T12:36:33.140950"
+    },
+    {
+      "id": "administration-building-flores-hall",
+      "name": "Administration Building (Flores Hall)",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Administration Building (Flores Hall)",
+        "AdministrationBuilding(FloresHall)"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=115",
+      "updated_at": "2026-04-22T12:36:33.140512"
+    },
+    {
+      "id": "parking-areas-2",
+      "name": "Parking Areas (2)",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Parking Areas (2)",
+        "ParkingAreas(2)"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=115",
+      "updated_at": "2026-04-22T12:36:33.140555"
+    },
+    {
+      "id": "hostel",
+      "name": "Hostel",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Hostel"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=116",
+      "updated_at": "2026-04-22T12:36:33.140748"
+    },
+    {
+      "id": "building-hall-names-and-wayfinding-landmarks",
+      "name": "Building/Hall Names and Wayfinding Landmarks",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Building/Hall Names and Wayfinding Landmarks",
+        "Building/Hall Names and Wayfinding Landmarks:**",
+        "Building/HallNamesandWayfindingLandmarks",
+        "Building/HallNamesandWayfindingLandmarks:**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119",
+      "updated_at": "2026-04-22T12:36:33.141483"
+    },
+    {
+      "id": "valencia-hall",
+      "name": "Valencia Hall",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Valencia Hall",
+        "ValenciaHall"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117",
+      "updated_at": "2026-04-22T12:36:33.140990"
+    },
+    {
+      "id": "canteen",
+      "name": "Canteen",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Canteen"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117",
+      "updated_at": "2026-04-22T12:36:33.141029"
+    },
+    {
+      "id": "gymnasium",
+      "name": "Gymnasium",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Gymnasium"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117",
+      "updated_at": "2026-04-22T12:36:33.141072"
+    },
+    {
+      "id": "rizal-park",
+      "name": "Rizal Park",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Rizal Park",
+        "RizalPark"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118",
+      "updated_at": "2026-04-22T12:36:33.141226"
+    },
+    {
+      "id": "activity-center",
+      "name": "Activity Center",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Activity Center",
+        "ActivityCenter"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118",
+      "updated_at": "2026-04-22T12:36:33.141271"
+    },
+    {
+      "id": "academic-building",
+      "name": "Academic Building",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Academic Building",
+        "AcademicBuilding"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118",
+      "updated_at": "2026-04-22T12:36:33.141316"
+    },
+    {
+      "id": "parking-area",
+      "name": "Parking Area",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Parking Area",
+        "ParkingArea"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
+      "updated_at": "2026-04-22T12:36:33.142343"
+    },
+    {
+      "id": "carpio-hall",
+      "name": "Carpio Hall",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Carpio Hall",
+        "Carpio Hall**",
+        "CarpioHall",
+        "CarpioHall**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119",
+      "updated_at": "2026-04-22T12:36:33.141527"
+    },
+    {
+      "id": "student-park",
+      "name": "Student Park",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Student Park",
+        "Student Park**",
+        "StudentPark",
+        "StudentPark**"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119",
+      "updated_at": "2026-04-22T12:36:33.141571"
+    },
+    {
+      "id": "flores-hall-admin-bldg",
+      "name": "Flores Hall/Admin. Bldg",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Flores Hall/Admin. Bldg",
+        "FloresHall/Admin.Bldg"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=120",
+      "updated_at": "2026-04-22T12:36:33.141735"
+    },
+    {
+      "id": "main-hall",
+      "name": "Main Hall",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Main Hall",
+        "MainHall"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=121",
+      "updated_at": "2026-04-22T12:36:33.141932"
+    },
+    {
+      "id": "tennis-court",
+      "name": "Tennis Court",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Tennis Court",
+        "TennisCourt"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=121",
+      "updated_at": "2026-04-22T12:36:33.141980"
+    },
+    {
+      "id": "alumni-building",
+      "name": "Alumni Building",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Alumni Building",
+        "AlumniBuilding"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
+      "updated_at": "2026-04-22T12:36:33.142149"
+    },
+    {
+      "id": "natividad-hall",
+      "name": "Natividad Hall",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Natividad Hall",
+        "NatividadHall"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
+      "updated_at": "2026-04-22T12:36:33.142198"
+    },
+    {
+      "id": "heroes-park",
+      "name": "Heroes Park",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Heroes Park",
+        "HeroesPark"
+      ],
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
+      "updated_at": "2026-04-22T12:36:33.142243"
+    },
+    {
+      "id": "gate-2",
+      "name": "Gate 2",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Gate 2",
+        "Gate-2",
+        "Gate2"
+      ],
+      "source_file": "inferred:campus-poi-seed",
+      "updated_at": "2026-04-22T12:36:33.142486"
+    },
+    {
+      "id": "registrar",
+      "name": "Registrar",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Registrar"
+      ],
+      "source_file": "inferred:campus-poi-seed",
+      "updated_at": "2026-04-22T12:36:33.142387"
+    },
+    {
+      "id": "gate-1",
+      "name": "Gate 1",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Gate 1",
+        "Gate1"
+      ],
+      "source_file": "inferred:campus-poi-seed",
+      "updated_at": "2026-04-22T12:36:33.142438"
+    },
+    {
+      "id": "main-gate",
+      "name": "Main Gate",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": null,
+      "y": null,
+      "aliases": [
+        "Main Gate",
+        "MainGate"
+      ],
+      "source_file": "inferred:campus-poi-seed",
+      "updated_at": "2026-04-22T12:36:33.142533"
     }
   ],
   "edges": [
@@ -1346,6 +1986,433 @@
       "door": "",
       "weight": 2.0,
       "source_file": "bootstrap:Pimentel Hall:main"
+    },
+    {
+      "from": "a1-on-the-right-wing-before-the-stairs",
+      "to": "the-rear-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:1F:stairs"
+    },
+    {
+      "from": "a1-on-the-right-wing-before-the-stairs",
+      "to": "pimentel-hall-1f-rear-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:1F:stairs"
+    },
+    {
+      "from": "a1-on-the-right-wing-before-the-stairs",
+      "to": "pimentel-hall-1f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:1F:stairs"
+    },
+    {
+      "from": "the-rear-stairs",
+      "to": "pimentel-hall-1f-rear-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:1F:stairs"
+    },
+    {
+      "from": "the-rear-stairs",
+      "to": "pimentel-hall-1f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:1F:stairs"
+    },
+    {
+      "from": "pimentel-hall-1f-rear-stairs",
+      "to": "pimentel-hall-1f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:1F:stairs"
+    },
+    {
+      "from": "pimentel-hall-3f-central-stairs",
+      "to": "it1-and-next-to-the-central-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:3F:stairs"
+    },
+    {
+      "from": "pimentel-hall-3f-central-stairs",
+      "to": "the-central-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:3F:stairs"
+    },
+    {
+      "from": "pimentel-hall-3f-central-stairs",
+      "to": "pimentel-hall-3f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:3F:stairs"
+    },
+    {
+      "from": "it1-and-next-to-the-central-stairs",
+      "to": "the-central-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:3F:stairs"
+    },
+    {
+      "from": "it1-and-next-to-the-central-stairs",
+      "to": "pimentel-hall-3f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:3F:stairs"
+    },
+    {
+      "from": "the-central-stairs",
+      "to": "pimentel-hall-3f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:3F:stairs"
+    },
+    {
+      "from": "the-dean",
+      "to": "the-ojt-office",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:Pimentel Hall:3F:dean-ojt"
+    },
+    {
+      "from": "ojt-office-of-the-department-heads",
+      "to": "the-ojt-office",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:Pimentel Hall:3F:ojt-merge"
+    },
+    {
+      "from": "ojt-office-of-the-department-heads",
+      "to": "faculty-room",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:Pimentel Hall:3F:ojt-faculty"
+    },
+    {
+      "from": "ojt-office-of-the-department-heads",
+      "to": "the-faculty-room",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:Pimentel Hall:3F:ojt-faculty"
+    },
+    {
+      "from": "the-ojt-office",
+      "to": "the-faculty-room",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:Pimentel Hall:3F:ojt-faculty"
+    },
+    {
+      "from": "faculty-room",
+      "to": "it1",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "inferred:Pimentel Hall:3F:faculty-it1"
+    },
+    {
+      "from": "faculty-room",
+      "to": "it1-and-next-to-the-central-stairs",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "inferred:Pimentel Hall:3F:faculty-it1"
+    },
+    {
+      "from": "the-faculty-room",
+      "to": "it1-and-next-to-the-central-stairs",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "inferred:Pimentel Hall:3F:faculty-it1"
+    },
+    {
+      "from": "pimentel-hall-1f-main-stairs",
+      "to": "pimentel-hall-2f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:main:chain"
+    },
+    {
+      "from": "pimentel-hall-2f-main-stairs",
+      "to": "pimentel-hall-3f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:main:chain"
+    },
+    {
+      "from": "nstp-building-1f-main-stairs",
+      "to": "nstp-building-2f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:NSTP Building:main:chain"
+    },
+    {
+      "from": "nstp-building-2f-main-stairs",
+      "to": "nstp-building-3f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:NSTP Building:main:chain"
+    },
+    {
+      "from": "nstp-building-3f-main-stairs",
+      "to": "nstp-building-4f-main-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:NSTP Building:main:chain"
+    },
+    {
+      "from": "the-central-stairs",
+      "to": "pimentel-hall-4f-central-stairs",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:Pimentel Hall:central:chain"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "building-hall-names-and-wayfinding-landmarks-at-bulsu-main-campus",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "buildings-halls",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "round-hall",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "center-for-libraries-and-information-services-clis",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "bulsu-gym",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "bulsu-e-library",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "main-gate-gate-1-and-gate-2",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "main-gate-gate-1-and-gate-2-two-primary-entrance-points-to-the-campus",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "building-hall-names",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=115"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "federizo-hall",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=115"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "administration-building-flores-hall",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=115"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "parking-areas-2",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=115"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "hostel",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=116"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "building-hall-names-and-wayfinding-landmarks",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "valencia-hall",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "canteen",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "gymnasium",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "rizal-park",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "activity-center",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "academic-building",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "parking-area",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "carpio-hall",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "student-park",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "flores-hall-admin-bldg",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=120"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "main-hall",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=121"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "tennis-court",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=121"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "alumni-building",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "natividad-hall",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "heroes-park",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "gate-2",
+      "door": "",
+      "weight": 2.2,
+      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "registrar",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:campus-poi-seed"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "gate-1",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:campus-poi-seed"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "main-gate",
+      "door": "",
+      "weight": 1.8,
+      "source_file": "inferred:campus-poi-seed"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "nstp-building-1f-main-stairs",
+      "door": "",
+      "weight": 3.0,
+      "source_file": "inferred:campus-hub-building"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "a1-on-the-right-wing-before-the-stairs",
+      "door": "",
+      "weight": 3.0,
+      "source_file": "inferred:campus-hub-building"
     }
   ]
 }

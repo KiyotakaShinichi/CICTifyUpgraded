@@ -3,10 +3,22 @@ const sendBtn = document.getElementById("send-btn");
 const micBtn = document.getElementById("mic-btn");
 const chatbox = document.getElementById("chatbox");
 const expandBtn = document.getElementById("expand-btn");
+const routeFeatureBtn = document.getElementById("route-feature-btn");
+const routePanel = document.getElementById("route-panel");
+const routeBtn = document.getElementById("route-btn");
+const routeFrom = document.getElementById("route-from");
+const routeTo = document.getElementById("route-to");
+const routeAlgorithm = document.getElementById("route-algorithm");
+const routeSummary = document.getElementById("route-summary");
+const routeMapToggle = document.getElementById("route-map-toggle");
+const routeCanvasWrap = document.getElementById("route-canvas-wrap");
+const routeSvg = document.getElementById("route-svg");
 
 let abortController = null;
 let recognizing = false;
 let recognition;
+let routeOptionsCache = [];
+let hasDrawableRoute = false;
 
 function escapeHtml(text) {
   return String(text || "")
@@ -85,6 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
     chatLogEl.appendChild(botMsg);
     chatLogEl.scrollTop = chatLogEl.scrollHeight;
   }, 150);
+
+  loadRouteOptions();
 });
 
 // Toggle chatbox visibility
@@ -112,6 +126,281 @@ function showTypingIndicator() {
 
 function hideTypingIndicator(typingIndicator) {
   if (typingIndicator && typingIndicator.parentNode) typingIndicator.remove();
+}
+
+function appendBotMessage(text, enableTts = true) {
+  const chatLog = document.getElementById("chat-log");
+  if (!chatLog) return;
+
+  const botMsg = document.createElement("div");
+  botMsg.classList.add("chat-message", "bot-message");
+  botMsg.innerHTML = `
+    <img src="images/CICTify_ChatLogo.png" alt="Bot Avatar">
+    <div class="text"></div>
+  `;
+  botMsg.querySelector(".text").innerHTML = renderRichText(text || "");
+
+  if (enableTts) {
+    const listenBtn = document.createElement("button");
+    listenBtn.textContent = "🔊 Listen";
+    listenBtn.className = "tts-btn";
+    listenBtn.style.marginTop = "5px";
+    listenBtn.onclick = () => {
+      const utterance = new SpeechSynthesisUtterance(String(text || ""));
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      window.speechSynthesis.speak(utterance);
+    };
+    botMsg.appendChild(listenBtn);
+  }
+
+  chatLog.appendChild(botMsg);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function setMapVisibility(visible) {
+  if (!routeCanvasWrap || !routeMapToggle) return;
+  routeCanvasWrap.classList.toggle("hidden", !visible);
+  routeMapToggle.textContent = visible ? "Hide map" : "Show map";
+}
+
+function drawMapPlaceholder(message) {
+  if (!routeSvg) return;
+  routeSvg.innerHTML = "";
+  const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  text.setAttribute("x", "50%");
+  text.setAttribute("y", "50%");
+  text.setAttribute("text-anchor", "middle");
+  text.setAttribute("dominant-baseline", "middle");
+  text.setAttribute("font-size", "14");
+  text.setAttribute("fill", "#6b7280");
+  text.textContent = message || "No map preview available.";
+  routeSvg.appendChild(text);
+}
+
+function drawRoute(route) {
+  if (!routeSvg) return;
+  routeSvg.innerHTML = "";
+
+  const points = Array.isArray(route?.points) ? route.points : [];
+  if (!points.length) {
+    hasDrawableRoute = false;
+    setMapVisibility(false);
+    if (routeMapToggle) routeMapToggle.disabled = false;
+    routeSummary.textContent = "No drawable route points available.";
+    return;
+  }
+
+  const usable = points.filter((p) => Number.isFinite(p?.x) && Number.isFinite(p?.y));
+  if (!usable.length) {
+    hasDrawableRoute = false;
+    setMapVisibility(false);
+    if (routeMapToggle) routeMapToggle.disabled = false;
+    drawMapPlaceholder("Coordinates are missing for map drawing.");
+    const pathLabel = Array.isArray(route.path_names) ? route.path_names.join(" -> ") : "";
+    routeSummary.textContent = `Route found (text-only). Coordinates are missing for drawing.${pathLabel ? ` Path: ${pathLabel}` : ""}`;
+    return;
+  }
+
+  hasDrawableRoute = true;
+  if (routeMapToggle) routeMapToggle.disabled = false;
+  setMapVisibility(true);
+
+  const xs = usable.map((p) => Number(p.x));
+  const ys = usable.map((p) => Number(p.y));
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+
+  const padding = 40;
+  const width = 1000;
+  const height = 700;
+  const spanX = Math.max(1, maxX - minX);
+  const spanY = Math.max(1, maxY - minY);
+
+  const mapped = usable.map((p) => {
+    const nx = ((Number(p.x) - minX) / spanX) * (width - padding * 2) + padding;
+    const ny = ((Number(p.y) - minY) / spanY) * (height - padding * 2) + padding;
+    return { ...p, sx: nx, sy: ny };
+  });
+
+  const poly = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+  poly.setAttribute("fill", "none");
+  poly.setAttribute("stroke", "#f6921e");
+  poly.setAttribute("stroke-width", "6");
+  poly.setAttribute("stroke-linecap", "round");
+  poly.setAttribute("stroke-linejoin", "round");
+  poly.setAttribute("points", mapped.map((p) => `${p.sx},${p.sy}`).join(" "));
+  routeSvg.appendChild(poly);
+
+  mapped.forEach((p, idx) => {
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx", String(p.sx));
+    dot.setAttribute("cy", String(p.sy));
+    dot.setAttribute("r", idx === 0 || idx === mapped.length - 1 ? "8" : "5");
+    dot.setAttribute("fill", idx === 0 ? "#2a9d8f" : idx === mapped.length - 1 ? "#e63946" : "#264653");
+    routeSvg.appendChild(dot);
+
+    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.setAttribute("x", String(p.sx + 10));
+    label.setAttribute("y", String(p.sy - 10));
+    label.setAttribute("font-size", "13");
+    label.setAttribute("fill", "#1f2937");
+    label.textContent = String(p.name || p.id || "Node");
+    routeSvg.appendChild(label);
+  });
+
+  const pathLabel = Array.isArray(route.path_names) ? route.path_names.join(" -> ") : "";
+  routeSummary.textContent = `Algorithm: ${route.algorithm || "astar"} | Cost: ${route.distance ?? "n/a"}${pathLabel ? ` | Path: ${pathLabel}` : ""}`;
+}
+
+async function computeRoute() {
+  const fromId = String(routeFrom?.value || "").trim();
+  const toId = String(routeTo?.value || "").trim();
+  const fromLabel = String(routeFrom?.selectedOptions?.[0]?.textContent || "").trim();
+  const toLabel = String(routeTo?.selectedOptions?.[0]?.textContent || "").trim();
+  const algorithm = String(routeAlgorithm?.value || "astar").trim().toLowerCase();
+  if (!fromId || !toId) {
+    routeSummary.textContent = "Please fill in both From and To.";
+    return;
+  }
+
+  routeSummary.textContent = "Computing route...";
+  try {
+    const response = await fetch("/api/route", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ from_id: fromId, to_id: toId, from_label: fromLabel, to_label: toLabel, algorithm }),
+    });
+    const data = await response.json();
+    if (!response.ok || data.status !== "success") {
+      hasDrawableRoute = false;
+      if (routeMapToggle) routeMapToggle.disabled = false;
+      drawMapPlaceholder("No map preview available.");
+      setMapVisibility(false);
+      routeSummary.textContent = data.message || "Route request failed.";
+      if (routeSvg) routeSvg.innerHTML = "";
+      return;
+    }
+    const route = data.route || {};
+    drawRoute(route);
+    const botReply = String(data.reply || "").trim() || (route.directions_text ? `🧭 Route guidance:\n${route.directions_text}` : "Route is ready.");
+    appendBotMessage(botReply, true);
+    routeSummary.textContent = `Route ready. Follow the guidance in chat. Algorithm: ${route.algorithm || "astar"}.`;
+  } catch (error) {
+    console.error("Route error:", error);
+    hasDrawableRoute = false;
+    if (routeMapToggle) routeMapToggle.disabled = false;
+    drawMapPlaceholder("Unable to fetch map preview.");
+    setMapVisibility(false);
+    routeSummary.textContent = "Failed to connect to route service.";
+    if (routeSvg) routeSvg.innerHTML = "";
+  }
+}
+
+async function loadRouteOptions() {
+  if (!routeFrom || !routeTo) return;
+
+  try {
+    const response = await fetch("/api/route/options");
+    const data = await response.json();
+    if (!response.ok || data.status !== "success") {
+      routeSummary.textContent = "Could not load route choices.";
+      return;
+    }
+
+    const options = Array.isArray(data.options) ? data.options : [];
+    routeOptionsCache = options;
+
+    const renderGroupedOptions = (items) => {
+      const groups = {
+        cict_indoor: [],
+        campus_place: [],
+      };
+      items.forEach((opt) => {
+        const t = String(opt.place_type || "");
+        if (groups[t]) {
+          groups[t].push(opt);
+        }
+      });
+
+      const makeOptions = (arr) => arr
+        .map((opt) => {
+          const id = String(opt.id || "");
+          const label = String(opt.label || opt.name || id);
+          return `<option value="${escapeHtml(id)}">${escapeHtml(label)}</option>`;
+        })
+        .join("");
+
+      let html = "";
+      if (groups.cict_indoor.length) {
+        html += `<optgroup label="CICT Indoor (Rooms/Labs/Stairs)">${makeOptions(groups.cict_indoor)}</optgroup>`;
+      }
+      if (groups.campus_place.length) {
+        html += `<optgroup label="Campus Places (Buildings/Gates/Areas)">${makeOptions(groups.campus_place)}</optgroup>`;
+      }
+      return html;
+    };
+
+    const grouped = renderGroupedOptions(options);
+    routeFrom.innerHTML = `<option value="">From...</option>${grouped}`;
+    routeTo.innerHTML = `<option value="">To...</option>${grouped}`;
+    routeSummary.textContent = `Loaded ${options.length} route points. Select From and To.`;
+  } catch (error) {
+    console.error("Route options error:", error);
+    routeSummary.textContent = "Failed to load route choices.";
+  }
+}
+
+function selectedOptionById(nodeId) {
+  return routeOptionsCache.find((opt) => String(opt.id) === String(nodeId));
+}
+
+function filterDestinationOptions() {
+  if (!routeFrom || !routeTo) return;
+  const fromId = String(routeFrom.value || "").trim();
+  const from = selectedOptionById(fromId);
+
+  const candidates = !from
+    ? routeOptionsCache
+    : routeOptionsCache.filter((opt) => opt.component === from.component && String(opt.id) !== fromId);
+
+  const currentTo = String(routeTo.value || "").trim();
+  const groups = {
+    cict_indoor: [],
+    campus_place: [],
+  };
+  candidates.forEach((opt) => {
+    const t = String(opt.place_type || "");
+    if (groups[t]) groups[t].push(opt);
+  });
+
+  const makeOptions = (arr) => arr
+    .map((opt) => {
+      const id = String(opt.id || "");
+      const label = String(opt.label || opt.name || id);
+      return `<option value="${escapeHtml(id)}">${escapeHtml(label)}</option>`;
+    })
+    .join("");
+
+  let groupedHtml = "";
+  if (groups.cict_indoor.length) {
+    groupedHtml += `<optgroup label="CICT Indoor (Rooms/Labs/Stairs)">${makeOptions(groups.cict_indoor)}</optgroup>`;
+  }
+  if (groups.campus_place.length) {
+    groupedHtml += `<optgroup label="Campus Places (Buildings/Gates/Areas)">${makeOptions(groups.campus_place)}</optgroup>`;
+  }
+
+  routeTo.innerHTML = `<option value="">To...</option>${groupedHtml}`;
+  if (currentTo && candidates.some((opt) => String(opt.id) === currentTo)) {
+    routeTo.value = currentTo;
+  }
+
+  if (from) {
+    routeSummary.textContent = `Showing ${candidates.length} reachable destinations from ${from.name}.`;
+  }
 }
 
 // ---- Main Send Message ----
@@ -159,30 +448,7 @@ async function sendMessage() {
     hideTypingIndicator(typingIndicator);
 
     const botReply = data.reply || "⚠️ No response received.";
-    const botMsg = document.createElement("div");
-    botMsg.classList.add("chat-message", "bot-message");
-    botMsg.innerHTML = `
-      <img src="images/CICTify_ChatLogo.png" alt="Bot Avatar">
-      <div class="text"></div>
-    `;
-    botMsg.querySelector(".text").innerHTML = renderRichText(botReply);
-
-    // 🔊 Listen button
-    const listenBtn = document.createElement("button");
-    listenBtn.textContent = "🔊 Listen";
-    listenBtn.className = "tts-btn";
-    listenBtn.style.marginTop = "5px";
-    listenBtn.onclick = () => {
-      const utterance = new SpeechSynthesisUtterance(botReply);
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      window.speechSynthesis.speak(utterance);
-    };
-    botMsg.appendChild(listenBtn);
-
-    chatLog.appendChild(botMsg);
-    chatLog.scrollTop = chatLog.scrollHeight;
+    appendBotMessage(botReply, true);
   } catch (error) {
     hideTypingIndicator(typingIndicator);
     const botMsg = document.createElement("div");
@@ -310,3 +576,28 @@ expandBtn.addEventListener("click", () => {
   chatbox.classList.toggle("expanded");
   expandBtn.innerHTML = chatbox.classList.contains("expanded") ? "🗗" : "⛶";
 });
+
+if (routeBtn) {
+  routeBtn.addEventListener("click", computeRoute);
+}
+
+if (routeFeatureBtn && routePanel) {
+  routeFeatureBtn.addEventListener("click", () => {
+    routePanel.classList.toggle("hidden");
+    routeFeatureBtn.textContent = routePanel.classList.contains("hidden") ? "🧭" : "🗺️";
+  });
+}
+
+if (routeFrom) {
+  routeFrom.addEventListener("change", filterDestinationOptions);
+}
+
+if (routeMapToggle) {
+  routeMapToggle.addEventListener("click", () => {
+    const isHidden = routeCanvasWrap?.classList.contains("hidden");
+    if (isHidden && !hasDrawableRoute) {
+      drawMapPlaceholder("Route is text-only. Coordinates are missing for drawing.");
+    }
+    setMapVisibility(Boolean(isHidden));
+  });
+}

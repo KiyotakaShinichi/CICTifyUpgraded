@@ -19939,9 +19939,9 @@
     }
   ],
   "report": {
-    "source_total": 7,
+    "source_total": 8,
     "source_kept": 7,
-    "source_dropped": 0,
+    "source_dropped": 1,
     "chunk_total": 2208,
     "chunk_size": 1500,
     "chunk_overlap": 400,

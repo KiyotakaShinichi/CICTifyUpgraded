@@ -1,8 +1,8 @@
 # KB Curation Report
 
-- Source PDFs scanned: 7
+- Source PDFs scanned: 8
 - Sources kept: 7
-- Sources dropped: 0
+- Sources dropped: 1
 - Final chunks: 2208
 - Chunk size: 1500
 - Chunk overlap: 400

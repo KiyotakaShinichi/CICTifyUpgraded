@@ -23,6 +23,7 @@
         <span id="header-title">CICTify</span>
       </div>
       <div id="header-actions">
+        <button id="route-feature-btn" title="Route Planner">🧭</button>
         <button id="expand-btn">⛶</button>
         <button id="close-btn" onclick="toggleChat()">✖</button>
       </div>
@@ -38,6 +39,30 @@
       <button id="send-btn" title="Send">
         <img src="images/sendIcon.png" alt="Send">
       </button>
+    </div>
+
+    <div id="route-panel" class="hidden">
+      <div id="route-panel-title">
+        <span>Route Planner</span>
+        <button id="route-map-toggle" title="Show or hide map">Show map</button>
+      </div>
+      <div class="route-controls">
+        <select id="route-from">
+          <option value="">From...</option>
+        </select>
+        <select id="route-to">
+          <option value="">To...</option>
+        </select>
+        <select id="route-algorithm">
+          <option value="astar">A*</option>
+          <option value="dijkstra">Dijkstra</option>
+        </select>
+        <button id="route-btn" title="Compute Route">Show Route</button>
+      </div>
+      <div id="route-summary"></div>
+      <div id="route-canvas-wrap" class="hidden">
+        <svg id="route-svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
     </div>
   </div>
 

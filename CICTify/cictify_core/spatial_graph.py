@@ -9,16 +9,197 @@ from typing import Dict, List, Optional, Tuple
 from .config import CURATED_CORPUS_PATH, FLOORPLAN_CONTEXT_PATH, SPATIAL_GRAPH_PATH
 
 
+CICT_PRIMARY_BUILDING_FLOORS = {
+    "pimentel hall": {"3f", "4f"},
+    "nstp building": {"1f"},
+}
+
+CAMPUS_PLACE_TOKENS = {
+    "gate",
+    "park",
+    "building",
+    "hall",
+    "registrar",
+    "hostel",
+    "dorm",
+    "gym",
+    "gymnasium",
+    "canteen",
+    "library",
+    "parking",
+    "court",
+    "center",
+}
+
+
 class SpatialGraphStore:
     def __init__(self) -> None:
         self._path = SPATIAL_GRAPH_PATH
         self._nodes: Dict[str, Dict] = {}
         self._edges: List[Dict] = []
         self._load()
+        touched = self._ensure_alias_hints()
+        touched = self._ensure_connectivity_hints() or touched
+        campus_boot = self._bootstrap_campus_places_from_floorplan_context()
+        touched = bool(campus_boot.get("added_nodes") or campus_boot.get("added_edges")) or touched
         if not self._nodes:
             boot = self._bootstrap_from_curated_corpus()
             if boot.get("added_nodes", 0) or boot.get("added_edges", 0):
                 self._save()
+        elif touched:
+            self._save()
+
+    @staticmethod
+    def _clean_bullet_item(line: str) -> str:
+        text = re.sub(r"^[\s*\-\u2022\u25cf\d\.)]+", "", str(line or "")).strip()
+        text = text.replace("**", "")
+        if ":" in text:
+            text = text.split(":", 1)[0].strip()
+        text = re.sub(r"\s+", " ", text).strip(" .,:;-")
+        return text
+
+    @staticmethod
+    def _looks_campus_place(name: str) -> bool:
+        low = str(name or "").strip().lower()
+        if not low:
+            return False
+        if len(low) > 80:
+            return False
+        if low in {"buildings/halls", "buildings", "wayfinding landmarks", "landmarks"}:
+            return False
+        if "evacuation" in low or "plan" in low:
+            return False
+        if any(tok in low for tok in CAMPUS_PLACE_TOKENS):
+            return True
+        return bool(re.search(r"\b(hall|building|gate|park|court|hostel|library|gym|registrar)\b", low))
+
+    def _extract_campus_places_from_ocr(self, text: str) -> List[str]:
+        items: List[str] = []
+        seen = set()
+        for raw in str(text or "").splitlines():
+            item = self._clean_bullet_item(raw)
+            if not self._looks_campus_place(item):
+                continue
+            norm = self._norm_for_match(item)
+            if not norm or norm in seen:
+                continue
+            seen.add(norm)
+            items.append(item)
+        return items
+
+    def _campus_hub_id(self) -> str:
+        return self._merge_node(
+            {
+                "id": "campus-main-hub",
+                "name": "BulSU Main Campus Hub",
+                "building": "BulSU Main Campus",
+                "floor": "Campus",
+                "kind": "campus_place",
+                "aliases": ["main campus", "campus hub", "bulsu main campus"],
+            },
+            "inferred:campus-hub",
+        )
+
+    def _building_entry_node(self, building: str) -> Optional[str]:
+        candidates = []
+        for node_id, node in self._nodes.items():
+            if str(node.get("building") or "").strip().lower() != str(building or "").strip().lower():
+                continue
+            kind = str(node.get("kind") or "").strip().lower()
+            name = str(node.get("name") or "").strip().lower()
+            floor_idx = self._floor_index(str(node.get("floor") or ""))
+            floor_rank = floor_idx if floor_idx is not None else 99
+            stair_rank = 0 if ("stairs" in kind or "stairs" in name) else 1
+            candidates.append((floor_rank, stair_rank, node_id))
+        if not candidates:
+            return None
+        candidates.sort(key=lambda item: (item[0], item[1]))
+        return candidates[0][2]
+
+    def _bootstrap_campus_places_from_floorplan_context(self) -> Dict:
+        if not FLOORPLAN_CONTEXT_PATH.exists():
+            return {"added_nodes": 0, "added_edges": 0}
+
+        try:
+            payload = json.loads(FLOORPLAN_CONTEXT_PATH.read_text(encoding="utf-8"))
+            records = payload.get("records", []) if isinstance(payload, dict) else []
+        except Exception:
+            return {"added_nodes": 0, "added_edges": 0}
+
+        before_nodes = len(self._nodes)
+        before_edges = len(self._edges)
+
+        hub_id = self._campus_hub_id()
+        campus_node_ids: List[str] = []
+
+        for rec in records:
+            if not isinstance(rec, dict):
+                continue
+            floor = str(rec.get("floor") or "").strip().lower()
+            title = str(rec.get("title") or "").strip().lower()
+            source = str(rec.get("source_file") or "")
+            is_campus_map = ("campus map" in floor) or ("evacuation map" in title)
+            if not is_campus_map:
+                continue
+
+            building = str(rec.get("building") or "BulSU Main Campus").strip() or "BulSU Main Campus"
+            for place in self._extract_campus_places_from_ocr(str(rec.get("ocr_text") or "")):
+                node_id = self._merge_node(
+                    {
+                        "name": place,
+                        "building": building,
+                        "floor": "Campus",
+                        "kind": "campus_place",
+                        "aliases": [place],
+                    },
+                    source,
+                )
+                campus_node_ids.append(node_id)
+                self._add_edge(hub_id, node_id, 2.2, source)
+
+        # Ensure important non-floor campus POIs exist even if OCR misses them.
+        for poi in ["Registrar", "Gate 1", "Gate 2", "Main Gate"]:
+            node_id = self._merge_node(
+                {
+                    "name": poi,
+                    "building": "BulSU Main Campus",
+                    "floor": "Campus",
+                    "kind": "campus_place",
+                    "aliases": [poi],
+                },
+                "inferred:campus-poi-seed",
+            )
+            campus_node_ids.append(node_id)
+            self._add_edge(hub_id, node_id, 1.8, "inferred:campus-poi-seed")
+
+        unique_campus_nodes = sorted(set(campus_node_ids))
+        for node_id in unique_campus_nodes:
+            node = self._nodes.get(node_id, {})
+            name = str(node.get("name") or "")
+            target_building = self._match_building_name(name)
+            if not target_building:
+                continue
+            entry_id = self._building_entry_node(target_building)
+            if entry_id:
+                self._add_edge(node_id, entry_id, 2.0, "inferred:campus-building-connector")
+
+        # Keep campus traversable: link hub to every known building entry.
+        connected_buildings = sorted({
+            str(node.get("building") or "").strip()
+            for node in self._nodes.values()
+            if str(node.get("building") or "").strip()
+        })
+        for building in connected_buildings:
+            if building.lower() == "bulsu main campus":
+                continue
+            entry_id = self._building_entry_node(building)
+            if entry_id:
+                self._add_edge(hub_id, entry_id, 3.0, "inferred:campus-hub-building")
+
+        return {
+            "added_nodes": len(self._nodes) - before_nodes,
+            "added_edges": len(self._edges) - before_edges,
+        }
 
     def _load(self) -> None:
         if not self._path.exists():
@@ -68,7 +249,209 @@ class SpatialGraphStore:
         if "office" in lowered:
             aliases.add(lowered.replace("office", "").strip().title())
 
+        if "dean" in lowered:
+            aliases.update({"Dean Office", "Dean's Office", "Deans Office", "Office of the Dean"})
+
+        prog_lab_match = re.search(r"\bprog\s*lab\s*(\d+)\b", lowered)
+        if prog_lab_match:
+            num = prog_lab_match.group(1)
+            aliases.update({
+                f"Programming Laboratory {num}",
+                f"Programming Lab {num}",
+                f"Prog Lab {num}",
+                f"ProgLab{num}",
+            })
+
         return sorted(a for a in aliases if a)
+
+    def _ensure_alias_hints(self) -> bool:
+        touched = False
+        for node in self._nodes.values():
+            name = str(node.get("name") or "").strip()
+            if not name:
+                continue
+            aliases = set(str(a).strip() for a in node.get("aliases", []) if str(a).strip())
+            before = set(aliases)
+            aliases.update(self._room_aliases(name))
+            if aliases != before:
+                node["aliases"] = sorted(aliases)
+                touched = True
+        return touched
+
+    def _nodes_by_pattern(self, *, building: str, floor: str, pattern: str) -> List[str]:
+        rgx = re.compile(pattern, flags=re.IGNORECASE)
+        hits: List[str] = []
+        for node_id, node in self._nodes.items():
+            if str(node.get("building") or "").strip().lower() != building.lower():
+                continue
+            if str(node.get("floor") or "").strip().lower() != floor.lower():
+                continue
+            hay = f"{node.get('name', '')} {' '.join(str(a) for a in node.get('aliases', []))}"
+            if rgx.search(hay):
+                hits.append(node_id)
+        return hits
+
+    def _ensure_connectivity_hints(self) -> bool:
+        before_edges = len(self._edges)
+
+        floor_groups: Dict[Tuple[str, str], List[str]] = defaultdict(list)
+        for node_id, node in self._nodes.items():
+            building = str(node.get("building") or "").strip()
+            floor = str(node.get("floor") or "").strip()
+            if not building or not floor:
+                continue
+            floor_groups[(building, floor)].append(node_id)
+
+        for (building, floor), node_ids in floor_groups.items():
+            stair_ids = [
+                n
+                for n in node_ids
+                if "stairs" in str(self._nodes.get(n, {}).get("kind") or "").lower()
+                or "stairs" in str(self._nodes.get(n, {}).get("name") or "").lower()
+            ]
+            for i in range(len(stair_ids)):
+                for j in range(i + 1, len(stair_ids)):
+                    self._add_edge(stair_ids[i], stair_ids[j], 1.8, f"inferred:{building}:{floor}:stairs")
+
+            dean_nodes = self._nodes_by_pattern(building=building, floor=floor, pattern=r"\bdean")
+            ojt_nodes = self._nodes_by_pattern(building=building, floor=floor, pattern=r"\bojt\b|department\s+heads")
+            faculty_nodes = self._nodes_by_pattern(building=building, floor=floor, pattern=r"faculty\s+room")
+            it1_nodes = self._nodes_by_pattern(building=building, floor=floor, pattern=r"\bit\s*1\b")
+
+            for dean in dean_nodes:
+                for ojt in ojt_nodes:
+                    if dean != ojt:
+                        self._add_edge(dean, ojt, 1.0, f"inferred:{building}:{floor}:dean-ojt")
+
+            for i in range(len(ojt_nodes)):
+                for j in range(i + 1, len(ojt_nodes)):
+                    self._add_edge(ojt_nodes[i], ojt_nodes[j], 1.0, f"inferred:{building}:{floor}:ojt-merge")
+
+            for ojt in ojt_nodes:
+                for fac in faculty_nodes:
+                    if ojt != fac:
+                        self._add_edge(ojt, fac, 1.0, f"inferred:{building}:{floor}:ojt-faculty")
+
+            for fac in faculty_nodes:
+                for it1 in it1_nodes:
+                    if fac != it1:
+                        self._add_edge(fac, it1, 1.2, f"inferred:{building}:{floor}:faculty-it1")
+
+        self._ensure_stair_chains()
+
+        return len(self._edges) > before_edges
+
+    def _ensure_stair_chains(self) -> None:
+        stair_groups: Dict[Tuple[str, str], List[str]] = defaultdict(list)
+        for node_id, node in self._nodes.items():
+            kind = str(node.get("kind") or "").strip().lower()
+            name = str(node.get("name") or "").strip()
+            if "stairs" not in kind and "stairs" not in name.lower():
+                continue
+            building = str(node.get("building") or "").strip()
+            floor = str(node.get("floor") or "").strip()
+            if not building or not floor:
+                continue
+            stair_kind = "main"
+            low = name.lower()
+            if "central" in low:
+                stair_kind = "central"
+            elif "rear" in low:
+                stair_kind = "rear"
+            stair_groups[(building, stair_kind)].append(node_id)
+
+        for (building, stair_kind), ids in stair_groups.items():
+            floors_present = {}
+            for node_id in ids:
+                floor = str(self._nodes.get(node_id, {}).get("floor") or "")
+                idx = self._floor_index(floor)
+                if idx is None:
+                    continue
+                floors_present[idx] = node_id
+
+            if len(floors_present) < 2:
+                continue
+
+            min_floor = min(floors_present.keys())
+            max_floor = max(floors_present.keys())
+            for level in range(min_floor, max_floor + 1):
+                if level not in floors_present:
+                    floor_label = f"{level}F"
+                    stairs_name = f"{building} {floor_label} {stair_kind.title()} Stairs"
+                    node_id = self._merge_node(
+                        {
+                            "name": stairs_name,
+                            "building": building,
+                            "floor": floor_label,
+                            "kind": "stairs",
+                            "aliases": [f"{stair_kind} stairs", f"{building} stairs", "stairs"],
+                        },
+                        f"inferred:{building}:{stair_kind}:virtual-floor",
+                    )
+                    floors_present[level] = node_id
+
+            ordered = sorted(floors_present.items(), key=lambda kv: kv[0])
+            for idx in range(len(ordered) - 1):
+                floor_a, node_a = ordered[idx]
+                floor_b, node_b = ordered[idx + 1]
+                if floor_b - floor_a == 1:
+                    self._add_edge(node_a, node_b, 1.8, f"inferred:{building}:{stair_kind}:chain")
+
+    def _edge_allowed(self, frm: str, to: str) -> bool:
+        a = self._nodes.get(frm, {})
+        b = self._nodes.get(to, {})
+        a_name = str(a.get("name") or "").lower()
+        b_name = str(b.get("name") or "").lower()
+        a_kind = str(a.get("kind") or "").lower()
+        b_kind = str(b.get("kind") or "").lower()
+        a_is_stairs = "stairs" in a_kind or "stairs" in a_name
+        b_is_stairs = "stairs" in b_kind or "stairs" in b_name
+        if a_is_stairs and b_is_stairs:
+            a_build = str(a.get("building") or "").strip().lower()
+            b_build = str(b.get("building") or "").strip().lower()
+            if a_build == b_build:
+                af = self._floor_index(str(a.get("floor") or ""))
+                bf = self._floor_index(str(b.get("floor") or ""))
+                if af is not None and bf is not None and abs(af - bf) > 1:
+                    return False
+        return True
+
+    def _is_cict_indoor_node(self, node: Dict) -> bool:
+        building = str(node.get("building") or "").strip().lower()
+        floor = str(node.get("floor") or "").strip().lower()
+        kind = str(node.get("kind") or "").strip().lower()
+        name = str(node.get("name") or "").strip().lower()
+
+        if "stairs" in kind or "stairs" in name:
+            # Keep stairs only on CICT-authorized floors for each building.
+            allowed = CICT_PRIMARY_BUILDING_FLOORS.get(building)
+            if allowed is None:
+                return False
+            return floor in allowed
+
+        if kind in {"room", "lab", "office"} or any(tok in name for tok in ["lab", "office", "room", "sdl", "acad", "it", "prog"]):
+            allowed = CICT_PRIMARY_BUILDING_FLOORS.get(building)
+            if allowed is None:
+                return False
+            return floor in allowed
+
+        return False
+
+    def _is_campus_place_node(self, node: Dict) -> bool:
+        name = str(node.get("name") or "").strip().lower()
+        kind = str(node.get("kind") or "").strip().lower()
+        if kind in {"campus_place", "building", "landmark", "gate"}:
+            return True
+        if kind in {"room", "lab", "office", "stairs"}:
+            return False
+        return any(tok in name for tok in CAMPUS_PLACE_TOKENS)
+
+    def _place_type(self, node: Dict) -> str:
+        if self._is_cict_indoor_node(node):
+            return "cict_indoor"
+        if self._is_campus_place_node(node):
+            return "campus_place"
+        return "other"
 
     @staticmethod
     def _as_bool(value) -> bool:
@@ -666,6 +1049,8 @@ class SpatialGraphStore:
                 continue
 
             for nxt, weight in adjacency.get(cur, []):
+                if not self._edge_allowed(cur, nxt):
+                    continue
                 candidate = cur_dist + weight
                 if candidate < dist.get(nxt, math.inf):
                     dist[nxt] = candidate
@@ -687,6 +1072,247 @@ class SpatialGraphStore:
             "path_ids": path_ids,
             "path_names": [self._nodes[n].get("name", n) for n in path_ids],
         }
+
+    @staticmethod
+    def _as_float(value) -> Optional[float]:
+        try:
+            return float(value)
+        except Exception:
+            return None
+
+    def _node_xy(self, node_id: str) -> Optional[Tuple[float, float]]:
+        node = self._nodes.get(node_id, {})
+        x = self._as_float(node.get("x"))
+        y = self._as_float(node.get("y"))
+        if x is None or y is None:
+            return None
+        return (x, y)
+
+    def _heuristic(self, node_id: str, goal_id: str) -> float:
+        a = self._node_xy(node_id)
+        b = self._node_xy(goal_id)
+        if not a or not b:
+            return 0.0
+
+        node_a = self._nodes.get(node_id, {})
+        node_b = self._nodes.get(goal_id, {})
+        same_building = str(node_a.get("building") or "").strip().lower() == str(node_b.get("building") or "").strip().lower()
+        same_floor = str(node_a.get("floor") or "").strip().lower() == str(node_b.get("floor") or "").strip().lower()
+        if not (same_building and same_floor):
+            return 0.0
+
+        return math.hypot(a[0] - b[0], a[1] - b[1])
+
+    def shortest_path_astar(self, start_id: str, goal_id: str) -> Optional[Dict]:
+        if start_id not in self._nodes or goal_id not in self._nodes:
+            return None
+        if start_id == goal_id:
+            node = self._nodes[start_id]
+            return {
+                "distance": 0.0,
+                "path_ids": [start_id],
+                "path_names": [node.get("name", start_id)],
+            }
+
+        adjacency = self._adjacency()
+        g_score = {start_id: 0.0}
+        prev: Dict[str, Optional[str]] = {start_id: None}
+        heap: List[Tuple[float, str]] = [(self._heuristic(start_id, goal_id), start_id)]
+
+        while heap:
+            _, cur = heappop(heap)
+            if cur == goal_id:
+                break
+
+            cur_g = g_score.get(cur, math.inf)
+            if cur_g == math.inf:
+                continue
+
+            for nxt, weight in adjacency.get(cur, []):
+                if not self._edge_allowed(cur, nxt):
+                    continue
+                candidate_g = cur_g + weight
+                if candidate_g < g_score.get(nxt, math.inf):
+                    g_score[nxt] = candidate_g
+                    prev[nxt] = cur
+                    f_score = candidate_g + self._heuristic(nxt, goal_id)
+                    heappush(heap, (f_score, nxt))
+
+        if goal_id not in g_score:
+            return None
+
+        path_ids = []
+        cursor = goal_id
+        while cursor is not None:
+            path_ids.append(cursor)
+            cursor = prev.get(cursor)
+        path_ids.reverse()
+
+        return {
+            "distance": round(g_score[goal_id], 2),
+            "path_ids": path_ids,
+            "path_names": [self._nodes[n].get("name", n) for n in path_ids],
+        }
+
+    def compute_route(self, start_hint: str, target_hint: str, *, algorithm: str = "astar") -> Optional[Dict]:
+        start_id = self._match_node_id(start_hint)
+        target_id = self._match_node_id(target_hint)
+        if not start_id or not target_id:
+            return None
+
+        return self.compute_route_by_ids(start_id, target_id, algorithm=algorithm)
+
+    def compute_route_by_ids(self, start_id: str, target_id: str, *, algorithm: str = "astar") -> Optional[Dict]:
+        if start_id not in self._nodes or target_id not in self._nodes:
+            return None
+
+        algo = (algorithm or "astar").strip().lower()
+        if algo == "dijkstra":
+            route = self.shortest_path(start_id, target_id)
+            algorithm_used = "dijkstra"
+        else:
+            route = self.shortest_path_astar(start_id, target_id)
+            algorithm_used = "astar"
+
+        if not route:
+            return None
+
+        return self._build_route_payload(start_id, target_id, route, algorithm_used)
+
+    def _build_route_payload(self, start_id: str, target_id: str, route: Dict, algorithm_used: str) -> Dict:
+        points = []
+        for node_id in route.get("path_ids", []):
+            xy = self._node_xy(node_id)
+            node = self._nodes.get(node_id, {})
+            points.append(
+                {
+                    "id": node_id,
+                    "name": node.get("name", node_id),
+                    "x": xy[0] if xy else None,
+                    "y": xy[1] if xy else None,
+                    "building": node.get("building", "Unknown Building"),
+                    "floor": node.get("floor", "Unknown Floor"),
+                }
+            )
+
+        directions = self._directions_from_points(points)
+
+        start_node = self._nodes.get(start_id, {})
+        target_node = self._nodes.get(target_id, {})
+        return {
+            "algorithm": algorithm_used,
+            "distance": route.get("distance", 0.0),
+            "path_ids": route.get("path_ids", []),
+            "path_names": route.get("path_names", []),
+            "points": points,
+            "directions": directions,
+            "directions_text": "\n".join(f"{idx}. {step}" for idx, step in enumerate(directions, start=1)),
+            "start": {
+                "id": start_id,
+                "name": start_node.get("name", start_id),
+                "building": start_node.get("building", "Unknown Building"),
+                "floor": start_node.get("floor", "Unknown Floor"),
+            },
+            "target": {
+                "id": target_id,
+                "name": target_node.get("name", target_id),
+                "building": target_node.get("building", "Unknown Building"),
+                "floor": target_node.get("floor", "Unknown Floor"),
+            },
+        }
+
+    @staticmethod
+    def _directions_from_points(points: List[Dict]) -> List[str]:
+        if not points:
+            return []
+
+        directions: List[str] = []
+        first = points[0]
+        directions.append(
+            f"Start at {first.get('name', 'the start point')} "
+            f"({first.get('building', 'Unknown Building')}, {first.get('floor', 'Unknown Floor')})."
+        )
+
+        for idx in range(1, len(points)):
+            prev = points[idx - 1]
+            cur = points[idx]
+            prev_building = str(prev.get("building") or "Unknown Building")
+            cur_building = str(cur.get("building") or "Unknown Building")
+            prev_floor = str(prev.get("floor") or "Unknown Floor")
+            cur_floor = str(cur.get("floor") or "Unknown Floor")
+            cur_name = str(cur.get("name") or "the next point")
+
+            if prev_building != cur_building:
+                directions.append(
+                    f"Move from {prev_building} to {cur_building}, then proceed to {cur_name}."
+                )
+            elif prev_floor != cur_floor:
+                directions.append(
+                    f"Change floor from {prev_floor} to {cur_floor}, then proceed to {cur_name}."
+                )
+            else:
+                directions.append(f"Proceed to {cur_name}.")
+
+        if len(points) > 1:
+            directions.append(f"You have arrived at {points[-1].get('name', 'your destination')}.")
+
+        return directions
+
+    def route_options(self) -> List[Dict]:
+        adjacency = self._adjacency()
+
+        component_of: Dict[str, int] = {}
+        comp_idx = 0
+        for node_id in self._nodes.keys():
+            if node_id in component_of:
+                continue
+            stack = [node_id]
+            while stack:
+                cur = stack.pop()
+                if cur in component_of:
+                    continue
+                component_of[cur] = comp_idx
+                for nxt, _ in adjacency.get(cur, []):
+                    if nxt not in component_of:
+                        stack.append(nxt)
+            comp_idx += 1
+
+        options = []
+        seen = set()
+        for node_id, node in self._nodes.items():
+            raw_name = str(node.get("name") or "").strip()
+            name = self._clean_bullet_item(raw_name)
+            if not name:
+                continue
+            if len(name) > 70:
+                continue
+
+            place_type = self._place_type(node)
+            if place_type not in {"cict_indoor", "campus_place"}:
+                continue
+
+            key = (name.lower(), str(node.get("building") or "").lower(), str(node.get("floor") or "").lower())
+            if key in seen:
+                continue
+            seen.add(key)
+            building = str(node.get("building") or "Unknown Building").strip()
+            floor = str(node.get("floor") or "Unknown Floor").strip()
+            xy = self._node_xy(node_id)
+            options.append(
+                {
+                    "id": node_id,
+                    "name": name,
+                    "building": building,
+                    "floor": floor,
+                    "place_type": place_type,
+                    "component": component_of.get(node_id, -1),
+                    "has_coordinates": bool(xy),
+                    "label": f"[{ 'Campus' if place_type == 'campus_place' else 'CICT' }] {name} ({building}, {floor})",
+                }
+            )
+
+        options.sort(key=lambda item: (item["building"], item["floor"], item["name"]))
+        return options
 
     def answer_navigation_query(self, question: str) -> Optional[str]:
         q = (question or "").lower()
