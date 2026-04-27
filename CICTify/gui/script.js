@@ -12,7 +12,11 @@ const routeAlgorithm = document.getElementById("route-algorithm");
 const routeSummary = document.getElementById("route-summary");
 const routeMapToggle = document.getElementById("route-map-toggle");
 const routeCanvasWrap = document.getElementById("route-canvas-wrap");
+const routePlanBg = document.getElementById("route-plan-bg");
 const routeSvg = document.getElementById("route-svg");
+
+const ROUTE_VIEW_WIDTH = 1000;
+const ROUTE_VIEW_HEIGHT = 700;
 
 let abortController = null;
 let recognizing = false;
@@ -165,8 +169,66 @@ function setMapVisibility(visible) {
   routeMapToggle.textContent = visible ? "Hide map" : "Show map";
 }
 
+function inferPlanBackground(route) {
+  const explicit = String(route?.plan_background_url || "").trim();
+  if (explicit) return explicit;
+  const points = Array.isArray(route?.points) ? route.points : [];
+  const buildings = points
+    .map((p) => String(p?.building || "").toLowerCase())
+    .filter(Boolean);
+
+  const floors = points.map((p) => String(p?.floor || "").toLowerCase()).filter(Boolean);
+  const hasCampus = buildings.some((b) => b.includes("main campus") || b.includes("bulsu"))
+    || floors.some((f) => f.includes("campus"));
+  const hasCict = buildings.some((b) => b.includes("pimentel") || b.includes("nstp") || b.includes("cict"));
+
+  if (hasCampus) return "/plan_assets/bulsu-main-campus-campus.png";
+  // Indoor building routes should not be forced to the campus image.
+  if (hasCict) return "";
+  return "";
+}
+
+function setPlanBackground(route) {
+  if (!routePlanBg) return;
+  const src = inferPlanBackground(route);
+  if (!src) {
+    routePlanBg.classList.add("hidden");
+    routePlanBg.removeAttribute("src");
+    return;
+  }
+  routePlanBg.src = src;
+  routePlanBg.classList.remove("hidden");
+}
+
+function drawSvgBackground(route) {
+  if (!routeSvg) return;
+  const src = inferPlanBackground(route);
+  if (!src) return;
+  routeSvg.setAttribute("viewBox", `0 0 ${ROUTE_VIEW_WIDTH} ${ROUTE_VIEW_HEIGHT}`);
+  routeSvg.setAttribute("preserveAspectRatio", "none");
+
+  const bg = document.createElementNS("http://www.w3.org/2000/svg", "image");
+  bg.setAttribute("href", src);
+  bg.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", src);
+  bg.setAttribute("x", "0");
+  bg.setAttribute("y", "0");
+  bg.setAttribute("width", String(ROUTE_VIEW_WIDTH));
+  bg.setAttribute("height", String(ROUTE_VIEW_HEIGHT));
+  bg.setAttribute("preserveAspectRatio", "none");
+  bg.setAttribute("opacity", "0.92");
+  bg.style.imageRendering = "auto";
+  routeSvg.appendChild(bg);
+}
+
+function clearPlanBackground() {
+  if (!routePlanBg) return;
+  routePlanBg.classList.add("hidden");
+  routePlanBg.removeAttribute("src");
+}
+
 function drawMapPlaceholder(message) {
   if (!routeSvg) return;
+  clearPlanBackground();
   routeSvg.innerHTML = "";
   const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
   text.setAttribute("x", "50%");
@@ -179,9 +241,108 @@ function drawMapPlaceholder(message) {
   routeSvg.appendChild(text);
 }
 
+function drawSchematicRoute(points, route = null) {
+  if (!routeSvg) return;
+  routeSvg.setAttribute("viewBox", `0 0 ${ROUTE_VIEW_WIDTH} ${ROUTE_VIEW_HEIGHT}`);
+  routeSvg.setAttribute("preserveAspectRatio", "none");
+  routeSvg.innerHTML = "";
+  if (route) {
+    drawSvgBackground(route);
+  }
+
+  const width = ROUTE_VIEW_WIDTH;
+  const height = ROUTE_VIEW_HEIGHT;
+  const padding = 70;
+  const count = Math.max(1, points.length);
+  const stepX = count > 1 ? (width - padding * 2) / (count - 1) : 0;
+
+  const mapped = points.map((p, idx) => ({
+    ...p,
+    sx: padding + stepX * idx,
+    sy: height / 2 + ((idx % 2 === 0) ? -40 : 40),
+  }));
+
+  const poly = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+  poly.setAttribute("fill", "none");
+  poly.setAttribute("stroke", "#f6921e");
+  poly.setAttribute("stroke-width", "6");
+  poly.setAttribute("stroke-linecap", "round");
+  poly.setAttribute("stroke-linejoin", "round");
+  poly.setAttribute("points", mapped.map((p) => `${p.sx},${p.sy}`).join(" "));
+  routeSvg.appendChild(poly);
+
+  animateRoutePolyline(poly);
+  animateMovingDot(poly);
+
+  mapped.forEach((p, idx) => {
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx", String(p.sx));
+    dot.setAttribute("cy", String(p.sy));
+    dot.setAttribute("r", idx === 0 || idx === mapped.length - 1 ? "8" : "5");
+    dot.setAttribute("fill", idx === 0 ? "#2a9d8f" : idx === mapped.length - 1 ? "#e63946" : "#264653");
+    routeSvg.appendChild(dot);
+
+    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.setAttribute("x", String(p.sx + 10));
+    label.setAttribute("y", String(p.sy - 10));
+    label.setAttribute("font-size", "13");
+    label.setAttribute("fill", "#1f2937");
+    label.textContent = String(p.name || p.id || "Node");
+    routeSvg.appendChild(label);
+  });
+}
+
+function animateRoutePolyline(polyline) {
+  if (!polyline || typeof polyline.getTotalLength !== "function") return;
+  const total = polyline.getTotalLength();
+  if (!Number.isFinite(total) || total <= 0) return;
+
+  polyline.style.strokeDasharray = `${total}`;
+  polyline.style.strokeDashoffset = `${total}`;
+  polyline.style.transition = "stroke-dashoffset 1.1s ease-out";
+
+  requestAnimationFrame(() => {
+    polyline.style.strokeDashoffset = "0";
+  });
+}
+
+function animateMovingDot(polyline) {
+  if (!routeSvg || !polyline || typeof polyline.getTotalLength !== "function") return;
+  const total = polyline.getTotalLength();
+  if (!Number.isFinite(total) || total <= 0) return;
+
+  const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  dot.setAttribute("r", "6");
+  dot.setAttribute("fill", "#2563eb");
+  dot.setAttribute("stroke", "#ffffff");
+  dot.setAttribute("stroke-width", "2");
+  routeSvg.appendChild(dot);
+
+  const durationMs = 1800;
+  let startedAt = null;
+
+  const tick = (ts) => {
+    if (startedAt === null) startedAt = ts;
+    const elapsed = ts - startedAt;
+    const progress = Math.min(1, elapsed / durationMs);
+    const point = polyline.getPointAtLength(total * progress);
+    dot.setAttribute("cx", String(point.x));
+    dot.setAttribute("cy", String(point.y));
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    }
+  };
+
+  requestAnimationFrame(tick);
+}
+
 function drawRoute(route) {
   if (!routeSvg) return;
+  routeSvg.setAttribute("viewBox", `0 0 ${ROUTE_VIEW_WIDTH} ${ROUTE_VIEW_HEIGHT}`);
+  routeSvg.setAttribute("preserveAspectRatio", "none");
   routeSvg.innerHTML = "";
+  clearPlanBackground();
+  drawSvgBackground(route);
 
   const points = Array.isArray(route?.points) ? route.points : [];
   if (!points.length) {
@@ -189,17 +350,18 @@ function drawRoute(route) {
     setMapVisibility(false);
     if (routeMapToggle) routeMapToggle.disabled = false;
     routeSummary.textContent = "No drawable route points available.";
+    clearPlanBackground();
     return;
   }
 
   const usable = points.filter((p) => Number.isFinite(p?.x) && Number.isFinite(p?.y));
-  if (!usable.length) {
-    hasDrawableRoute = false;
-    setMapVisibility(false);
+  if (!usable.length || usable.length !== points.length) {
+    hasDrawableRoute = true;
+    setMapVisibility(true);
     if (routeMapToggle) routeMapToggle.disabled = false;
-    drawMapPlaceholder("Coordinates are missing for map drawing.");
+    drawSchematicRoute(points, route);
     const pathLabel = Array.isArray(route.path_names) ? route.path_names.join(" -> ") : "";
-    routeSummary.textContent = `Route found (text-only). Coordinates are missing for drawing.${pathLabel ? ` Path: ${pathLabel}` : ""}`;
+    routeSummary.textContent = `Route ready. Showing live schematic map for the full path.${pathLabel ? ` Path: ${pathLabel}` : ""}`;
     return;
   }
 
@@ -209,14 +371,15 @@ function drawRoute(route) {
 
   const xs = usable.map((p) => Number(p.x));
   const ys = usable.map((p) => Number(p.y));
-  const minX = Math.min(...xs);
-  const maxX = Math.max(...xs);
-  const minY = Math.min(...ys);
-  const maxY = Math.max(...ys);
+  const bounds = route?.coordinate_bounds || {};
+  const minX = Number.isFinite(Number(bounds.min_x)) ? Number(bounds.min_x) : Math.min(...xs);
+  const maxX = Number.isFinite(Number(bounds.max_x)) ? Number(bounds.max_x) : Math.max(...xs);
+  const minY = Number.isFinite(Number(bounds.min_y)) ? Number(bounds.min_y) : Math.min(...ys);
+  const maxY = Number.isFinite(Number(bounds.max_y)) ? Number(bounds.max_y) : Math.max(...ys);
 
   const padding = 40;
-  const width = 1000;
-  const height = 700;
+  const width = ROUTE_VIEW_WIDTH;
+  const height = ROUTE_VIEW_HEIGHT;
   const spanX = Math.max(1, maxX - minX);
   const spanY = Math.max(1, maxY - minY);
 
@@ -234,6 +397,9 @@ function drawRoute(route) {
   poly.setAttribute("stroke-linejoin", "round");
   poly.setAttribute("points", mapped.map((p) => `${p.sx},${p.sy}`).join(" "));
   routeSvg.appendChild(poly);
+
+  animateRoutePolyline(poly);
+  animateMovingDot(poly);
 
   mapped.forEach((p, idx) => {
     const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -281,10 +447,13 @@ async function computeRoute() {
       drawMapPlaceholder("No map preview available.");
       setMapVisibility(false);
       routeSummary.textContent = data.message || "Route request failed.";
-      if (routeSvg) routeSvg.innerHTML = "";
+      appendBotMessage(`I couldn't compute a route yet. ${data.message || "Route request failed."}`, false);
       return;
     }
     const route = data.route || {};
+    if (data.plan_background_url) {
+      route.plan_background_url = String(data.plan_background_url);
+    }
     drawRoute(route);
     const botReply = String(data.reply || "").trim() || (route.directions_text ? `🧭 Route guidance:\n${route.directions_text}` : "Route is ready.");
     appendBotMessage(botReply, true);
@@ -296,7 +465,7 @@ async function computeRoute() {
     drawMapPlaceholder("Unable to fetch map preview.");
     setMapVisibility(false);
     routeSummary.textContent = "Failed to connect to route service.";
-    if (routeSvg) routeSvg.innerHTML = "";
+    appendBotMessage("I couldn't reach the route service right now. Please try again.", false);
   }
 }
 
@@ -365,7 +534,12 @@ function filterDestinationOptions() {
 
   const candidates = !from
     ? routeOptionsCache
-    : routeOptionsCache.filter((opt) => opt.component === from.component && String(opt.id) !== fromId);
+    : routeOptionsCache.filter(
+        (opt) =>
+          opt.component === from.component &&
+          String(opt.id) !== fromId &&
+          String(opt.place_type || "") === String(from.place_type || "")
+      );
 
   const currentTo = String(routeTo.value || "").trim();
   const groups = {
@@ -399,7 +573,8 @@ function filterDestinationOptions() {
   }
 
   if (from) {
-    routeSummary.textContent = `Showing ${candidates.length} reachable destinations from ${from.name}.`;
+    const domainLabel = String(from.place_type || "") === "cict_indoor" ? "CICT-only" : "Campus-only";
+    routeSummary.textContent = `Showing ${candidates.length} ${domainLabel} destinations from ${from.name}.`;
   }
 }
 
@@ -596,7 +771,7 @@ if (routeMapToggle) {
   routeMapToggle.addEventListener("click", () => {
     const isHidden = routeCanvasWrap?.classList.contains("hidden");
     if (isHidden && !hasDrawableRoute) {
-      drawMapPlaceholder("Route is text-only. Coordinates are missing for drawing.");
+      drawMapPlaceholder("Compute a route first to show the map preview.");
     }
     setMapVisibility(Boolean(isHidden));
   });

@@ -61,6 +61,7 @@ body {
   flex-direction: column;
   box-shadow: 0 6px 16px rgba(0,0,0,0.4);
   overflow: hidden;
+  overflow-x: hidden;
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.3s, transform 0.3s;
@@ -80,14 +81,15 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 85vw;
-  max-width: 900px;
+  width: min(96vw, 1200px);
+  max-width: 1200px;
   height: 85vh;
   border-radius: 20px;
   background: linear-gradient(to bottom right, #ffffff 60%, #fff0e0 100%);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
   z-index: 1000;
-  overflow: auto;     /* allow scroll if needed */
+  overflow-y: auto;
+  overflow-x: hidden;
   resize: both;       /* ✅ allow resize */
   min-width: 500px;   /* optional limits */
   min-height: 400px;
@@ -133,6 +135,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  overflow-x: hidden;
 }
 
 /* Input bar inside modal */
@@ -232,6 +235,7 @@ body {
   line-height: 1.4;
   max-width: 230px;
   word-wrap: break-word;
+  overflow-wrap: anywhere;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
@@ -262,6 +266,7 @@ body {
   line-height: 1.4;
   max-width: 230px;
   word-wrap: break-word;
+  overflow-wrap: anywhere;
   padding: 10px 14px;
   border-radius: 20px 20px 20px 0;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
@@ -446,6 +451,7 @@ body {
   padding: 10px;
   max-height: 40%;
   overflow: auto;
+  overflow-x: hidden;
 }
 
 #route-panel-title {
@@ -475,7 +481,7 @@ body {
 
 .route-controls {
   display: grid;
-  grid-template-columns: 1fr 1fr auto auto;
+  grid-template-columns: 1fr;
   gap: 8px;
   align-items: center;
 }
@@ -503,6 +509,7 @@ body {
   color: #fff;
   font-weight: 600;
   cursor: pointer;
+  width: 100%;
 }
 
 #route-btn:hover {
@@ -515,6 +522,7 @@ body {
   font-size: 12px;
   line-height: 1.35;
   min-height: 16px;
+  overflow-wrap: anywhere;
 }
 
 #route-canvas-wrap {
@@ -523,21 +531,67 @@ body {
   border-radius: 12px;
   background: linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
   overflow: hidden;
-  height: 150px;
-  min-height: 90px;
-  max-height: 260px;
-  resize: vertical;
+  width: min(100%, 760px);
+  aspect-ratio: 10 / 7;
+  height: auto;
+  min-height: 180px;
+  resize: horizontal;
+  position: relative;
+}
+
+#route-plan-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.82;
+  pointer-events: none;
+  z-index: 1;
 }
 
 #route-svg {
   width: 100%;
   height: 100%;
   display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
 }
 
 #chatbox.expanded #route-panel {
   padding: 14px 20px;
-  max-height: 45%;
+  max-height: 52%;
+}
+
+#chatbox.expanded #route-canvas-wrap {
+  width: min(100%, 980px);
+}
+
+#chatbox.expanded .route-controls {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+#chatbox.expanded #route-btn {
+  width: 100%;
+}
+
+#chatbox.expanded #route-from {
+  grid-column: 1 / 2;
+}
+
+#chatbox.expanded #route-to {
+  grid-column: 2 / 3;
+}
+
+#chatbox.expanded #route-algorithm {
+  grid-column: 1 / 2;
+}
+
+#chatbox.expanded #route-btn {
+  grid-column: 2 / 3;
 }
 
 #chatbox.expanded #route-svg {

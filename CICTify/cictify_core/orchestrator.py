@@ -23,15 +23,44 @@ from .web_search import WebFallback
 ROUTER_PROMPT = """You are a multilingual intent router for BulSU CICT assistant.
 
 Task:
-Classify the user query into exactly one label:
+Classify the user query into exactly one intent label:
 - GENERAL: greetings, identity, small talk, thanks, short chit-chat.
-- ACADEMIC: all other user questions that may require knowledge lookup from BulSU CICT documents or approved web pages.
+- ACADEMIC: factual/policy/procedure/location/people/schedule/admission/academic questions.
+
+Primary principle:
+- Use semantic understanding first. Heuristic hints are secondary.
+
+Examples:
+- "hi", "kumusta", "thanks" -> GENERAL
+- "who is the dean", "what is a transferee", "where is registrar" -> ACADEMIC
+- "u sure?" after an answer -> GENERAL (confirmation follow-up)
+- "how about vice dean" after role query -> ACADEMIC (contextual follow-up)
+
+Return strict JSON only:
+{
+    "label": "GENERAL" | "ACADEMIC",
+    "confidence": 0.0-1.0,
+    "is_followup": true|false,
+    "reason": "short reason"
+}
+"""
+
+SCOPE_PROMPT = """You are a scope classifier for BulSU CICT assistant.
+
+Task:
+Decide if the query is within BulSU CICT scope.
 
 Rules:
-- Support multilingual input (English, Filipino/Tagalog, Taglish, French, Spanish, German, and similar variations).
-- For any factual/policy/procedure/location/people/schedule/admission/academic query, output ACADEMIC.
-- Do not reject based on language, slang, or typo quality.
-- Output exactly one token only: GENERAL or ACADEMIC.
+- If query is BulSU/CICT related, greetings, or a clear follow-up to prior BulSU context -> IN_SCOPE.
+- If query is unrelated general-knowledge (e.g., world history, random math, coding help outside BulSU context) -> OUT_OF_SCOPE.
+- Use semantics first; keyword hints are only supportive.
+
+Return strict JSON only:
+{
+    "scope": "IN_SCOPE" | "OUT_OF_SCOPE",
+    "confidence": 0.0-1.0,
+    "reason": "short reason"
+}
 """
 
 FALLBACK_GENERAL_PATTERNS = [
@@ -100,38 +129,123 @@ class CascadeOrchestrator:
             finally:
                 loop.close()
 
+    @staticmethod
+    def _parse_json_object(raw: str) -> Dict:
+        text = str(raw or "").strip()
+        if not text:
+            return {}
+        if "{" in text and "}" in text:
+            start = text.find("{")
+            end = text.rfind("}")
+            text = text[start : end + 1]
+        try:
+            obj = json.loads(text)
+            return obj if isinstance(obj, dict) else {}
+        except Exception:
+            return {}
+
     async def _route(self, question: str) -> str:
         q = (question or "").strip()
         q_lower = q.lower()
 
-        # Keep short gratitude acknowledgements conversational.
-        if re.search(r"\b(thanks|thank\s*you|salamat|merci|danke|grazie)\b", q_lower) and len(q_lower.split()) <= 10:
-            return "GENERAL"
+        general_hint = bool(any(re.match(pattern, q_lower) for pattern in FALLBACK_GENERAL_PATTERNS))
+        academic_hint = bool(self._looks_academic(q_lower))
+        followup_hint = bool(self._contains_followup_marker(q_lower) or self._is_confirmation_followup(q_lower))
 
-        # Minimal guard for obvious casual messages when router occasionally over-classifies as ACADEMIC.
-        if any(re.match(pattern, q_lower) for pattern in FALLBACK_GENERAL_PATTERNS) and not self._looks_academic(q_lower):
-            return "GENERAL"
+        router_user_prompt = (
+            f"Query: {q}\n"
+            f"Heuristic hints (secondary only): general_hint={general_hint}, academic_hint={academic_hint}, followup_hint={followup_hint}"
+        )
 
-        label = await self.llm.chat(
+        raw = await self.llm.chat(
             ROUTER_PROMPT,
-            q,
+            router_user_prompt,
             model=CONFIG.routing_model,
-            max_tokens=8,
+            max_tokens=120,
             temperature=0.0,
             timeout_sec=CONFIG.quick_timeout_sec,
         )
-        label_upper = (label or "").upper()
-        label_lower = (label or "").lower()
-        if "GENERAL" in label_upper or re.search(r"\b(general|greeting|casual|small\s*talk|chit\s*chat)\b", label_lower):
-            return "GENERAL"
-        if "ACADEMIC" in label_upper or re.search(r"\b(academic|bulsu|cict)\b", label_lower):
-            return "ACADEMIC"
 
-        if any(re.match(pattern, q_lower) for pattern in FALLBACK_GENERAL_PATTERNS):
-            return "GENERAL"
+        parsed = self._parse_json_object(raw or "")
+        llm_label = str(parsed.get("label") or "").strip().upper()
+        try:
+            llm_conf = float(parsed.get("confidence", 0.0) or 0.0)
+        except Exception:
+            llm_conf = 0.0
 
-        # If router output is malformed, default to ACADEMIC so retrieval can still attempt an answer.
-        return "ACADEMIC"
+        heuristic_label = "ACADEMIC"
+        if general_hint and not academic_hint:
+            heuristic_label = "GENERAL"
+        elif academic_hint and not general_hint:
+            heuristic_label = "ACADEMIC"
+        elif followup_hint and not academic_hint:
+            heuristic_label = "GENERAL"
+
+        if llm_label in {"GENERAL", "ACADEMIC"}:
+            # LLM is primary. Heuristics only assist when confidence is low and conflict is strong.
+            if llm_conf < 0.55 and llm_label != heuristic_label:
+                return heuristic_label
+            return llm_label
+
+        # Malformed router output fallback.
+        return heuristic_label or "ACADEMIC"
+
+    async def _is_out_of_scope_hybrid(self, question: str, relevant_memory: str) -> bool:
+        q = (question or "").strip().lower()
+        if not q:
+            return False
+
+        if relevant_memory and self._is_known_place_phrase(q):
+            return False
+
+        # Deterministic high-signal cases remain hard blocks.
+        if any(re.search(pattern, q) for pattern in OUT_OF_SCOPE_PATTERNS):
+            return True
+
+        followup_hint = bool(self._contains_followup_marker(q) or self._is_confirmation_followup(q))
+        academic_hint = bool(self._looks_academic(q))
+        direct_wh = bool(re.search(r"\b(who\s+is|what\s+is|where\s+is|when\s+is|why\s+is|how\s+to)\b", q))
+
+        scope_user_prompt = (
+            f"Query: {question}\n"
+            f"Recent memory available: {bool(relevant_memory)}\n"
+            f"Heuristic hints (secondary only): followup_hint={followup_hint}, academic_hint={academic_hint}, direct_wh={direct_wh}"
+        )
+
+        raw = await self.llm.chat(
+            SCOPE_PROMPT,
+            scope_user_prompt,
+            model=CONFIG.routing_model,
+            max_tokens=120,
+            temperature=0.0,
+            timeout_sec=CONFIG.quick_timeout_sec,
+        )
+        parsed = self._parse_json_object(raw or "")
+        scope = str(parsed.get("scope") or "").strip().upper()
+        try:
+            conf = float(parsed.get("confidence", 0.0) or 0.0)
+        except Exception:
+            conf = 0.0
+
+        heuristic_out = False
+        if followup_hint and relevant_memory:
+            heuristic_out = False
+        elif any(re.match(pattern, q) for pattern in FALLBACK_GENERAL_PATTERNS):
+            heuristic_out = False
+        elif academic_hint:
+            heuristic_out = False
+        elif re.search(r"\b(where\s+is|nasaan|asan|nasan|near|nearby|beside|route|path|directions|papunta|paano\s+pumunta)\b", q):
+            heuristic_out = False
+        elif direct_wh:
+            heuristic_out = True
+
+        if scope in {"IN_SCOPE", "OUT_OF_SCOPE"}:
+            llm_out = scope == "OUT_OF_SCOPE"
+            if conf < 0.55:
+                return heuristic_out
+            return llm_out
+
+        return heuristic_out
 
     async def _is_context_relevant(self, question: str, rag_context: str) -> bool:
         context = (rag_context or "").strip()
@@ -234,6 +348,87 @@ class CascadeOrchestrator:
             seen.add(key)
             parts.append(chunk)
         return "\n".join(parts)
+
+    def _is_known_place_phrase(self, text: str) -> bool:
+        phrase = str(text or "").strip()
+        if not phrase or len(phrase) > 80:
+            return False
+        try:
+            return bool(
+                self.spatial_graph._match_node_id(phrase)
+                or self.spatial_graph._match_building_name(phrase)
+            )
+        except Exception:
+            return False
+
+    @staticmethod
+    def _last_user_query_from_memory(relevant_memory: str) -> str:
+        user_lines = [ln for ln in str(relevant_memory or "").splitlines() if ln.startswith("User:")]
+        if not user_lines:
+            return ""
+        return user_lines[-1].replace("User:", "", 1).strip()
+
+    @staticmethod
+    def _destination_hint_from_query(text: str) -> str:
+        q = str(text or "").strip()
+        if not q:
+            return ""
+        m = re.search(r"(?:where\s+is|nasaan\s+ang|nasaan|asan|nasan)\s+(.+)$", q, flags=re.IGNORECASE)
+        if m:
+            return m.group(1).strip(" ?!.,")
+        m2 = re.search(r"(?:to|papunta\s+sa)\s+([a-zA-Z0-9/\-\s']+)$", q, flags=re.IGNORECASE)
+        if m2:
+            return m2.group(1).strip(" ?!.,")
+        return ""
+
+    def _resolve_location_only_followup(self, question: str, relevant_memory: str) -> str:
+        q = str(question or "").strip()
+        if not q or not self._is_known_place_phrase(q) or not relevant_memory:
+            return q
+
+        assistant_memory = str(relevant_memory or "").lower()
+        asks_location = any(
+            marker in assistant_memory
+            for marker in (
+                "share your current location",
+                "current location",
+                "step-by-step directions",
+                "give directions",
+            )
+        )
+        if not asks_location:
+            return q
+
+        last_user = self._last_user_query_from_memory(relevant_memory)
+        destination_hint = self._destination_hint_from_query(last_user)
+        if not destination_hint:
+            return q
+
+        return f"How do I get from {q} to {destination_hint}?"
+
+    @staticmethod
+    def _latest_exchange_from_history(history: List[Dict]) -> str:
+        if not history:
+            return ""
+        # Ignore current trailing user turn when reconstructing prior exchange.
+        window = history[:-1] if history and history[-1].get("role") == "user" else history[:]
+        last_assistant = ""
+        for msg in reversed(window):
+            if msg.get("role") == "assistant":
+                last_assistant = str(msg.get("content") or "").strip()
+                break
+        if not last_assistant:
+            return ""
+
+        last_user = ""
+        for msg in reversed(window):
+            if msg.get("role") == "user":
+                last_user = str(msg.get("content") or "").strip()
+                if last_user:
+                    break
+        if not last_user:
+            return f"Assistant: {last_assistant}"
+        return f"User: {last_user}\nAssistant: {last_assistant}"
 
     @staticmethod
     def _merge_contexts(contexts: List[str], max_blocks: int = 10) -> str:
@@ -368,6 +563,7 @@ class CascadeOrchestrator:
 
     @staticmethod
     def _is_out_of_scope(question: str, relevant_memory: str) -> bool:
+        # Legacy deterministic helper retained for compatibility references.
         q = (question or "").strip().lower()
         if not q:
             return False
@@ -383,10 +579,7 @@ class CascadeOrchestrator:
             return False
         if re.search(r"\b(where\s+is|nasaan|asan|nasan|near|nearby|beside|route|path|directions|papunta|paano\s+pumunta)\b", q):
             return False
-        # Non-BulSU factual/general-knowledge prompts should be rejected.
-        if re.search(r"\b(who\s+is|what\s+is|where\s+is|when\s+is|why\s+is|how\s+to)\b", q):
-            return True
-        return False
+        return bool(re.search(r"\b(who\s+is|what\s+is|where\s+is|when\s+is|why\s+is|how\s+to)\b", q))
 
     @staticmethod
     def _expand_room_tokens(text: str) -> str:
@@ -467,14 +660,36 @@ class CascadeOrchestrator:
                 return True
 
         if q.startswith("who is") or q.startswith("sino"):
-            has_person = bool(re.search(r"\b(?:Dr|Mr|Ms|Engr)\.?\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){0,4}\b", a))
-            has_person |= bool(re.search(r"\b[A-Z][a-z]+\s+[A-Z][a-z]+\b", a))
+            has_person = CascadeOrchestrator._has_likely_person_name(a)
             if re.search(r"\b(serves\s+as|shall\s+designate|prime\s+duty|educational\s+leader)\b", a, flags=re.IGNORECASE):
                 return True
             if not has_person:
                 return True
 
         return False
+
+    @staticmethod
+    def _has_likely_person_name(text: str) -> bool:
+        content = str(text or "")
+        if re.search(r"\b(?:Dr|Mr|Ms|Engr)\.?\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){0,5}\b", content):
+            return True
+
+        # Accept two to four capitalized tokens if they are not purely role labels.
+        for m in re.finditer(r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\b", content):
+            candidate = m.group(1)
+            if re.search(r"\b(Dean|Vice|Associate|Assistant|Office|President|Academic|Affairs|College|University|CICT|BulSU)\b", candidate):
+                continue
+            return True
+        return False
+
+    @staticmethod
+    def _is_role_query(question: str) -> bool:
+        q = (question or "").strip().lower()
+        if not q:
+            return False
+        asks_person = bool(re.search(r"\b(who\s+is|sino\s+si|sino\s+ang|name\s+of)\b", q))
+        mentions_role = bool(re.search(r"\b(dean|vice\s+dean|associate\s+dean|coordinator|director|chair|adviser|advisor)\b", q))
+        return asks_person and mentions_role
 
     @staticmethod
     def _looks_noisy_sentence(sentence: str) -> bool:
@@ -823,6 +1038,32 @@ class CascadeOrchestrator:
                 # Avoid hallucinating dean/policy snippets when no associate-dean name is readable.
                 return "I could not find a clear associate dean name in the current documents."
 
+            if role in {"vice dean", "deputy dean"}:
+                m_vice = re.search(
+                    rf"{honorific_name}\s*[^A-Za-z]{{0,10}}\s*(?:Vice|Deputy)\s+Dean\s*,?\s*CICT",
+                    normalized_flat_no_sources,
+                    flags=re.IGNORECASE,
+                )
+                if m_vice:
+                    name = CascadeOrchestrator._clean_person_name(m_vice.group(1) or "")
+                    if name:
+                        return f"The vice dean is {name}."
+
+                # Some documents use Associate Dean instead of Vice Dean.
+                m_assoc_alt = re.search(
+                    rf"{honorific_name}\s*[^A-Za-z]{{0,10}}\s*Associate\s+Dean\s*,?\s*CICT",
+                    normalized_flat_no_sources,
+                    flags=re.IGNORECASE,
+                )
+                if m_assoc_alt:
+                    name = CascadeOrchestrator._clean_person_name(m_assoc_alt.group(1) or "")
+                    if name:
+                        return (
+                            f"I could not find a separate Vice Dean entry, but the Associate Dean listed is {name}."
+                        )
+
+                return "I could not find a clear vice dean name in the current documents."
+
             if role == "dean":
                 m_dean = re.search(
                     rf"{honorific_name}\s*[^A-Za-z]{{0,10}}\s*Dean\s*,?\s*CICT",
@@ -905,7 +1146,12 @@ class CascadeOrchestrator:
                 except Exception:
                     pass
 
-        dean_name_query = (("dean" in q and ("name" in q or "who" in q)) or ("her name" in q) or ("his name" in q)) and ("associate dean" not in q)
+        dean_name_query = (
+            (("dean" in q and ("name" in q or "who" in q)) or ("her name" in q) or ("his name" in q))
+            and ("associate dean" not in q)
+            and ("vice dean" not in q)
+            and ("deputy dean" not in q)
+        )
         if dean_name_query:
             m = re.search(r"(Dr\.\s+[A-Z][A-Za-z\.\s]{2,60}?)\s*(?:-|,)?\s*Dean\b", flat)
             if not m:
@@ -1117,11 +1363,17 @@ class CascadeOrchestrator:
                 context=safety.get("reason", "blocked"),
             ), safety.get("reason", "blocked")
 
-        route = await self._route(normalized_question)
-        print(f"[Router] -> {route}", flush=True)
         history_text = self._history_to_text(history)
         relevant_memory = self._relevant_memory(normalized_question, history)
+        if not relevant_memory and self._is_known_place_phrase(normalized_question):
+            relevant_memory = self._latest_exchange_from_history(history)
         resolved_question = self._resolve_followup_question(normalized_question, relevant_memory)
+        resolved_question = self._resolve_location_only_followup(resolved_question, relevant_memory)
+
+        route = await self._route(normalized_question)
+        if route == "GENERAL" and resolved_question != normalized_question:
+            route = "ACADEMIC"
+        print(f"[Router] -> {route}", flush=True)
         if relevant_memory:
             print("[Memory] Relevant history found for current query", flush=True)
         if resolved_question != normalized_question:
@@ -1167,7 +1419,7 @@ class CascadeOrchestrator:
             return CascadeResult(reply=final, route="GENERAL", context=""), "ok"
 
         # Block clearly unrelated topics early.
-        if self._is_out_of_scope(normalized_question, relevant_memory):
+        if await self._is_out_of_scope_hybrid(normalized_question, relevant_memory):
             return CascadeResult(
                 reply="I can only answer queries related to BulSU CICT.",
                 route="OUT_OF_SCOPE",
@@ -1179,7 +1431,7 @@ class CascadeOrchestrator:
         english_query = query_variants.get("english_query", "")
         slang_expansion = query_variants.get("slang_expansion", "")
 
-        spatial_probe = corrected_query or resolved_question
+        spatial_probe = resolved_question or corrected_query
         spatial_reply = self.spatial_tool.run(spatial_probe)
         if spatial_reply:
             print("[Tool] Spatial tool handled query", flush=True)
@@ -1221,6 +1473,11 @@ class CascadeOrchestrator:
             mv_direct = self._mission_vision_fallback(resolved_question, rag_context)
             if mv_direct and not self._looks_low_quality_answer(normalized_question, mv_direct):
                 return CascadeResult(reply=mv_direct, route="RAG_DIRECT_MV", context=rag_context), "ok"
+
+            if self._is_role_query(resolved_question):
+                role_direct = self._direct_fact_fallback(resolved_question, rag_context)
+                if role_direct:
+                    return CascadeResult(reply=role_direct, route="RAG_DIRECT_ROLE", context=rag_context), "ok"
 
             rag_user_prompt = f"Current Question: {resolved_question}"
             if relevant_memory:
@@ -1265,6 +1522,11 @@ class CascadeOrchestrator:
             mv_direct = self._mission_vision_fallback(resolved_question, rag_context)
             if mv_direct and not self._looks_low_quality_answer(normalized_question, mv_direct):
                 return CascadeResult(reply=mv_direct, route="RAG_DIRECT_MV", context=rag_context), "ok"
+
+            if self._is_role_query(resolved_question):
+                role_direct = self._direct_fact_fallback(resolved_question, rag_context)
+                if role_direct:
+                    return CascadeResult(reply=role_direct, route="RAG_DIRECT_ROLE_LOWREL", context=rag_context), "ok"
 
             keyword_def = self._definition_keyword_fallback(resolved_question, rag_context)
             if keyword_def and not self._looks_low_quality_answer(normalized_question, keyword_def):

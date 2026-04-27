@@ -31,6 +31,179 @@ CAMPUS_PLACE_TOKENS = {
     "center",
 }
 
+# Coordinates are in a campus-plan local space (roughly matching BulSUMap layout).
+# They are intentionally approximate but stable and far better than schematic spread.
+CAMPUS_COORDS = {
+    "gate 1": (860.0, 485.0),
+    "main gate": (860.0, 485.0),
+    "gate 2": (130.0, 485.0),
+    "gate 3": (885.0, 360.0),
+    "activity center": (780.0, 470.0),
+    "pimentel hall": (705.0, 420.0),
+    "nstp building": (650.0, 455.0),
+    "cict con": (812.0, 335.0),
+    "coe": (915.0, 545.0),
+    "mis office": (890.0, 585.0),
+    "coed": (760.0, 620.0),
+    "cal": (385.0, 500.0),
+    "cs": (425.0, 500.0),
+    "cafa": (385.0, 535.0),
+    "gs": (425.0, 535.0),
+    "cba": (500.0, 505.0),
+    "cser": (495.0, 565.0),
+    "sg": (330.0, 505.0),
+    "cssp": (340.0, 610.0),
+    "ccje library": (365.0, 620.0),
+    "citcs": (470.0, 545.0),
+    "clis": (445.0, 575.0),
+    "ciit": (545.0, 555.0),
+    "ce": (610.0, 545.0),
+    "alvarado hall": (760.0, 640.0),
+    "academic building": (650.0, 380.0),
+    "alumni building": (870.0, 530.0),
+    "carpio hall": (620.0, 520.0),
+    "federizo hall": (460.0, 370.0),
+    "valencia hall": (500.0, 430.0),
+    "natividad hall": (905.0, 560.0),
+    "heroes park": (915.0, 505.0),
+    "student park": (690.0, 555.0),
+    "round hall": (520.0, 330.0),
+    "hostel": (360.0, 500.0),
+    "registrar": (585.0, 430.0),
+}
+
+CAMPUS_AREA_NOTES = {
+    "pimentelhall": "Pimentel Hall is in the central-right side of BulSU Main Campus (CICT area).",
+    "nstpbuilding": "NSTP Building is in the inner campus area near the CICT/Pimentel zone.",
+    "activitycenter": "Activity Center is on the right side of the main campus map, near the main gate corridor.",
+    "gate1": "Gate 1 is along MacArthur Highway (main road side).",
+    "gate2": "Gate 2 is on the Provincial Capitol side.",
+    "gate3": "Gate 3 is another campus access point near the upper-right side of the map layout.",
+}
+
+# Map identifiers/labels shown in boxes that refer to units within/pointing to a host building.
+CAMPUS_BUILDING_IDENTIFIERS = {
+    "pimentelhall": ["CICT CON"],
+    "natividadhall": ["COE", "MIS Office"],
+    "alvaradohall": ["COED"],
+    "valenciahall": ["CAL", "CS", "CAFA", "GS"],
+    "carpiohall": ["CBA", "CSER"],
+    "federizohall": ["SG", "CSSP", "CCJE Library"],
+    "roundhall": ["CITCS", "CLIS", "CIIT", "CE"],
+}
+
+# Identifier label -> host building on the campus map.
+CAMPUS_IDENTIFIER_HOSTS = {
+    "cictcon": "Pimentel Hall",
+    "coe": "Natividad Hall",
+    "misoffice": "Natividad Hall",
+    "coed": "Alvarado Hall",
+    "cal": "Valencia Hall",
+    "cs": "Valencia Hall",
+    "cafa": "Valencia Hall",
+    "gs": "Valencia Hall",
+    "cba": "Carpio Hall",
+    "cser": "Carpio Hall",
+    "sg": "Federizo Hall",
+    "cssp": "Federizo Hall",
+    "ccjelibrary": "Federizo Hall",
+    "citcs": "Round Hall",
+    "clis": "Round Hall",
+    "ciit": "Round Hall",
+    "ce": "Round Hall",
+}
+
+CAMPUS_CANONICAL_PLACES = [
+    "Gate 1",
+    "Gate 2",
+    "Gate 3",
+    "Main Gate",
+    "Activity Center",
+    "Pimentel Hall",
+    "NSTP Building",
+    "CICT CON",
+    "COE",
+    "MIS Office",
+    "COED",
+    "CAL",
+    "CS",
+    "CAFA",
+    "GS",
+    "CBA",
+    "CSER",
+    "SG",
+    "CSSP",
+    "CCJE Library",
+    "CITCS",
+    "CLIS",
+    "CIIT",
+    "CE",
+    "Alvarado Hall",
+    "Valencia Hall",
+    "Federizo Hall",
+    "Carpio Hall",
+    "Alumni Building",
+    "Natividad Hall",
+    "Heroes Park",
+    "Student Park",
+    "Round Hall",
+    "Hostel",
+    "Registrar",
+]
+
+# Curated campus backbone edges based on BulSUMap visual adjacency.
+CAMPUS_GRAPH_EDGES = [
+    ("Gate 1", "Activity Center", 1.2),
+    ("Activity Center", "Pimentel Hall", 1.0),
+    ("Pimentel Hall", "NSTP Building", 1.0),
+    ("Pimentel Hall", "CICT CON", 1.0),
+    ("Pimentel Hall", "Valencia Hall", 1.6),
+    ("Valencia Hall", "Federizo Hall", 1.0),
+    ("Federizo Hall", "Round Hall", 1.0),
+    ("Federizo Hall", "Hostel", 1.2),
+    ("Valencia Hall", "Carpio Hall", 1.3),
+    ("Carpio Hall", "Student Park", 1.0),
+    ("Carpio Hall", "Alumni Building", 1.2),
+    ("Alumni Building", "Natividad Hall", 1.0),
+    ("Natividad Hall", "Heroes Park", 1.0),
+    ("Heroes Park", "Gate 2", 1.0),
+    ("Activity Center", "Gate 2", 1.4),
+    ("CICT CON", "Gate 3", 1.3),
+    ("Pimentel Hall", "Registrar", 1.6),
+]
+
+# Curated nearby landmarks aligned to the BulSUMap campus drawing to avoid noisy OCR-derived pairings.
+CAMPUS_NEARBY_OVERRIDES = {
+    "pimentelhall": ["Activity Center", "NSTP Building", "Gate 1"],
+    "nstpbuilding": ["Pimentel Hall", "Activity Center", "Gate 1"],
+    "activitycenter": ["Pimentel Hall", "NSTP Building", "Gate 1"],
+    "cictcon": ["Pimentel Hall", "NSTP Building", "Activity Center"],
+    "valenciahall": ["Pimentel Hall", "Federizo Hall", "Carpio Hall"],
+    "federizohall": ["Valencia Hall", "Round Hall", "Hostel"],
+    "carpiohall": ["Valencia Hall", "Student Park", "Alumni Building"],
+    "alumnibuilding": ["Carpio Hall", "Natividad Hall", "Heroes Park"],
+    "alvaradohall": ["Activity Center", "Gate 1", "Pimentel Hall"],
+    "natividadhall": ["Alumni Building", "Heroes Park", "Gate 2"],
+    "registrar": ["Pimentel Hall", "Activity Center", "NSTP Building"],
+    "coe": ["Natividad Hall", "MIS Office", "Heroes Park", "Gate 2"],
+    "misoffice": ["Natividad Hall", "COE", "Heroes Park", "Gate 2"],
+    "coed": ["Alvarado Hall", "Activity Center", "Gate 1"],
+    "cal": ["Valencia Hall", "CS", "CAFA", "GS"],
+    "cs": ["Valencia Hall", "CAL", "CAFA", "GS"],
+    "cafa": ["Valencia Hall", "CAL", "CS", "GS"],
+    "gs": ["Valencia Hall", "CAL", "CS", "CAFA"],
+    "cba": ["Carpio Hall", "CSER", "Student Park"],
+    "cser": ["Carpio Hall", "CBA", "Student Park"],
+    "sg": ["Federizo Hall", "CSSP", "CCJE Library"],
+    "cssp": ["Federizo Hall", "SG", "CCJE Library"],
+    "ccjelibrary": ["Federizo Hall", "SG", "CSSP"],
+    "citcs": ["Round Hall", "CLIS", "CIIT", "CE"],
+    "clis": ["Round Hall", "CITCS", "CIIT", "CE"],
+    "ciit": ["Round Hall", "CITCS", "CLIS", "CE"],
+    "ce": ["Round Hall", "CITCS", "CLIS", "CIIT"],
+    "gate3": ["CICT CON", "Pimentel Hall", "Activity Center"],
+}
+
 
 class SpatialGraphStore:
     def __init__(self) -> None:
@@ -88,6 +261,7 @@ class SpatialGraphStore:
         return items
 
     def _campus_hub_id(self) -> str:
+        hub_x, hub_y = (560.0, 450.0)
         return self._merge_node(
             {
                 "id": "campus-main-hub",
@@ -96,9 +270,24 @@ class SpatialGraphStore:
                 "floor": "Campus",
                 "kind": "campus_place",
                 "aliases": ["main campus", "campus hub", "bulsu main campus"],
+                "x": hub_x,
+                "y": hub_y,
             },
             "inferred:campus-hub",
         )
+
+    def _campus_xy(self, name: str) -> Tuple[Optional[float], Optional[float]]:
+        norm = self._norm_for_match(name)
+        if not norm:
+            return (None, None)
+
+        for key, xy in CAMPUS_COORDS.items():
+            kn = self._norm_for_match(key)
+            if not kn:
+                continue
+            if kn == norm or kn in norm or norm in kn:
+                return xy
+        return (None, None)
 
     def _building_entry_node(self, building: str) -> Optional[str]:
         candidates = []
@@ -144,6 +333,7 @@ class SpatialGraphStore:
 
             building = str(rec.get("building") or "BulSU Main Campus").strip() or "BulSU Main Campus"
             for place in self._extract_campus_places_from_ocr(str(rec.get("ocr_text") or "")):
+                x, y = self._campus_xy(place)
                 node_id = self._merge_node(
                     {
                         "name": place,
@@ -151,6 +341,8 @@ class SpatialGraphStore:
                         "floor": "Campus",
                         "kind": "campus_place",
                         "aliases": [place],
+                        "x": x,
+                        "y": y,
                     },
                     source,
                 )
@@ -159,6 +351,7 @@ class SpatialGraphStore:
 
         # Ensure important non-floor campus POIs exist even if OCR misses them.
         for poi in ["Registrar", "Gate 1", "Gate 2", "Main Gate"]:
+            x, y = self._campus_xy(poi)
             node_id = self._merge_node(
                 {
                     "name": poi,
@@ -166,11 +359,16 @@ class SpatialGraphStore:
                     "floor": "Campus",
                     "kind": "campus_place",
                     "aliases": [poi],
+                    "x": x,
+                    "y": y,
                 },
                 "inferred:campus-poi-seed",
             )
             campus_node_ids.append(node_id)
             self._add_edge(hub_id, node_id, 1.8, "inferred:campus-poi-seed")
+
+        # Stabilize campus graph with canonical places and curated map backbone.
+        self._stabilize_campus_backbone(hub_id)
 
         unique_campus_nodes = sorted(set(campus_node_ids))
         for node_id in unique_campus_nodes:
@@ -200,6 +398,67 @@ class SpatialGraphStore:
             "added_nodes": len(self._nodes) - before_nodes,
             "added_edges": len(self._edges) - before_edges,
         }
+
+    def _upsert_edge(self, frm: str, to: str, weight: float, source_file: str, door: str = "") -> None:
+        if not frm or not to or frm == to:
+            return
+        if frm not in self._nodes or to not in self._nodes:
+            return
+        key_a = (frm, to, door)
+        key_b = (to, frm, door)
+        for edge in self._edges:
+            existing = (str(edge.get("from", "")), str(edge.get("to", "")), str(edge.get("door", "")))
+            if existing == key_a or existing == key_b:
+                edge["weight"] = max(0.1, float(weight))
+                edge["source_file"] = source_file
+                return
+
+        self._edges.append(
+            {
+                "from": frm,
+                "to": to,
+                "door": door,
+                "weight": max(0.1, float(weight)),
+                "source_file": source_file,
+            }
+        )
+
+    def _stabilize_campus_backbone(self, hub_id: str) -> None:
+        campus_ids: List[str] = []
+        for place in CAMPUS_CANONICAL_PLACES:
+            x, y = self._campus_xy(place)
+            node_id = self._merge_node(
+                {
+                    "name": place,
+                    "building": "BulSU Main Campus",
+                    "floor": "Campus",
+                    "kind": "campus_place",
+                    "aliases": [place],
+                    "x": x,
+                    "y": y,
+                },
+                "inferred:campus-backbone-seed",
+            )
+            campus_ids.append(node_id)
+
+        # Keep hub as fallback connector but with higher weight than curated backbone paths.
+        for node_id in sorted(set(campus_ids)):
+            self._upsert_edge(hub_id, node_id, 7.5, "inferred:campus-hub-fallback")
+
+        for a_name, b_name, weight in CAMPUS_GRAPH_EDGES:
+            a_id = self._match_node_id(a_name)
+            b_id = self._match_node_id(b_name)
+            if not a_id or not b_id:
+                continue
+            self._upsert_edge(a_id, b_id, weight, "inferred:campus-backbone")
+
+        # Tie boxed identifiers to their host buildings to preserve map semantics.
+        for ident_norm, host in CAMPUS_IDENTIFIER_HOSTS.items():
+            ident_id = self._match_node_id(ident_norm)
+            host_id = self._match_node_id(host)
+            if not ident_id or not host_id:
+                continue
+            self._upsert_edge(ident_id, host_id, 0.35, "inferred:campus-identifier-host")
 
     def _load(self) -> None:
         if not self._path.exists():
@@ -785,6 +1044,34 @@ class SpatialGraphStore:
         hint_lower = hint_clean.lower()
         hint_norm = self._norm_for_match(hint_clean)
 
+        # Gate disambiguation: prefer exact single-gate nodes over combined gate labels.
+        if hint_norm in {"gate1", "gate2", "gate3"}:
+            gate_candidates: List[Tuple[int, str]] = []
+            for node_id, node in self._nodes.items():
+                node_name_norm = self._norm_for_match(str(node.get("name") or ""))
+                alias_pool = [str(node.get("name") or "")] + [str(a or "") for a in node.get("aliases", [])]
+                best_score = -1
+                for alias in alias_pool:
+                    an = self._norm_for_match(alias)
+                    if not an:
+                        continue
+                    score = -1
+                    if node_name_norm == hint_norm:
+                        score = 140
+                    elif an == hint_norm:
+                        score = 100
+                    elif hint_norm in an and "and" not in an:
+                        score = 70
+                    elif hint_norm in an:
+                        score = 40
+                    if score > best_score:
+                        best_score = score
+                if best_score >= 0:
+                    gate_candidates.append((best_score, node_id))
+            if gate_candidates:
+                gate_candidates.sort(key=lambda item: item[0], reverse=True)
+                return gate_candidates[0][1]
+
         # 1) Exact match against aliases/names (case-insensitive).
         for node_id, node in self._nodes.items():
             candidates = [node.get("name", "")] + list(node.get("aliases", []))
@@ -870,6 +1157,10 @@ class SpatialGraphStore:
             for alias in alias_list:
                 aliases[self._norm_for_match(alias)] = canonical
 
+        # Campus map boxed identifiers that point to host buildings.
+        for ident_norm, host_building in CAMPUS_IDENTIFIER_HOSTS.items():
+            aliases[ident_norm] = host_building
+
         # Helpful manual aliases for common wording.
         if "pimentelhall" in aliases:
             aliases["pimentel"] = aliases["pimentelhall"]
@@ -896,11 +1187,22 @@ class SpatialGraphStore:
         target = (building or "").strip().lower()
         if not target:
             return []
-        return [
-            node_id
-            for node_id, node in self._nodes.items()
-            if str(node.get("building") or "").strip().lower() == target
-        ]
+        target_norm = self._norm_for_match(target)
+        out: List[str] = []
+        for node_id, node in self._nodes.items():
+            node_building = str(node.get("building") or "").strip().lower()
+            node_name = str(node.get("name") or "")
+            node_floor = str(node.get("floor") or "").strip().lower()
+
+            if node_building == target:
+                out.append(node_id)
+                continue
+
+            # Campus place nodes often use building="BulSU Main Campus"; include by name match.
+            if node_floor == "campus" and self._norm_for_match(node_name) == target_norm:
+                out.append(node_id)
+
+        return out
 
     def _best_route_between_buildings(self, building_a: str, building_b: str) -> Optional[Dict]:
         ids_a = self._nodes_for_building(building_a)
@@ -983,6 +1285,61 @@ class SpatialGraphStore:
                             return found
 
         return found
+
+    def _nearby_campus_landmarks_for_building(self, building: str, max_items: int = 4) -> List[str]:
+        key = self._norm_for_match(building)
+        override = CAMPUS_NEARBY_OVERRIDES.get(key, [])
+        if override:
+            return [str(item).strip() for item in override if str(item).strip()][:max_items]
+
+        bxy = self._campus_xy(building)
+        bx = self._as_float(bxy[0])
+        by = self._as_float(bxy[1])
+        if bx is None or by is None:
+            return []
+
+        target_norm = self._norm_for_match(building)
+        identifier_norms = set(CAMPUS_IDENTIFIER_HOSTS.keys())
+        ranked: List[Tuple[float, str]] = []
+        for name, (x, y) in CAMPUS_COORDS.items():
+            norm = self._norm_for_match(name)
+            if not norm or norm == target_norm:
+                continue
+            if norm in identifier_norms:
+                continue
+            if "main campus" in norm or "hub" in norm:
+                continue
+            dist = math.hypot(float(x) - bx, float(y) - by)
+            ranked.append((dist, name.title()))
+
+        ranked.sort(key=lambda item: item[0])
+        out: List[str] = []
+        seen = set()
+        for _, label in ranked:
+            key = self._norm_for_match(label)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            out.append(label)
+            if len(out) >= max_items:
+                break
+        return out
+
+    @staticmethod
+    def _campus_area_note(building: str) -> str:
+        key = SpatialGraphStore._norm_for_match(building)
+        return CAMPUS_AREA_NOTES.get(key, "")
+
+    @staticmethod
+    def _building_identifiers(building: str) -> List[str]:
+        key = SpatialGraphStore._norm_for_match(building)
+        vals = CAMPUS_BUILDING_IDENTIFIERS.get(key, [])
+        return [str(v).strip() for v in vals if str(v).strip()]
+
+    @staticmethod
+    def _identifier_host_building(identifier: str) -> str:
+        key = SpatialGraphStore._norm_for_match(identifier)
+        return str(CAMPUS_IDENTIFIER_HOSTS.get(key) or "").strip()
 
     @staticmethod
     def _looks_building_hint(text: str) -> bool:
@@ -1195,6 +1552,8 @@ class SpatialGraphStore:
                 }
             )
 
+        coordinate_bounds = self._coordinate_bounds_for_route(points)
+
         directions = self._directions_from_points(points)
 
         start_node = self._nodes.get(start_id, {})
@@ -1205,6 +1564,7 @@ class SpatialGraphStore:
             "path_ids": route.get("path_ids", []),
             "path_names": route.get("path_names", []),
             "points": points,
+            "coordinate_bounds": coordinate_bounds,
             "directions": directions,
             "directions_text": "\n".join(f"{idx}. {step}" for idx, step in enumerate(directions, start=1)),
             "start": {
@@ -1220,6 +1580,61 @@ class SpatialGraphStore:
                 "floor": target_node.get("floor", "Unknown Floor"),
             },
         }
+
+    def _coordinate_bounds_for_route(self, points: List[Dict]) -> Dict:
+        def bounds_of(nodes: List[Dict]) -> Optional[Dict]:
+            vals = []
+            for n in nodes:
+                x = self._as_float(n.get("x"))
+                y = self._as_float(n.get("y"))
+                if x is None or y is None:
+                    continue
+                vals.append((x, y))
+            if not vals:
+                return None
+            xs = [v[0] for v in vals]
+            ys = [v[1] for v in vals]
+            return {
+                "min_x": min(xs),
+                "max_x": max(xs),
+                "min_y": min(ys),
+                "max_y": max(ys),
+            }
+
+        if not points:
+            return {"min_x": 0.0, "max_x": 1.0, "min_y": 0.0, "max_y": 1.0}
+
+        # Campus mode: use all campus-level nodes to keep a stable campus anchor.
+        route_floors = {str(p.get("floor") or "").strip().lower() for p in points}
+        campus_mode = "campus" in route_floors
+        if campus_mode:
+            campus_nodes = []
+            for node in self._nodes.values():
+                if str(node.get("floor") or "").strip().lower() == "campus":
+                    campus_nodes.append(node)
+            b = bounds_of(campus_nodes)
+            if b:
+                return b
+
+        # Indoor mode: anchor to same building+floor as route start.
+        start_building = str(points[0].get("building") or "").strip().lower()
+        start_floor = str(points[0].get("floor") or "").strip().lower()
+        indoor_nodes = []
+        for node in self._nodes.values():
+            if str(node.get("building") or "").strip().lower() != start_building:
+                continue
+            if str(node.get("floor") or "").strip().lower() != start_floor:
+                continue
+            indoor_nodes.append(node)
+        b = bounds_of(indoor_nodes)
+        if b:
+            return b
+
+        # Fallback: route point bounds.
+        b = bounds_of(points)
+        if b:
+            return b
+        return {"min_x": 0.0, "max_x": 1.0, "min_y": 0.0, "max_y": 1.0}
 
     @staticmethod
     def _directions_from_points(points: List[Dict]) -> List[str]:
@@ -1247,16 +1662,118 @@ class SpatialGraphStore:
                     f"Move from {prev_building} to {cur_building}, then proceed to {cur_name}."
                 )
             elif prev_floor != cur_floor:
+                transition = SpatialGraphStore._vertical_transition_phrase(prev, cur)
                 directions.append(
-                    f"Change floor from {prev_floor} to {cur_floor}, then proceed to {cur_name}."
+                    f"{transition} from {prev_floor} to {cur_floor}, then proceed to {cur_name}."
                 )
             else:
-                directions.append(f"Proceed to {cur_name}.")
+                turn = None
+                if idx >= 2:
+                    turn = SpatialGraphStore._turn_instruction(points[idx - 2], prev, cur)
+                orientation_hint = SpatialGraphStore._orientation_hint(cur)
+                if idx == 1 and turn is None:
+                    if orientation_hint in {"left", "right"}:
+                        directions.append(f"Turn {orientation_hint}, then continue to {cur_name}.")
+                    elif orientation_hint in {"rear", "front", "central"}:
+                        directions.append(
+                            f"Proceed toward the {orientation_hint} corridor, then continue to {cur_name}."
+                        )
+                    else:
+                        directions.append(f"Go straight ahead to {cur_name}.")
+                elif turn == "straight":
+                    directions.append(f"Go straight ahead to {cur_name}.")
+                elif turn == "slight_left":
+                    directions.append(f"Slight left, then continue to {cur_name}.")
+                elif turn == "left":
+                    directions.append(f"Turn left, then continue to {cur_name}.")
+                elif turn == "slight_right":
+                    directions.append(f"Slight right, then continue to {cur_name}.")
+                elif turn == "right":
+                    directions.append(f"Turn right, then continue to {cur_name}.")
+                elif turn == "uturn":
+                    directions.append(f"Make a U-turn, then continue to {cur_name}.")
+                else:
+                    if orientation_hint in {"left", "right"}:
+                        directions.append(f"Turn {orientation_hint}, then continue to {cur_name}.")
+                    elif orientation_hint in {"rear", "front", "central"}:
+                        directions.append(
+                            f"Proceed toward the {orientation_hint} corridor, then continue to {cur_name}."
+                        )
+                    else:
+                        directions.append(f"Continue to {cur_name}.")
 
         if len(points) > 1:
             directions.append(f"You have arrived at {points[-1].get('name', 'your destination')}.")
 
         return directions
+
+    @staticmethod
+    def _orientation_hint(node: Dict) -> Optional[str]:
+        text = f"{node.get('name', '')} {' '.join(str(a) for a in node.get('aliases', []))}".lower()
+        if "left" in text:
+            return "left"
+        if "right" in text:
+            return "right"
+        if "rear" in text or "back" in text:
+            return "rear"
+        if "front" in text:
+            return "front"
+        if "central" in text or "center" in text:
+            return "central"
+        return None
+
+    @staticmethod
+    def _vertical_transition_phrase(prev: Dict, cur: Dict) -> str:
+        prev_text = str(prev.get("name") or "").lower()
+        cur_text = str(cur.get("name") or "").lower()
+        prev_kind = str(prev.get("kind") or "").lower()
+        cur_kind = str(cur.get("kind") or "").lower()
+
+        combined = f"{prev_text} {cur_text} {prev_kind} {cur_kind}"
+        if "stairs" in combined:
+            if "rear" in combined:
+                return "Use the rear stairs to change floor"
+            if "central" in combined:
+                return "Use the central stairs to change floor"
+            return "Use the stairs to change floor"
+        if "elevator" in combined or "lift" in combined:
+            return "Use the elevator to change floor"
+        return "Change floor"
+
+    @staticmethod
+    def _turn_instruction(prev2: Dict, prev: Dict, cur: Dict) -> Optional[str]:
+        x0 = SpatialGraphStore._as_float(prev2.get("x"))
+        y0 = SpatialGraphStore._as_float(prev2.get("y"))
+        x1 = SpatialGraphStore._as_float(prev.get("x"))
+        y1 = SpatialGraphStore._as_float(prev.get("y"))
+        x2 = SpatialGraphStore._as_float(cur.get("x"))
+        y2 = SpatialGraphStore._as_float(cur.get("y"))
+
+        if None in {x0, y0, x1, y1, x2, y2}:
+            return None
+
+        ax = x1 - x0
+        ay = y1 - y0
+        bx = x2 - x1
+        by = y2 - y1
+
+        norm_a = math.hypot(ax, ay)
+        norm_b = math.hypot(bx, by)
+        if norm_a < 1e-6 or norm_b < 1e-6:
+            return None
+
+        cross = ax * by - ay * bx
+        dot = ax * bx + ay * by
+        angle_deg = math.degrees(math.atan2(cross, dot))
+        abs_angle = abs(angle_deg)
+
+        if abs_angle < 20:
+            return "straight"
+        if abs_angle < 55:
+            return "slight_left" if angle_deg > 0 else "slight_right"
+        if abs_angle < 140:
+            return "left" if angle_deg > 0 else "right"
+        return "uturn"
 
     def route_options(self) -> List[Dict]:
         adjacency = self._adjacency()
@@ -1315,7 +1832,10 @@ class SpatialGraphStore:
         return options
 
     def answer_navigation_query(self, question: str) -> Optional[str]:
-        q = (question or "").lower()
+        raw_q = str(question or "")
+        q = raw_q.lower()
+        q_primary = q.split("\nfollow-up:", 1)[0].splitlines()[0].strip() if q else ""
+        q_parse = q_primary or q
         if not self._nodes:
             return None
 
@@ -1378,7 +1898,7 @@ class SpatialGraphStore:
 
         near_match = re.search(
             r"(?:is|are)?\s*([a-z0-9/\-\s']+?)\s+(?:near|nearby|beside|next\s+to|katabi(?:\s+ng)?|malapit(?:\s+sa)?)\s+([a-z0-9/\-\s']+)",
-            q,
+            q_parse,
             flags=re.IGNORECASE,
         )
         if near_match:
@@ -1451,7 +1971,7 @@ class SpatialGraphStore:
                         f"Known locations: {left_name} ({left_loc}); {right_name} ({right_loc})."
                     )
 
-        single_near_match = re.search(r"(?:what|which|where)\s+(?:is|are)?\s*(?:near|nearby\s+to|close\s+to)\s+([a-z0-9/\-\s']+)", q, flags=re.IGNORECASE)
+        single_near_match = re.search(r"(?:what|which|where)\s+(?:is|are)?\s*(?:near|nearby\s+to|close\s+to)\s+([a-z0-9/\-\s']+)", q_parse, flags=re.IGNORECASE)
         if single_near_match:
             target_hint = single_near_match.group(1).strip(" ?!.,")
             target_building = self._match_building_name(target_hint)
@@ -1473,27 +1993,55 @@ class SpatialGraphStore:
                 return f"I recognize {target_name}, but no nearby nodes are linked yet in the current graph."
 
         if where_query:
-            where_match = re.search(r"(?:where\s+is|nasaan\s+ang|nasaan|asan|nasan)\s+(.+)$", q, flags=re.IGNORECASE)
+            where_match = re.search(r"(?:where\s+is|nasaan\s+ang|nasaan|asan|nasan)\s+(.+)$", q_parse, flags=re.IGNORECASE)
             target_hint = where_match.group(1).strip(" ?!.,") if where_match else ""
             target_building = self._match_building_name(target_hint)
             if target_building and self._looks_building_hint(target_hint):
                 floors = sorted({str(n.get("floor") or "Unknown Floor") for n in self._nodes.values() if str(n.get("building") or "").strip().lower() == target_building.lower()})
-                landmarks = self._landmarks_for_building(target_building)
+                landmarks = self._nearby_campus_landmarks_for_building(target_building)
+                if not landmarks:
+                    landmarks = self._landmarks_for_building(target_building)
+                area_note = self._campus_area_note(target_building)
+                identifiers = self._building_identifiers(target_building)
                 floor_text = ", ".join(floors) if floors else "Unknown Floor"
                 if landmarks:
+                    lead = area_note or f"{target_building} is mapped in the BulSU Main Campus graph."
+                    id_text = f" Map identifiers for this building: {', '.join(identifiers)}." if identifiers else ""
                     return (
-                        f"{target_building} appears in the spatial graph with mapped areas on: {floor_text}. "
-                        f"Nearby landmarks (campus map): {', '.join(landmarks)}."
+                        f"{lead} "
+                        f"Mapped floors/areas: {floor_text}. "
+                        f"{id_text} "
+                        f"Nearby landmarks: {', '.join(landmarks)}.\n"
+                        "If you share your current location (for example: Gate 1, Activity Center, NSTP Building, or a nearby hall), "
+                        "I can give step-by-step directions to it."
                     )
-                return f"{target_building} appears in the spatial graph with mapped areas on: {floor_text}."
+                lead = area_note or f"{target_building} appears in the spatial graph with mapped areas on: {floor_text}."
+                id_text = f" Map identifiers for this building: {', '.join(identifiers)}." if identifiers else ""
+                return (
+                    f"{lead}{id_text} "
+                    "If you share your current location, I can give step-by-step directions to it."
+                )
 
             target_id = self._match_node_id(target_hint)
             if target_id:
                 node = self._nodes.get(target_id, {})
+                node_name = str(node.get("name") or target_id)
+                host_building = self._identifier_host_building(node_name)
+                if host_building:
+                    host_note = self._campus_area_note(host_building)
+                    nearby = self._nearby_campus_landmarks_for_building(host_building)
+                    nearby_text = f" Nearby landmarks around {host_building}: {', '.join(nearby)}." if nearby else ""
+                    host_note_text = f" {host_note}" if host_note else ""
+                    return (
+                        f"{node_name} is a campus map identifier associated with {host_building}.{host_note_text}"
+                        f"{nearby_text}"
+                    )
                 neighbors = [self._nodes.get(nxt, {}).get("name", nxt) for nxt, _ in sorted(self._adjacency().get(target_id, []), key=lambda item: item[1])[:3]]
                 neighbor_text = f" Nearby: {', '.join(neighbors)}." if neighbors else ""
+                note = self._campus_area_note(node_name)
+                note_text = f" {note}" if note else ""
                 return (
-                    f"{node.get('name', target_id)} is in {node.get('building', 'Unknown Building')}, {node.get('floor', 'Unknown Floor')}."
+                    f"{node_name} is in {node.get('building', 'Unknown Building')}, {node.get('floor', 'Unknown Floor')}.{note_text}"
                     f"{neighbor_text}"
                 )
             if target_building:
@@ -1503,13 +2051,13 @@ class SpatialGraphStore:
 
         # Generic route request: try to infer destination after 'to'.
         target_hint = ""
-        from_to_match = re.search(r"from\s+([a-zA-Z0-9/\-\s]+?)\s+to\s+([a-zA-Z0-9/\-\s]+)", q, flags=re.IGNORECASE)
+        from_to_match = re.search(r"from\s+([a-zA-Z0-9/\-\s]+?)\s+to\s+([a-zA-Z0-9/\-\s]+)", q_parse, flags=re.IGNORECASE)
         if from_to_match:
             start_hint = from_to_match.group(1).strip()
             target_hint = from_to_match.group(2).strip()
             start_id = self._match_node_id(start_hint) or start_id
         else:
-            to_match = re.search(r"to\s+([a-zA-Z0-9/\-\s]+)", q, flags=re.IGNORECASE)
+            to_match = re.search(r"to\s+([a-zA-Z0-9/\-\s]+)", q_parse, flags=re.IGNORECASE)
             if to_match:
                 target_hint = to_match.group(1).strip()
 
@@ -1520,7 +2068,9 @@ class SpatialGraphStore:
 
         start_building = self._match_building_name(start_hint) if start_hint else None
         target_building = self._match_building_name(target_hint) if target_hint else None
-        building_route_mode = self._looks_building_hint(start_hint) or self._looks_building_hint(target_hint)
+        start_building_hint = self._looks_building_hint(start_hint)
+        target_building_hint = self._looks_building_hint(target_hint)
+        building_route_mode = start_building_hint and target_building_hint
 
         if building_route_mode and start_building and target_building:
             building_route = self._best_route_between_buildings(start_building, target_building)
@@ -1529,6 +2079,13 @@ class SpatialGraphStore:
                     f"Route unavailable between {start_building} and {target_building} in the current graph. "
                     "Upload or ingest campus pathways/floorplans to enable cross-building directions."
                 )
+            detailed = self.compute_route_by_ids(
+                str(building_route.get("from_id") or ""),
+                str(building_route.get("to_id") or ""),
+                algorithm="astar",
+            )
+            if detailed:
+                return self._friendly_route_text(detailed)
             route = building_route["route"]
             return (
                 f"Best mapped route from {start_building} to {target_building}: {' -> '.join(route['path_names'])}\n"
@@ -1543,8 +2100,8 @@ class SpatialGraphStore:
         if not target_id:
             return None
 
-        route = self.shortest_path(start_id, target_id)
-        if not route:
+        detailed = self.compute_route_by_ids(start_id, target_id, algorithm="astar")
+        if not detailed:
             start_node = self._nodes.get(start_id, {})
             target_node = self._nodes.get(target_id, {})
             start_name = start_node.get("name", start_id)
@@ -1556,10 +2113,39 @@ class SpatialGraphStore:
                 f"Known locations: {start_name} ({start_loc}); {target_name} ({target_loc})."
             )
 
-        target = self._nodes.get(target_id, {})
+        return self._friendly_route_text(detailed)
+
+    @staticmethod
+    def _friendly_route_text(route_payload: Dict) -> str:
+        start_name = str(route_payload.get("start", {}).get("name") or "Start")
+        target_name = str(route_payload.get("target", {}).get("name") or "Destination")
+        directions = [str(step).strip() for step in route_payload.get("directions", []) if str(step).strip()]
+        if not directions:
+            path = [str(p).strip() for p in route_payload.get("path_names", []) if str(p).strip()]
+            if path:
+                directions = [f"Proceed along: {' -> '.join(path)}."]
+
+        # Keep instructions concise and user-friendly.
+        cleaned: List[str] = []
+        for step in directions:
+            s = re.sub(r"\s+", " ", step).strip()
+            s = s.replace("Go straight ahead", "Go straight")
+            s = s.replace("then continue to", "and continue to")
+            s = s.replace("Proceed toward the central corridor", "Move toward the central corridor")
+            cleaned.append(s)
+        directions = cleaned
+
+        numbered = "\n".join(f"{idx}. {step}" for idx, step in enumerate(directions, start=1))
+        path_names = [str(p).strip() for p in route_payload.get("path_names", []) if str(p).strip()]
+        path_text = " -> ".join(path_names) if path_names else "n/a"
+        distance = route_payload.get("distance", "n/a")
+        algo = str(route_payload.get("algorithm") or "astar")
         return (
-            f"Best route to {target.get('name', target_id)}: {' -> '.join(route['path_names'])}\n"
-            f"Estimated path cost: {route['distance']}"
+            f"Here is a complete route from {start_name} to {target_name}:\n"
+            f"{numbered}\n"
+            f"Estimated path cost: {distance}\n"
+            f"Algorithm used: {algo}\n"
+            f"Mapped path: {path_text}"
         )
 
     def stats(self) -> Dict:

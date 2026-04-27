@@ -63,6 +63,8 @@ REASON: [brief]
     @staticmethod
     def _is_obviously_safe(message: str) -> bool:
         msg = (message or "").strip().lower()
+        if re.search(r"\b(are\s+you\s+sure|u\s+sure|sure\s+ka|sigurado\s+ka|you\s+sure)\b", msg):
+            return True
         if msg in {"hi", "hello", "hey", "thanks", "thank you", "ok", "okay", "yes", "no"}:
             return True
         if len(msg) <= 2:

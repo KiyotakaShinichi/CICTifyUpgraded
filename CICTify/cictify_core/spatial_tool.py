@@ -24,6 +24,10 @@ class SpatialAwarenessTool:
         keywords = {
             "room",
             "hall",
+            "building",
+            "campus",
+            "landmark",
+            "gate",
             "floor",
             "stairs",
             "staircase",
@@ -78,6 +82,11 @@ class SpatialAwarenessTool:
             "katabi",
             "papunta",
             "paano pumunta",
+            "which part of the campus",
+            "what part of the campus",
+            "which part",
+            "located",
+            "location",
         ]
         return any(term in t for term in spatial_terms)
 

@@ -14,6 +14,11 @@ from cictify_core.config import CONFIG, groq_api_key
 
 BASE_DIR = pathlib.Path(__file__).parent.resolve()
 GUI_DIR = BASE_DIR / "gui"
+PLAN_ASSETS_DIR = GUI_DIR / "plan_assets"
+PDF_DIR = BASE_DIR / "knowledge_base" / "pdfs"
+CAMPU_MAP_PDF = PDF_DIR / "BulSUMap.pdf"
+CAMPUS_PLAN_ASSET_NAME = "bulsu-main-campus-campus.png"
+MIN_CAMPUS_PLAN_WIDTH = 2600
 
 app = Flask(__name__, static_folder=None)
 loop = asyncio.new_event_loop()
@@ -61,6 +66,128 @@ def _initialize_before_serve() -> None:
         raise
 
 
+def _slug(text: str) -> str:
+    import re
+    return re.sub(r"[^a-z0-9]+", "-", str(text or "").strip().lower()).strip("-")
+
+
+def _safe_ext(filename: str) -> str:
+    ext = pathlib.Path(str(filename or "")).suffix.lower()
+    return ext if ext in {".png", ".jpg", ".jpeg", ".webp"} else ".png"
+
+
+def _ensure_campus_plan_asset_from_pdf() -> Optional[str]:
+    PLAN_ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    target = PLAN_ASSETS_DIR / CAMPUS_PLAN_ASSET_NAME
+    if target.exists() and target.stat().st_size > 0:
+        try:
+            from PIL import Image
+
+            with Image.open(str(target)) as existing:
+                if int(existing.width or 0) >= MIN_CAMPUS_PLAN_WIDTH:
+                    return f"/plan_assets/{CAMPUS_PLAN_ASSET_NAME}"
+        except Exception:
+            return f"/plan_assets/{CAMPUS_PLAN_ASSET_NAME}"
+
+    if not CAMPU_MAP_PDF.exists():
+        return None
+
+    try:
+        import pypdfium2 as pdfium  # type: ignore
+
+        pdf = pdfium.PdfDocument(str(CAMPU_MAP_PDF))
+        if len(pdf) < 1:
+            return None
+
+        page = pdf[0]
+        # Higher DPI export keeps the map readable when users resize/zoom the route panel.
+        bitmap = page.render(scale=4.0)
+        pil_image = bitmap.to_pil()
+        # Trim white page margins so plotted coordinates align to the visible map area.
+        try:
+            from PIL import ImageChops
+
+            rgb = pil_image.convert("RGB")
+            bg = rgb.copy()
+            bg.paste((255, 255, 255), [0, 0, rgb.size[0], rgb.size[1]])
+            diff = ImageChops.difference(rgb, bg)
+            bbox = diff.getbbox()
+            if bbox:
+                pil_image = rgb.crop(bbox)
+        except Exception:
+            pass
+        pil_image.save(str(target), format="PNG")
+        return f"/plan_assets/{CAMPUS_PLAN_ASSET_NAME}"
+    except Exception as exc:
+        print(f"[Startup] Campus plan generation skipped: {exc}", flush=True)
+        return None
+
+
+def _save_plan_asset(*, image_bytes: bytes, filename: str, building: str, floor: str) -> str:
+    PLAN_ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    ext = _safe_ext(filename)
+    build_slug = _slug(building) or "unknown-building"
+    floor_slug = _slug(floor) or "unknown-floor"
+    out_name = f"{build_slug}-{floor_slug}{ext}"
+    out_path = PLAN_ASSETS_DIR / out_name
+    out_path.write_bytes(image_bytes)
+    return f"/plan_assets/{out_name}"
+
+
+def _resolve_plan_background_url(route: Dict) -> Optional[str]:
+    campus_asset_url = _ensure_campus_plan_asset_from_pdf()
+    points = route.get("points", []) if isinstance(route, dict) else []
+    floors = [str(p.get("floor") or "").strip().lower() for p in points]
+    campus_mode = any(f in {"campus", "campus map"} for f in floors)
+
+    if not PLAN_ASSETS_DIR.exists():
+        return campus_asset_url if campus_mode else None
+
+    files = [p for p in PLAN_ASSETS_DIR.iterdir() if p.is_file()]
+    if not files:
+        return campus_asset_url if campus_mode else None
+
+    if not points:
+        return campus_asset_url if campus_mode else None
+
+    buildings = [str(p.get("building") or "").strip() for p in points]
+    uniq_buildings = sorted({b for b in buildings if b})
+
+    # Cross-building route: prefer campus-level plan background.
+    if len(uniq_buildings) > 1:
+        if campus_asset_url:
+            return campus_asset_url
+        for p in files:
+            stem = p.stem.lower()
+            if any(tok in stem for tok in ["campus", "bulsu-main-campus", "main-campus"]):
+                return f"/plan_assets/{p.name}"
+
+    # Same-building route: prefer exact building-floor plan.
+    candidates = []
+    for b, f in zip(buildings, floors):
+        bs = _slug(b)
+        fs = _slug(f)
+        if bs and fs:
+            candidates.append((bs, fs))
+
+    for bs, fs in candidates:
+        for p in files:
+            stem = p.stem.lower()
+            if bs in stem and fs in stem:
+                return f"/plan_assets/{p.name}"
+
+    # Fallback to first matching building-only plan.
+    for b in buildings:
+        bs = _slug(b)
+        if not bs:
+            continue
+        for p in files:
+            if bs in p.stem.lower():
+                return f"/plan_assets/{p.name}"
+
+    return campus_asset_url if campus_mode else None
+
+
 @app.route("/")
 def index():
     index_path = GUI_DIR / "index.html"
@@ -80,6 +207,11 @@ def favicon():
 @app.route("/images/<path:filename>")
 def serve_images(filename):
     return send_from_directory(str(GUI_DIR / "images"), filename)
+
+
+@app.route("/plan_assets/<path:filename>")
+def serve_plan_assets(filename):
+    return send_from_directory(str(PLAN_ASSETS_DIR), filename)
 
 
 @app.route("/<path:filepath>")
@@ -165,6 +297,12 @@ def ingest_image():
         title = (request.form.get("title") or uploaded.filename or "Image").strip()
         building = (request.form.get("building") or "Unknown Building").strip()
         floor = (request.form.get("floor") or "Unknown Floor").strip()
+        plan_asset_url = _save_plan_asset(
+            image_bytes=image_bytes,
+            filename=uploaded.filename or "uploaded_image.png",
+            building=building,
+            floor=floor,
+        )
 
         result = loop.run_until_complete(
             ocr_ingestion.ingest_image_auto(
@@ -172,7 +310,7 @@ def ingest_image():
                 title=title,
                 building=building,
                 floor=floor,
-                source_file=uploaded.filename or "uploaded_image",
+                source_file=plan_asset_url,
             )
         )
         image_type = result.get("image_type", {})
@@ -187,6 +325,7 @@ def ingest_image():
                 "record": result.get("record"),
                 "ocr_text": result.get("ocr_text"),
                 "status_update": result.get("status_update"),
+                "plan_asset_url": plan_asset_url,
             }
         )
     except Exception:
@@ -210,6 +349,12 @@ def ingest_floorplan():
         title = (request.form.get("title") or uploaded.filename or "Floorplan").strip()
         building = (request.form.get("building") or "Unknown Building").strip()
         floor = (request.form.get("floor") or "Unknown Floor").strip()
+        plan_asset_url = _save_plan_asset(
+            image_bytes=image_bytes,
+            filename=uploaded.filename or "uploaded_floorplan.png",
+            building=building,
+            floor=floor,
+        )
 
         image_type = loop.run_until_complete(ocr_ingestion.classify_image(image_bytes))
         if image_type.get("type") != "floor_plan" and float(image_type.get("confidence", 0.0)) >= 0.6:
@@ -227,13 +372,13 @@ def ingest_floorplan():
                 title=title,
                 building=building,
                 floor=floor,
-                source_file=uploaded.filename or "uploaded_floorplan",
+                source_file=plan_asset_url,
             )
         )
         if not record:
             return jsonify({"status": "error", "message": "Floorplan OCR ingestion failed"}), 500
 
-        return jsonify({"status": "success", "image_type": image_type, "record": record})
+        return jsonify({"status": "success", "image_type": image_type, "record": record, "plan_asset_url": plan_asset_url})
     except Exception:
         return jsonify({"status": "error", "message": "Floorplan endpoint failed"}), 500
 
@@ -280,6 +425,31 @@ def route_endpoint():
         if algorithm not in {"astar", "dijkstra"}:
             algorithm = "astar"
 
+        # Safety guardrail: limit routing to same domain only.
+        # Allowed: CICT<->CICT or Campus<->Campus. Disallow mixed-domain routes.
+        place_type_by_id: Dict[str, str] = {}
+        try:
+            for opt in orchestrator.spatial_graph.route_options():
+                oid = str(opt.get("id") or "").strip()
+                if oid:
+                    place_type_by_id[oid] = str(opt.get("place_type") or "").strip()
+        except Exception:
+            place_type_by_id = {}
+
+        if start_id and target_id:
+            src_type = place_type_by_id.get(start_id, "")
+            dst_type = place_type_by_id.get(target_id, "")
+            if src_type and dst_type and src_type != dst_type:
+                return jsonify(
+                    {
+                        "status": "error",
+                        "message": (
+                            "Mixed-domain routing is disabled for now. "
+                            "Please choose CICT-to-CICT or Campus-to-Campus only."
+                        ),
+                    }
+                ), 400
+
         if start_id and target_id:
             route = orchestrator.spatial_graph.compute_route_by_ids(start_id, target_id, algorithm=algorithm)
         else:
@@ -293,6 +463,20 @@ def route_endpoint():
             ), 404
 
         directions = route.get("directions", [])
+        if not directions:
+            path_names = [str(name).strip() for name in route.get("path_names", []) if str(name).strip()]
+            if path_names:
+                synthesized = [f"Start at {path_names[0]}."]
+                for idx in range(1, len(path_names)):
+                    synthesized.append(f"Proceed to {path_names[idx]}.")
+                if len(path_names) > 1:
+                    synthesized.append(f"You have arrived at {path_names[-1]}.")
+                directions = synthesized
+                route["directions"] = synthesized
+                route["directions_text"] = "\n".join(
+                    f"{idx}. {step}" for idx, step in enumerate(synthesized, start=1)
+                )
+
         if directions:
             guide_lines = "\n".join(f"{idx}. {step}" for idx, step in enumerate(directions, start=1))
             reply = (
@@ -315,7 +499,8 @@ def route_endpoint():
         chat_memory.append({"role": "assistant", "content": reply})
         chat_memory = chat_memory[-CONFIG.max_memory_messages:]
 
-        return jsonify({"status": "success", "route": route, "reply": reply})
+        plan_background_url = _resolve_plan_background_url(route)
+        return jsonify({"status": "success", "route": route, "reply": reply, "plan_background_url": plan_background_url})
     except Exception as exc:
         print(f"[API][route] ERROR Type={type(exc).__name__} Message={exc}", flush=True)
         print(traceback.format_exc(), flush=True)

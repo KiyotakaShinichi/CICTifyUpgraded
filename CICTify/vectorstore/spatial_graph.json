@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-22T12:36:33.173173",
+  "updated_at": "2026-04-27T13:24:13.022988",
   "nodes": [
     {
       "id": "a1",
@@ -1111,8 +1111,8 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 560.0,
+      "y": 450.0,
       "aliases": [
         "BulSU Main Campus Hub",
         "BulSUMainCampusHub",
@@ -1121,7 +1121,7 @@
         "main campus"
       ],
       "source_file": "inferred:campus-hub",
-      "updated_at": "2026-04-22T12:36:33.138092"
+      "updated_at": "2026-04-27T13:24:12.983738"
     },
     {
       "id": "building-hall-names-and-wayfinding-landmarks-at-bulsu-main-campus",
@@ -1139,7 +1139,7 @@
         "Building/HallNamesandWayfindingLandmarksatBulSUMainCampus**"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
-      "updated_at": "2026-04-22T12:36:33.139803"
+      "updated_at": "2026-04-27T13:24:12.984658"
     },
     {
       "id": "buildings-halls",
@@ -1148,15 +1148,15 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 425.0,
+      "y": 535.0,
       "aliases": [
         "### Buildings/Halls",
         "###Buildings/Halls",
         "Buildings/Halls:**"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
-      "updated_at": "2026-04-22T12:36:33.139902"
+      "updated_at": "2026-04-27T13:24:12.984746"
     },
     {
       "id": "round-hall",
@@ -1165,16 +1165,16 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 520.0,
+      "y": 330.0,
       "aliases": [
         "Round Hall",
         "Round Hall**",
         "RoundHall",
         "RoundHall**"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
-      "updated_at": "2026-04-22T12:36:33.139980"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989755"
     },
     {
       "id": "center-for-libraries-and-information-services-clis",
@@ -1183,8 +1183,8 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 445.0,
+      "y": 575.0,
       "aliases": [
         "Center for Libraries and Information Services (CLIS)",
         "Center for Libraries and Information Services (CLIS)**",
@@ -1192,7 +1192,7 @@
         "CenterforLibrariesandInformationServices(CLIS)**"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
-      "updated_at": "2026-04-22T12:36:33.140075"
+      "updated_at": "2026-04-27T13:24:12.984920"
     },
     {
       "id": "bulsu-gym",
@@ -1210,7 +1210,7 @@
         "BulSUGym**"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
-      "updated_at": "2026-04-22T12:36:33.140149"
+      "updated_at": "2026-04-27T13:24:12.985008"
     },
     {
       "id": "bulsu-e-library",
@@ -1228,7 +1228,7 @@
         "BulSUE-Library**"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
-      "updated_at": "2026-04-22T12:36:33.140213"
+      "updated_at": "2026-04-27T13:24:12.985099"
     },
     {
       "id": "main-gate-gate-1-and-gate-2",
@@ -1237,8 +1237,8 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 860.0,
+      "y": 485.0,
       "aliases": [
         "Gate 1",
         "Gate 2",
@@ -1250,7 +1250,7 @@
         "MainGate(Gate1andGate2)**"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114",
-      "updated_at": "2026-04-22T12:36:33.140268"
+      "updated_at": "2026-04-27T13:24:12.985157"
     },
     {
       "id": "main-gate-gate-1-and-gate-2-two-primary-entrance-points-to-the-campus",
@@ -1288,7 +1288,7 @@
         "Building/HallNames:**"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
-      "updated_at": "2026-04-22T12:36:33.142098"
+      "updated_at": "2026-04-27T13:24:12.988048"
     },
     {
       "id": "federizo-hall",
@@ -1297,14 +1297,14 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 460.0,
+      "y": 370.0,
       "aliases": [
         "Federizo Hall",
         "FederizoHall"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117",
-      "updated_at": "2026-04-22T12:36:33.140950"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989449"
     },
     {
       "id": "administration-building-flores-hall",
@@ -1320,7 +1320,7 @@
         "AdministrationBuilding(FloresHall)"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=115",
-      "updated_at": "2026-04-22T12:36:33.140512"
+      "updated_at": "2026-04-27T13:24:12.985507"
     },
     {
       "id": "parking-areas-2",
@@ -1336,7 +1336,7 @@
         "ParkingAreas(2)"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=115",
-      "updated_at": "2026-04-22T12:36:33.140555"
+      "updated_at": "2026-04-27T13:24:12.985599"
     },
     {
       "id": "hostel",
@@ -1345,13 +1345,13 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 360.0,
+      "y": 500.0,
       "aliases": [
         "Hostel"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=116",
-      "updated_at": "2026-04-22T12:36:33.140748"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989803"
     },
     {
       "id": "building-hall-names-and-wayfinding-landmarks",
@@ -1369,7 +1369,7 @@
         "Building/HallNamesandWayfindingLandmarks:**"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119",
-      "updated_at": "2026-04-22T12:36:33.141483"
+      "updated_at": "2026-04-27T13:24:12.987055"
     },
     {
       "id": "valencia-hall",
@@ -1378,14 +1378,14 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 500.0,
+      "y": 430.0,
       "aliases": [
         "Valencia Hall",
         "ValenciaHall"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117",
-      "updated_at": "2026-04-22T12:36:33.140990"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989400"
     },
     {
       "id": "canteen",
@@ -1400,7 +1400,7 @@
         "Canteen"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117",
-      "updated_at": "2026-04-22T12:36:33.141029"
+      "updated_at": "2026-04-27T13:24:12.986294"
     },
     {
       "id": "gymnasium",
@@ -1415,7 +1415,7 @@
         "Gymnasium"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117",
-      "updated_at": "2026-04-22T12:36:33.141072"
+      "updated_at": "2026-04-27T13:24:12.986381"
     },
     {
       "id": "rizal-park",
@@ -1431,7 +1431,7 @@
         "RizalPark"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118",
-      "updated_at": "2026-04-22T12:36:33.141226"
+      "updated_at": "2026-04-27T13:24:12.986561"
     },
     {
       "id": "activity-center",
@@ -1440,14 +1440,14 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 780.0,
+      "y": 470.0,
       "aliases": [
         "Activity Center",
         "ActivityCenter"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118",
-      "updated_at": "2026-04-22T12:36:33.141271"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988809"
     },
     {
       "id": "academic-building",
@@ -1456,14 +1456,14 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 650.0,
+      "y": 380.0,
       "aliases": [
         "Academic Building",
         "AcademicBuilding"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118",
-      "updated_at": "2026-04-22T12:36:33.141316"
+      "updated_at": "2026-04-27T13:24:12.986728"
     },
     {
       "id": "parking-area",
@@ -1479,7 +1479,7 @@
         "ParkingArea"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
-      "updated_at": "2026-04-22T12:36:33.142343"
+      "updated_at": "2026-04-27T13:24:12.988428"
     },
     {
       "id": "carpio-hall",
@@ -1488,16 +1488,16 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 620.0,
+      "y": 520.0,
       "aliases": [
         "Carpio Hall",
         "Carpio Hall**",
         "CarpioHall",
         "CarpioHall**"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119",
-      "updated_at": "2026-04-22T12:36:33.141527"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989496"
     },
     {
       "id": "student-park",
@@ -1506,16 +1506,16 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 690.0,
+      "y": 555.0,
       "aliases": [
         "Student Park",
         "Student Park**",
         "StudentPark",
         "StudentPark**"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119",
-      "updated_at": "2026-04-22T12:36:33.141571"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989705"
     },
     {
       "id": "flores-hall-admin-bldg",
@@ -1531,7 +1531,7 @@
         "FloresHall/Admin.Bldg"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=120",
-      "updated_at": "2026-04-22T12:36:33.141735"
+      "updated_at": "2026-04-27T13:24:12.987458"
     },
     {
       "id": "main-hall",
@@ -1547,7 +1547,7 @@
         "MainHall"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=121",
-      "updated_at": "2026-04-22T12:36:33.141932"
+      "updated_at": "2026-04-27T13:24:12.987818"
     },
     {
       "id": "tennis-court",
@@ -1563,7 +1563,7 @@
         "TennisCourt"
       ],
       "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=121",
-      "updated_at": "2026-04-22T12:36:33.141980"
+      "updated_at": "2026-04-27T13:24:12.987902"
     },
     {
       "id": "alumni-building",
@@ -1572,14 +1572,14 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 870.0,
+      "y": 530.0,
       "aliases": [
         "Alumni Building",
         "AlumniBuilding"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
-      "updated_at": "2026-04-22T12:36:33.142149"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989542"
     },
     {
       "id": "natividad-hall",
@@ -1588,14 +1588,14 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 905.0,
+      "y": 560.0,
       "aliases": [
         "Natividad Hall",
         "NatividadHall"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
-      "updated_at": "2026-04-22T12:36:33.142198"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989608"
     },
     {
       "id": "heroes-park",
@@ -1604,14 +1604,14 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 915.0,
+      "y": 505.0,
       "aliases": [
         "Heroes Park",
         "HeroesPark"
       ],
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122",
-      "updated_at": "2026-04-22T12:36:33.142243"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989655"
     },
     {
       "id": "gate-2",
@@ -1620,15 +1620,15 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 130.0,
+      "y": 485.0,
       "aliases": [
         "Gate 2",
         "Gate-2",
         "Gate2"
       ],
-      "source_file": "inferred:campus-poi-seed",
-      "updated_at": "2026-04-22T12:36:33.142486"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988753"
     },
     {
       "id": "registrar",
@@ -1637,13 +1637,13 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 585.0,
+      "y": 430.0,
       "aliases": [
         "Registrar"
       ],
-      "source_file": "inferred:campus-poi-seed",
-      "updated_at": "2026-04-22T12:36:33.142387"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989854"
     },
     {
       "id": "gate-1",
@@ -1652,14 +1652,14 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 860.0,
+      "y": 485.0,
       "aliases": [
         "Gate 1",
         "Gate1"
       ],
-      "source_file": "inferred:campus-poi-seed",
-      "updated_at": "2026-04-22T12:36:33.142438"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988735"
     },
     {
       "id": "main-gate",
@@ -1668,14 +1668,354 @@
       "floor": "Campus",
       "kind": "campus_place",
       "has_open_pc": false,
-      "x": null,
-      "y": null,
+      "x": 860.0,
+      "y": 485.0,
       "aliases": [
         "Main Gate",
         "MainGate"
       ],
-      "source_file": "inferred:campus-poi-seed",
-      "updated_at": "2026-04-22T12:36:33.142533"
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988788"
+    },
+    {
+      "id": "pimentel-hall",
+      "name": "Pimentel Hall",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 705.0,
+      "y": 420.0,
+      "aliases": [
+        "Pimentel Hall",
+        "PimentelHall"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988830"
+    },
+    {
+      "id": "nstp-building",
+      "name": "NSTP Building",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 650.0,
+      "y": 455.0,
+      "aliases": [
+        "NSTP Building",
+        "NSTPBuilding"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988852"
+    },
+    {
+      "id": "citc-con",
+      "name": "CITC CON",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 812.0,
+      "y": 335.0,
+      "aliases": [
+        "CITC CON",
+        "CITCCON"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:01:34.820426"
+    },
+    {
+      "id": "alvarado-hall",
+      "name": "Alvarado Hall",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 760.0,
+      "y": 640.0,
+      "aliases": [
+        "Alvarado Hall",
+        "AlvaradoHall"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989348"
+    },
+    {
+      "id": "cict-con",
+      "name": "CICT CON",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 812.0,
+      "y": 335.0,
+      "aliases": [
+        "CICT CON",
+        "CICTCON",
+        "CON"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988876"
+    },
+    {
+      "id": "gate-3",
+      "name": "Gate 3",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 885.0,
+      "y": 360.0,
+      "aliases": [
+        "Gate 3",
+        "Gate3"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988771"
+    },
+    {
+      "id": "coe",
+      "name": "COE",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 915.0,
+      "y": 545.0,
+      "aliases": [
+        "COE"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988899"
+    },
+    {
+      "id": "mis-office",
+      "name": "MIS Office",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 890.0,
+      "y": 585.0,
+      "aliases": [
+        "MIS Office",
+        "MISOffice",
+        "Mis"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988928"
+    },
+    {
+      "id": "coed",
+      "name": "COED",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 915.0,
+      "y": 545.0,
+      "aliases": [
+        "COED"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988950"
+    },
+    {
+      "id": "cal",
+      "name": "CAL",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 385.0,
+      "y": 500.0,
+      "aliases": [
+        "CAL"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.988975"
+    },
+    {
+      "id": "cs",
+      "name": "CS",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 425.0,
+      "y": 500.0,
+      "aliases": [
+        "CS"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989000"
+    },
+    {
+      "id": "cafa",
+      "name": "CAFA",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 385.0,
+      "y": 535.0,
+      "aliases": [
+        "CAFA"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989025"
+    },
+    {
+      "id": "gs",
+      "name": "GS",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 425.0,
+      "y": 535.0,
+      "aliases": [
+        "GS"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989051"
+    },
+    {
+      "id": "cba",
+      "name": "CBA",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 500.0,
+      "y": 505.0,
+      "aliases": [
+        "CBA"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989079"
+    },
+    {
+      "id": "cser",
+      "name": "CSER",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 425.0,
+      "y": 500.0,
+      "aliases": [
+        "CSER"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989104"
+    },
+    {
+      "id": "sg",
+      "name": "SG",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 330.0,
+      "y": 505.0,
+      "aliases": [
+        "SG"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989132"
+    },
+    {
+      "id": "cssp",
+      "name": "CSSP",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 425.0,
+      "y": 500.0,
+      "aliases": [
+        "CSSP"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989157"
+    },
+    {
+      "id": "ccje-library",
+      "name": "CCJE Library",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 365.0,
+      "y": 620.0,
+      "aliases": [
+        "CCJE Library",
+        "CCJELibrary"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989198"
+    },
+    {
+      "id": "citcs",
+      "name": "CITCS",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 425.0,
+      "y": 500.0,
+      "aliases": [
+        "CITCS"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989224"
+    },
+    {
+      "id": "clis",
+      "name": "CLIS",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 445.0,
+      "y": 575.0,
+      "aliases": [
+        "CLIS"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989257"
+    },
+    {
+      "id": "ciit",
+      "name": "CIIT",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 545.0,
+      "y": 555.0,
+      "aliases": [
+        "CIIT"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989291"
+    },
+    {
+      "id": "ce",
+      "name": "CE",
+      "building": "BulSU Main Campus",
+      "floor": "Campus",
+      "kind": "campus_place",
+      "has_open_pc": false,
+      "x": 780.0,
+      "y": 470.0,
+      "aliases": [
+        "CE"
+      ],
+      "source_file": "inferred:campus-backbone-seed",
+      "updated_at": "2026-04-27T13:24:12.989307"
     }
   ],
   "edges": [
@@ -2187,8 +2527,8 @@
       "from": "campus-main-hub",
       "to": "round-hall",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=114"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
@@ -2236,8 +2576,8 @@
       "from": "campus-main-hub",
       "to": "federizo-hall",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=115"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
@@ -2257,8 +2597,8 @@
       "from": "campus-main-hub",
       "to": "hostel",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=116"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
@@ -2271,8 +2611,8 @@
       "from": "campus-main-hub",
       "to": "valencia-hall",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=117"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
@@ -2299,8 +2639,8 @@
       "from": "campus-main-hub",
       "to": "activity-center",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=118"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
@@ -2320,15 +2660,15 @@
       "from": "campus-main-hub",
       "to": "carpio-hall",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
       "to": "student-park",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=119"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
@@ -2355,50 +2695,50 @@
       "from": "campus-main-hub",
       "to": "alumni-building",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
       "to": "natividad-hall",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
       "to": "heroes-park",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
       "to": "gate-2",
       "door": "",
-      "weight": 2.2,
-      "source_file": "knowledge_base/pdfs/BulSU Student handbook.pdf#page=122"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
       "to": "registrar",
       "door": "",
-      "weight": 1.8,
-      "source_file": "inferred:campus-poi-seed"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
       "to": "gate-1",
       "door": "",
-      "weight": 1.8,
-      "source_file": "inferred:campus-poi-seed"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
       "to": "main-gate",
       "door": "",
-      "weight": 1.8,
-      "source_file": "inferred:campus-poi-seed"
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
     },
     {
       "from": "campus-main-hub",
@@ -2413,6 +2753,412 @@
       "door": "",
       "weight": 3.0,
       "source_file": "inferred:campus-hub-building"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "alvarado-hall",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "citc-con",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "nstp-building",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "pimentel-hall",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "main-gate-gate-1-and-gate-2",
+      "to": "activity-center",
+      "door": "",
+      "weight": 1.4,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "activity-center",
+      "to": "pimentel-hall",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "pimentel-hall",
+      "to": "nstp-building",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "pimentel-hall",
+      "to": "citc-con",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "pimentel-hall",
+      "to": "valencia-hall",
+      "door": "",
+      "weight": 1.6,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "valencia-hall",
+      "to": "federizo-hall",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "federizo-hall",
+      "to": "round-hall",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "federizo-hall",
+      "to": "hostel",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "valencia-hall",
+      "to": "carpio-hall",
+      "door": "",
+      "weight": 1.3,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "carpio-hall",
+      "to": "student-park",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "carpio-hall",
+      "to": "alumni-building",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "alumni-building",
+      "to": "natividad-hall",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "natividad-hall",
+      "to": "heroes-park",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "heroes-park",
+      "to": "main-gate-gate-1-and-gate-2",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "pimentel-hall",
+      "to": "registrar",
+      "door": "",
+      "weight": 1.6,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "cict-con",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "pimentel-hall",
+      "to": "cict-con",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "gate-1",
+      "to": "activity-center",
+      "door": "",
+      "weight": 1.2,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "heroes-park",
+      "to": "gate-2",
+      "door": "",
+      "weight": 1.0,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "activity-center",
+      "to": "gate-2",
+      "door": "",
+      "weight": 1.4,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "coe",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "coed",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "gate-3",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "mis-office",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "cict-con",
+      "to": "gate-3",
+      "door": "",
+      "weight": 1.3,
+      "source_file": "inferred:campus-backbone"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "cafa",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "cal",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "cba",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "ccje-library",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "ce",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "ciit",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "citcs",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "clis",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "cs",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "cser",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "cssp",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "gs",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "campus-main-hub",
+      "to": "sg",
+      "door": "",
+      "weight": 7.5,
+      "source_file": "inferred:campus-hub-fallback"
+    },
+    {
+      "from": "coe",
+      "to": "natividad-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "mis-office",
+      "to": "natividad-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "coed",
+      "to": "alvarado-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "cal",
+      "to": "valencia-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "cs",
+      "to": "valencia-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "cafa",
+      "to": "valencia-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "gs",
+      "to": "valencia-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "cba",
+      "to": "carpio-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "cser",
+      "to": "carpio-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "sg",
+      "to": "federizo-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "cssp",
+      "to": "federizo-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "ccje-library",
+      "to": "federizo-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "citcs",
+      "to": "round-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "clis",
+      "to": "round-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "ciit",
+      "to": "round-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
+    },
+    {
+      "from": "ce",
+      "to": "round-hall",
+      "door": "",
+      "weight": 0.35,
+      "source_file": "inferred:campus-identifier-host"
     }
   ]
 }
