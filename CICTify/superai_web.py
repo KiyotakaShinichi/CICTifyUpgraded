@@ -228,7 +228,6 @@ def chat_endpoint():
     global chat_memory
     req_id = uuid.uuid4().hex[:8]
     t0 = time.perf_counter()
-
     data = request.get_json(force=True, silent=True)
     if not data:
         print(f"[API][{req_id}] /api/chat -> 400 invalid-json", flush=True)
@@ -239,8 +238,12 @@ def chat_endpoint():
         print(f"[API][{req_id}] /api/chat -> 400 empty-message", flush=True)
         return jsonify({"reply": "Empty message", "model": "error"}), 400
 
+    # Don't block the worker while the application is prewarming.
+    if not startup_ready:
+        print(f"[API][{req_id}] Service starting, rejecting request", flush=True)
+        return jsonify({"reply": "Service is starting. Please try again shortly.", "model": "starting"}), 503
+
     try:
-        _ensure_ready()
         print(f"[API][{req_id}] User: {message}", flush=True)
 
         chat_memory.append({"role": "user", "content": message})
@@ -283,7 +286,8 @@ def chat_endpoint():
 @app.route("/api/ingest/image", methods=["POST"])
 def ingest_image():
     try:
-        _ensure_ready()
+        if not startup_ready:
+            return jsonify({"status": "error", "message": "Service starting. Try again later."}), 503
         if not groq_api_key():
             return jsonify({"status": "error", "message": "GROQ_API_KEY is missing. Set it in CICTify/.env to enable vision ingestion."}), 503
         if "file" not in request.files:
@@ -335,7 +339,8 @@ def ingest_image():
 @app.route("/api/ingest/floorplan", methods=["POST"])
 def ingest_floorplan():
     try:
-        _ensure_ready()
+        if not startup_ready:
+            return jsonify({"status": "error", "message": "Service starting. Try again later."}), 503
         if not groq_api_key():
             return jsonify({"status": "error", "message": "GROQ_API_KEY is missing. Set it in CICTify/.env to enable floorplan ingestion."}), 503
         if "file" not in request.files:
@@ -409,7 +414,8 @@ def health_check():
 def route_endpoint():
     global chat_memory
     try:
-        _ensure_ready()
+        if not startup_ready:
+            return jsonify({"status": "error", "message": "Service starting. Try again later."}), 503
         data = request.get_json(force=True, silent=True) or {}
         start_hint = str(data.get("from") or "").strip()
         target_hint = str(data.get("to") or "").strip()
@@ -510,7 +516,8 @@ def route_endpoint():
 @app.route("/api/route/options", methods=["GET"])
 def route_options_endpoint():
     try:
-        _ensure_ready()
+        if not startup_ready:
+            return jsonify({"status": "error", "message": "Service starting. Try again later."}), 503
         options = orchestrator.spatial_graph.route_options()
         return jsonify({"status": "success", "options": options})
     except Exception as exc:
@@ -524,6 +531,24 @@ def reset_conversation():
     global chat_memory
     chat_memory = []
     return jsonify({"status": "success", "message": "Conversation memory cleared"})
+
+
+# When running under a WSGI server (e.g., Gunicorn on Render), start
+# initialization in a background thread so health checks and lightweight
+# endpoints do not block while heavy prewarm tasks run.
+if __name__ != "__main__":
+    import threading
+    import time
+
+    def _bg_init():
+        # slight delay so the runtime is stable
+        time.sleep(0.5)
+        try:
+            _initialize_before_serve()
+        except Exception as exc:
+            print(f"[Startup][bg] Initialization failed: {exc}", flush=True)
+
+    threading.Thread(target=_bg_init, daemon=True).start()
 
 
 if __name__ == "__main__":
