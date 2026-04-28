@@ -43,6 +43,31 @@ python superai_web.py
 
 Then open `http://127.0.0.1:5000`.
 
+## Deployment
+
+Recommended production path:
+
+1. Build the app as a Docker image using [Dockerfile](Dockerfile).
+2. Deploy the image on Render using the root [render.yaml](../render.yaml).
+3. Keep `GROQ_API_KEY` and other secrets as Render environment variables, not in the image.
+
+### Local Docker run
+
+```powershell
+cd CICTify
+docker build -t cictify .
+docker run --rm -p 10000:10000 -e GROQ_API_KEY=your_key_here cictify
+```
+
+Then open `http://127.0.0.1:10000`.
+
+### Why this pipeline
+
+- Docker makes the runtime reproducible across machines.
+- Render is the quickest reliable host for a Python AI app like CICTify.
+- Gunicorn keeps the Flask app production-ready without a framework rewrite.
+- Kubernetes is unnecessary at this stage unless you need multi-service autoscaling.
+
 ## Key API Endpoints
 
 - `POST /api/chat`: main chat endpoint

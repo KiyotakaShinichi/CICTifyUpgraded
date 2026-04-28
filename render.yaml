@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: cictify
+    env: docker
+    region: singapore
+    plan: starter
+    autoDeploy: true
+    healthCheckPath: /api/health
+    dockerfilePath: CICTify/Dockerfile
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: WEB_LIVE_FALLBACK
+        value: "false"
