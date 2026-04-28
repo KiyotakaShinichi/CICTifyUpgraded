@@ -7,37 +7,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app/CICTify
 
-# System deps for Pillow / PDF rendering / browser-backed tooling.
+# System deps for PDF rendering only.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        build-essential \
-        curl \
-        git \
         libglib2.0-0 \
         libnss3 \
-        libgconf-2-4 \
-        libxss1 \
-        libasound2 \
-        libatk1.0-0 \
-        libatk-bridge2.0-0 \
-        libcups2 \
-        libdrm2 \
-        libxkbcommon0 \
-        libxcomposite1 \
-        libxdamage1 \
-        libxrandr2 \
-        libgbm1 \
-        libgtk-3-0 \
-        libpango-1.0-0 \
         libcairo2 \
-        fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
 COPY CICTify/requirements.txt ./requirements.txt
 
 RUN python -m pip install --upgrade pip \
-    && pip install -r requirements.txt \
-    && python -m playwright install --with-deps chromium
+    && pip install -r requirements.txt
 
 COPY CICTify/ ./
 

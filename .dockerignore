@@ -11,3 +11,5 @@ CICTify/.env
 .env
 evaluation
 *.log
+CICTify/vectorstore/faiss_index/
+CICTify/gui/plan_assets/
