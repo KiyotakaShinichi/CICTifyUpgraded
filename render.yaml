@@ -6,7 +6,7 @@ services:
     plan: starter
     autoDeploy: true
     healthCheckPath: /api/health
-    dockerfilePath: CICTify/Dockerfile
+    dockerfilePath: Dockerfile
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
